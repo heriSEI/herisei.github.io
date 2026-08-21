@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stok Material — BAKTI MSS 186</title>
+    <title>Dashboard Sparepart — BAKTI MSS 186</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
@@ -12,38 +12,50 @@
             --bg-card: #1a1f2e;
             --bg-card-2: #21283c;
             --accent: #00d4ff;
-            --accent-2: #0099ff;
             --green: #00d084;
             --yellow: #ffc107;
             --red: #ff5252;
+            --orange: #ff9f29;
+            --pink: #e84ed6;
             --text: #e6e6e6;
             --muted: #8892a6;
             --border: #2c344b;
         }
         body { background: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; }
-        header { margin-bottom: 24px; }
-        h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
-        .sub { color: var(--muted); font-size: 13px; }
-        .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
+        header { margin-bottom: 24px; text-align: center; }
+        h1 { font-size: 24px; color: var(--accent); margin-bottom: 4px; }
+        .sub { color: var(--muted); font-size: 14px; margin-bottom: 6px; }
+        .refresh-info { font-size: 12px; color: var(--muted); }
 
-        /* KARTU RINGKASAN */
-        .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+        /* KARTU RINGKASAN — Sesuai tampilan aslimu */
+        .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
         @media (max-width: 1024px) { .cards { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
         .card {
-            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-2));
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
         }
-        .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
-        .card .num { font-size: 28px; font-weight: 700; }
-        .card:nth-child(1) .num { color: var(--accent); }
-        .card:nth-child(2) .num { color: var(--green); }
-        .card:nth-child(3) .num { color: var(--red); }
-        .card:nth-child(4) .num { color: var(--yellow); }
-        .card:nth-child(5) .num { color: #a855f7; }
+        .card h3 { font-size: 13px; font-weight: 600; margin-bottom: 8px; padding: 4px 8px; border-radius: 6px; }
+        .card .num { font-size: 28px; font-weight: 700; padding: 10px; border-radius: 6px; }
+
+        .card:nth-child(1) h3 { background: var(--green); color: #000; }
+        .card:nth-child(1) .num { background: rgba(0,208,132,0.15); color: var(--green); }
+
+        .card:nth-child(2) h3 { background: #4285f4; color: #fff; }
+        .card:nth-child(2) .num { background: rgba(66,133,244,0.15); color: #7ab0ff; }
+
+        .card:nth-child(3) h3 { background: var(--orange); color: #000; }
+        .card:nth-child(3) .num { background: rgba(255,159,41,0.15); color: var(--orange); }
+
+        .card:nth-child(4) h3 { background: var(--red); color: #fff; }
+        .card:nth-child(4) .num { background: rgba(255,82,82,0.15); color: var(--red); }
+
+        .card:nth-child(5) h3 { background: var(--pink); color: #fff; }
+        .card:nth-child(5) .num { background: rgba(232,78,214,0.15); color: var(--pink); }
 
         /* FILTER */
         .filter-bar {
@@ -66,35 +78,25 @@
         button { background: var(--accent); color: #000; font-weight: 600; cursor: pointer; border: none; }
         button:hover { background: #33e5ff; }
 
-        /* GRID KONTEN */
-        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
-        @media (max-width: 900px) { .content-grid { grid-template-columns: 1fr; } }
-
-        /* TABEL */
-        .table-wrap {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .table-container { max-height: 550px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        th { background: var(--bg-card-2); color: var(--accent); font-weight: 600; position: sticky; top: 0; }
-        tr:hover { background: rgba(0,212,255,0.04); }
-        .status-stock { color: var(--green); font-weight: 500; }
-        .status-faulty { color: var(--yellow); }
-        .status-force { color: var(--red); }
-
         /* GRAFIK */
+        .chart-full, .chart-row { margin-bottom: 24px; }
         .chart-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 18px;
+            padding: 20px;
         }
-        .chart-box h4 { font-size: 14px; margin-bottom: 12px; color: var(--muted); }
+        .chart-box h4 {
+            font-size: 15px;
+            margin-bottom: 14px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-box h4 span { font-size: 12px; color: var(--muted); font-weight: normal; }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
 
         .loading { text-align: center; padding: 40px; color: var(--muted); }
     </style>
@@ -103,63 +105,47 @@
 
 <div class="container">
     <header>
-        <h1>📦 Stok Material — BAKTI MSS 186</h1>
-        <p class="sub">Sparepart Operation · Transaction Raw Data</p>
-        <p class="refresh-info" id="refreshInfo">Mengambil data...</p>
+        <h1>📊 DASHBOARD SPAREPART OPERATION BAKTI MSS 186 SITE</h1>
+        <p class="sub">PAKET 12 | KSO PT. SEI - AGTI</p>
+        <p class="refresh-info" id="refreshInfo">⏳ Mengambil data...</p>
     </header>
 
-    <!-- KARTU RINGKASAN -->
+    <!-- KARTU RINGKASAN — Sesuai tampilan aslimu -->
     <div class="cards">
-        <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
-        <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
-        <div class="card"><h3>PERLU PENGGANTIAN</h3><div class="num" id="needReplace">—</div></div>
-        <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
-        <div class="card"><h3>SITE / GUDANG</h3><div class="num" id="location">—</div></div>
+        <div class="card"><h3>TOTAL STOCK</h3><div class="num" id="totalStock">—</div></div>
+        <div class="card"><h3>STOCK CLUSTER</h3><div class="num" id="stockCluster">—</div></div>
+        <div class="card"><h3>REQUEST</h3><div class="num" id="totalRequest">—</div></div>
+        <div class="card"><h3>NEED REPLACE</h3><div class="num" id="needReplace">—</div></div>
+        <div class="card"><h3>CLAIM MONITORING</h3><div class="num" id="claimMonitoring">—</div></div>
     </div>
 
-    <!-- FILTER & PENCARIAN -->
+    <!-- FILTER -->
     <div class="filter-bar">
-        <input type="text" id="search" placeholder="🔍 Cari Part / No. Part / Site...">
+        <input type="text" id="search" placeholder="🔍 Cari Part / Site / No. Part...">
         <select id="filterScope"><option value="">Semua Scope</option></select>
-        <select id="filterBrand"><option value="">Semua Brand</option></select>
-        <select id="filterStatus"><option value="">Semua Status</option></select>
+        <select id="filterCluster"><option value="">Semua Cluster</option></select>
+        <select id="filterRequestStatus"><option value="">Semua Request Status</option></select>
+        <select id="filterClaimStatus"><option value="">Semua Claim Status</option></select>
         <button onclick="fetchData()">🔄 Refresh</button>
     </div>
 
-    <div class="content-grid">
-        <!-- TABEL DATA -->
-        <div class="table-wrap">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Part</th>
-                            <th>Brand</th>
-                            <th>Scope</th>
-                            <th>Part Number</th>
-                            <th>SN</th>
-                            <th>QTY</th>
-                            <th>Status</th>
-                            <th>Site</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="8" class="loading">Memuat data dari Google Sheets...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- 📈 GRAFIK BARU: SEMUA PART YANG STATUS = STOCK -->
+    <div class="chart-full">
+        <div class="chart-box">
+            <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
+            <canvas id="chartStockPart"></canvas>
         </div>
+    </div>
 
-        <!-- GRAFIK -->
-        <div>
-            <div class="chart-box">
-                <h4>Per Scope</h4>
-                <canvas id="chartScope"></canvas>
-            </div>
-            <div class="chart-box">
-                <h4>Per Usage Status</h4>
-                <canvas id="chartStatus"></canvas>
-            </div>
+    <!-- GRAFIK TAMBAHAN (tempat nanti) -->
+    <div class="chart-row">
+        <div class="chart-box">
+            <h4>📊 Per Scope</h4>
+            <canvas id="chartScope"></canvas>
+        </div>
+        <div class="chart-box">
+            <h4>🔧 Per Status</h4>
+            <canvas id="chartStatus"></canvas>
         </div>
     </div>
 </div>
@@ -167,13 +153,12 @@
 <script>
 // === KONFIGURASI ===
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
-// Ganti nama sheet di bawah ini sesuai nama TAB asli di Google Sheets kamu
-const SHEET_NAME = "Raw_File_Update"; 
+const SHEET_NAME = "Raw_File_Update"; // Ubah nama sheet jika perlu
 const REFRESH_MINUTES = 3;
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
 let allData = [];
-let chartScope, chartStatus;
+let chartStockPart, chartScope, chartStatus;
 
 // === AMBIL DATA ===
 async function fetchData() {
@@ -183,7 +168,7 @@ async function fetchData() {
         const txt = await res.text();
         const json = JSON.parse(txt.substr(47).slice(0, -2));
 
-        // Kolom sesuai urutan yang kamu berikan
+        // Kolom sesuai urutan asli
         const cols = [
             "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
             "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
@@ -195,87 +180,149 @@ async function fetchData() {
             "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
         ];
 
-        // Konversi data
         allData = json.table.rows.map(r => {
             let obj = {};
-            r.c.forEach((cell, i) => {
-                obj[cols[i]] = cell?.v ?? "";
-            });
+            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
             return obj;
         });
 
         updateDashboard(allData);
-        document.getElementById("refreshInfo").textContent = `✅ Data diperbarui: ${new Date().toLocaleString("id-ID")} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
+        document.getElementById("refreshInfo").textContent = 
+            `✅ Data diperbarui: ${new Date().toLocaleString("id-ID")} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
     } catch (err) {
         console.error(err);
-        document.getElementById("refreshInfo").innerHTML = `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
+        document.getElementById("refreshInfo").innerHTML = 
+            `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
     }
 }
 
-// === HITUNG & TAMPILKAN ===
+// === HITUNG KARTU RINGKASAN ===
 function updateDashboard(data) {
-    // Hitung ringkasan
-    const total = data.length;
-    
-    // Unit di Stock = USAGE STATUS berisi "Stock"
-    const stock = data.filter(r => {
-        const s = (r["USAGE STATUS"] || "").toString().trim().toLowerCase();
-        return s.includes("stock");
-    }).length;
+    // 1. TOTAL STOCK = Usage Status = Stock
+    const totalStock = data.filter(r => 
+        (r["USAGE STATUS"] || "").toString().trim().toLowerCase().includes("stock")
+    ).reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
 
-    // Perlu Penggantian = STATUS REPLACEMENT berisi Faulty / Force
-    const faulty = data.filter(r => {
+    // 2. STOCK CLUSTER = sama dengan Total Stock
+    const stockCluster = totalStock;
+
+    // 3. REQUEST = jumlah baris / total QTY
+    const totalRequest = data.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
+
+    // 4. NEED REPLACE = Status Replacement berisi Faulty / Force
+    const needReplace = data.filter(r => {
         const s = (r["STATUS REPLACEMENT"] || "").toString().trim().toLowerCase();
         return s.includes("faulty") || s.includes("force");
-    }).length;
+    }).reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
 
-    // Jenis Part unik
-    const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
-    
-    // Site / Gudang unik
-    const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
+    // 5. CLAIM MONITORING = jumlah data / total QTY
+    const claimMonitoring = totalRequest;
 
-    document.getElementById("totalUnit").textContent = total;
-    document.getElementById("inStock").textContent = stock;
-    document.getElementById("needReplace").textContent = faulty;
-    document.getElementById("typePart").textContent = unikPart;
-    document.getElementById("location").textContent = unikLoc;
+    // Tampilkan ke kartu
+    document.getElementById("totalStock").textContent = totalStock;
+    document.getElementById("stockCluster").textContent = stockCluster;
+    document.getElementById("totalRequest").textContent = totalRequest;
+    document.getElementById("needReplace").textContent = needReplace;
+    document.getElementById("claimMonitoring").textContent = claimMonitoring;
 
-    // Isi filter pilihan
-    const scopes = [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort();
-    const brands = [...new Set(data.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort();
-    const statuses = [...new Set(data.map(r => (r["USAGE STATUS"] || "").trim()).filter(v => v))].sort();
-    
-    fillSelect("filterScope", scopes);
-    fillSelect("filterBrand", brands);
-    fillSelect("filterStatus", statuses);
+    // Isi pilihan filter
+    fillSelect("filterScope", [...new Set(data.map(r => r["SCOPE"]).filter(v => v))].sort());
+    fillSelect("filterRequestStatus", [...new Set(data.map(r => r["REQUEST STATUS"]).filter(v => v))].sort());
+    fillSelect("filterClaimStatus", [...new Set(data.map(r => r["CLAIM STATUS"]).filter(v => v))].sort());
 
-    // Gambar grafik
-    drawCharts(data);
-
-    // Gambar tabel
-    renderTable(data);
+    // Gambar semua grafik
+    drawStockPartChart(data);
+    drawScopeChart(data);
+    drawStatusChart(data);
 }
 
-// === GRAFIK ===
-function drawCharts(data) {
-    // Per Scope
-    const scopeCount = {};
-    data.forEach(r => {
-        const s = (r["SCOPE"] || "Lainnya").toString().trim() || "Lainnya";
-        scopeCount[s] = (scopeCount[s] || 0) + 1;
+// === 📈 GRAFIK: SEMUA PART YANG STATUS = STOCK ===
+function drawStockPartChart(data) {
+    // Filter hanya Usage Status = Stock
+    const stockData = data.filter(r => 
+        (r["USAGE STATUS"] || "").toString().trim().toLowerCase().includes("stock")
+    );
+
+    // Hitung QTY per Nama Part
+    const partQty = {};
+    stockData.forEach(r => {
+        const partName = (r["PART"] || "UNKNOWN").toString().trim() || "UNKNOWN";
+        const qty = Number(r["QTY"]) || 0;
+        partQty[partName] = (partQty[partName] || 0) + qty;
     });
-    const sLabels = Object.keys(scopeCount);
-    const sValues = Object.values(scopeCount);
+
+    // Urutkan dari terbanyak
+    const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.map(item => item[0]);
+    const values = sorted.map(item => item[1]);
+
+    // Warna hijau gradasi
+    const greenColors = values.map((_, i) => {
+        const alpha = 0.4 + ((values[i] / Math.max(...values)) * 0.6);
+        return `rgba(0, 208, 132, ${alpha})`;
+    });
+
+    if (chartStockPart) chartStockPart.destroy();
+    chartStockPart = new Chart(document.getElementById("chartStockPart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Total QTY (Stock)",
+                data: values,
+                backgroundColor: greenColors,
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "#1a1f2e",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    borderColor: "#00d084",
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: "#8892a6" },
+                    grid: { color: "#2c344b" }
+                },
+                x: {
+                    ticks: { 
+                        color: "#8892a6",
+                        maxRotation: 60,
+                        minRotation: 45
+                    },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// === GRAFIK PER SCOPE ===
+function drawScopeChart(data) {
+    const scopeQty = {};
+    data.forEach(r => {
+        const s = (r["SCOPE"] || "Lainnya").trim() || "Lainnya";
+        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
+    });
 
     if (chartScope) chartScope.destroy();
     chartScope = new Chart(document.getElementById("chartScope"), {
         type: "bar",
         data: {
-            labels: sLabels,
+            labels: Object.keys(scopeQty),
             datasets: [{
-                label: "Jumlah",
-                data: sValues,
+                label: "Total QTY",
+                data: Object.values(scopeQty),
                 backgroundColor: "#00d4ff",
                 borderRadius: 4
             }]
@@ -289,21 +336,21 @@ function drawCharts(data) {
             }
         }
     });
+}
 
-    // Per Usage Status
-    const stCount = {};
+// === GRAFIK PER STATUS ===
+function drawStatusChart(data) {
+    const statusQty = {};
     data.forEach(r => {
-        const s = (r["USAGE STATUS"] || "Lainnya").toString().trim() || "Lainnya";
-        stCount[s] = (stCount[s] || 0) + 1;
+        const s = (r["USAGE STATUS"] || "Lainnya").trim() || "Lainnya";
+        statusQty[s] = (statusQty[s] || 0) + (Number(r["QTY"]) || 0);
     });
 
-    const stLabels = Object.keys(stCount);
-    const stData = Object.values(stCount);
-    const stColors = stLabels.map(l => {
-        const lc = l.toLowerCase();
-        if (lc.includes("stock")) return "#00d084";
-        if (lc.includes("faulty")) return "#ffc107";
-        if (lc.includes("force")) return "#ff5252";
+    const colors = Object.keys(statusQty).map(k => {
+        const l = k.toLowerCase();
+        if (l.includes("stock")) return "#00d084";
+        if (l.includes("faulty")) return "#ffc107";
+        if (l.includes("force")) return "#ff5252";
         return "#8892a6";
     });
 
@@ -311,70 +358,27 @@ function drawCharts(data) {
     chartStatus = new Chart(document.getElementById("chartStatus"), {
         type: "doughnut",
         data: {
-            labels: stLabels,
+            labels: Object.keys(statusQty),
             datasets: [{
-                data: stData,
-                backgroundColor: stColors,
+                data: Object.values(statusQty),
+                backgroundColor: colors,
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size:11 } } } }
+            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6" } } }
         }
     });
-}
-
-// === TABEL ===
-function renderTable(data) {
-    const search = document.getElementById("search").value.toLowerCase();
-    const fScope = document.getElementById("filterScope").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    const fStatus = document.getElementById("filterStatus").value;
-
-    const filtered = data.filter(r => {
-        const txt = Object.values(r).join(" ").toLowerCase();
-        return (!search || txt.includes(search)) &&
-               (!fScope || (r["SCOPE"] || "") === fScope) &&
-               (!fBrand || (r["BRAND"] || "") === fBrand) &&
-               (!fStatus || (r["USAGE STATUS"] || "") === fStatus);
-    });
-
-    const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = filtered.map(r => {
-        const st = (r["USAGE STATUS"] || "").toString().trim();
-        let cls = "";
-        const stLow = st.toLowerCase();
-        if (stLow.includes("stock")) cls = "status-stock";
-        else if (stLow.includes("faulty")) cls = "status-faulty";
-        else if (stLow.includes("force")) cls = "status-force";
-
-        return `<tr>
-            <td>${(r["PART"] || "-")}</td>
-            <td>${(r["BRAND"] || "-")}</td>
-            <td>${(r["SCOPE"] || "-")}</td>
-            <td>${(r["PART NUMBER"] || "-")}</td>
-            <td>${(r["SN"] || "-")}</td>
-            <td>${(r["QTY"] || "-")}</td>
-            <td class="${cls}">${st || "-"}</td>
-            <td>${(r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "-")}</td>
-        </tr>`;
-    }).join("");
 }
 
 function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
-    sel.innerHTML = `<option value="">Semua ${id.replace("filter","")}</option>` +
+    sel.innerHTML = `<option value="">Semua</option>` +
         arr.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.value = keep;
 }
-
-// === PANTALAN FILTER ===
-document.getElementById("search").addEventListener("input", () => renderTable(allData));
-document.getElementById("filterScope").addEventListener("change", () => renderTable(allData));
-document.getElementById("filterBrand").addEventListener("change", () => renderTable(allData));
-document.getElementById("filterStatus").addEventListener("change", () => renderTable(allData));
 
 // === MULAI ===
 fetchData();
