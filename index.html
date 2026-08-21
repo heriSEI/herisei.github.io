@@ -28,7 +28,6 @@
         .sub { color: var(--muted); font-size: 13px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-        /* KARTU RINGKASAN */
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
@@ -47,7 +46,6 @@
         .card:nth-child(5) .num { color: var(--yellow); }
         .card:nth-child(6) .num { color: var(--purple); }
 
-        /* FILTER BAR */
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -61,12 +59,8 @@
             gap: 12px;
             align-items: flex-end;
         }
-        @media (max-width: 1000px) {
-            .filter-header { grid-template-columns: repeat(2, 1fr) auto; }
-        }
-        @media (max-width: 600px) {
-            .filter-header { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 1000px) { .filter-header { grid-template-columns: repeat(2, 1fr) auto; } }
+        @media (max-width: 600px) { .filter-header { grid-template-columns: 1fr; } }
         .filter-group label {
             display: block;
             font-size: 12px;
@@ -87,7 +81,6 @@
         .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; }
         button:hover { opacity: 0.9; }
 
-        /* DETAIL PART INFO */
         .part-detail {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -109,7 +102,6 @@
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
 
-        /* GRAFIK */
         .chart-full { margin-bottom: 24px; }
         .chart-box {
             background: var(--bg-card);
@@ -139,7 +131,6 @@
         <p class="refresh-info" id="refreshInfo">Mengambil data...</p>
     </header>
 
-    <!-- KARTU RINGKASAN -->
     <div class="cards">
         <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
@@ -149,7 +140,6 @@
         <div class="card"><h3>SITE / GUDANG</h3><div class="num" id="location">—</div></div>
     </div>
 
-    <!-- FILTER -->
     <div class="filter-section">
         <div class="filter-header">
             <div class="filter-group">
@@ -175,7 +165,6 @@
         </div>
     </div>
 
-    <!-- DETAIL PART -->
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
@@ -190,7 +179,6 @@
         </div>
     </div>
 
-    <!-- GRAFIK STOCK AVAILABILITY -->
     <div class="chart-full">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
@@ -198,10 +186,9 @@
         </div>
     </div>
 
-    <!-- GRAFIK BAWAH -->
     <div class="chart-row">
         <div class="chart-box">
-            <h4>🔧 FAULTY RATE SPAREPART <span>(Replacement Faulty + Force Majure)</span></h4>
+            <h4>🔧 FAULTY RATE SPAREPART <span>(Usage=Replacement + Status=Open)</span></h4>
             <canvas id="chartFaulty"></canvas>
         </div>
         <div class="chart-box">
@@ -212,7 +199,6 @@
 </div>
 
 <script>
-// === KONFIGURASI ===
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
 const REFRESH_MINUTES = 3;
@@ -221,7 +207,20 @@ const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
 
-// === AMBIL DATA ===
+// === ✅ ATURAN: Cek apakah baris ini = Perlu Penggantian ===
+function isNeedsReplacement(row) {
+    const usage = (row["USAGE STATUS"] || "").trim();
+    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
+
+    // Syarat 1: USAGE STATUS = Replacement Faulty ATAU Replacement Force Majure
+    const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
+
+    // Syarat 2: STATUS REPLACEMENT = "Open"
+    const statusOk = replStatus === "Open";
+
+    return usageOk && statusOk;
+}
+
 async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
@@ -256,7 +255,7 @@ async function fetchData() {
     }
 }
 
-// === DATA TERFILTER ===
+// === Terapkan semua filter yang aktif ===
 function getFilteredData() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -271,7 +270,6 @@ function getFilteredData() {
     });
 }
 
-// === ISI SELECT — SUDAH DIFILTER NAMA KOLOMNYA ===
 function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
@@ -287,31 +285,31 @@ function fillSelect(id, arr) {
     sel.value = keep;
 }
 
-// === UPDATE DASHBOARD ===
+// === ✅ UPDATE SEMUA KARTU & GRAFIK — IKUT FILTER ===
 function updateDashboard(data) {
     const total = data.length;
+
+    // Stok = USAGE STATUS = "Stock"
     const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
     const inStock = stockRows.length;
     const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
 
-    // ✅ FILTER FAULTY SESUAI RUMUS EXCEL: W='Replacement Faulty' OR W='Replacement Force Majure'
-    const faultyDataAll = data.filter(r => {
-        const s = (r["STATUS REPLACEMENT"] || "").trim();
-        return s === "Replacement Faulty" || s === "Replacement Force Majure";
-    });
-    const faulty = faultyDataAll.length;
+    // ✅ PERLU PENGGANTIAN = USAGE STATUS(Replacement) + STATUS REPLACEMENT = "Open"
+    const faultyData = data.filter(r => isNeedsReplacement(r));
+    const needReplaceCount = faultyData.length;
 
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
 
+    // ✅ UPDATE ANGKA KARTU — SEMUA IKUT FILTER
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
-    document.getElementById("needReplace").textContent = faulty;
+    document.getElementById("needReplace").textContent = needReplaceCount;
     document.getElementById("typePart").textContent = unikPart;
     document.getElementById("location").textContent = unikLoc;
 
-    // Isi filter
+    // Isi pilihan filter
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
     syncFilterBrand();
@@ -325,7 +323,6 @@ function updateDashboard(data) {
     drawStockPerScopeChart(filtered);
 }
 
-// === SINKRON FILTER ===
 function syncFilterMaterialType() {
     const fScope = document.getElementById("filterScope").value;
     let filtered = allData;
@@ -351,7 +348,6 @@ function syncFilterPart() {
     fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
 }
 
-// === DETAIL PART ===
 function updatePartDetail() {
     const fPart = document.getElementById("filterPart").value;
     const detailBox = document.getElementById("partDetail");
@@ -383,7 +379,6 @@ function updatePartDetail() {
     detailBox.classList.add("show");
 }
 
-// === GRAFIK STOCK ===
 function drawStockPartChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
@@ -415,17 +410,12 @@ function drawStockPartChart(data) {
     });
 }
 
-// === 🔧 GRAFIK FAULTY RATE — SESUAI RUMUS EXCEL ===
-// QUERY: SELECT J,H,E,G, SUM(M) WHERE W IN ('Replacement Faulty','Replacement Force Majure') GROUP BY J,H,E,G ORDER BY E ASC
+// === ✅ GRAFIK FAULTY RATE — SAMA SUMBER DENGAN KARTU ===
 function drawFaultyRateChart(data) {
-    // Langkah 1: Filter sesuai kolom W = STATUS REPLACEMENT
-    const faultyData = data.filter(r => {
-        const s = (r["STATUS REPLACEMENT"] || "").trim();
-        return s === "Replacement Faulty" || s === "Replacement Force Majure";
-    });
+    // Ambil yang memenuhi syarat: Usage=Replacement + Status=Open
+    const faultyData = data.filter(r => isNeedsReplacement(r));
 
-    // Langkah 2: GROUP BY SCOPE (E) → MATERIAL TYPE (G) → BRAND (H) → PART (J)
-    // Lalu ORDER BY SCOPE ASC, lalu SUM(M) = QTY
+    // GROUP BY: Scope, Material Type, Brand, Part → SUM QTY
     const grouped = {};
     faultyData.forEach(r => {
         const scope = (r["SCOPE"] || "").trim();
@@ -434,7 +424,6 @@ function drawFaultyRateChart(data) {
         const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         const qty = Number(r["QTY"]) || 0;
 
-        // Key gabungan untuk urutan: SCOPE | MATERIAL TYPE | BRAND | PART
         const key = `${scope}||${matType}||${brand}||${part}`;
         if (!grouped[key]) {
             grouped[key] = { scope, matType, brand, part, totalQty: 0 };
@@ -442,7 +431,7 @@ function drawFaultyRateChart(data) {
         grouped[key].totalQty += qty;
     });
 
-    // Langkah 3: Ubah ke Array → URUTKAN BERDASARKAN SCOPE ASC (sesuai ORDER BY E ASC)
+    // Urutkan berdasarkan Scope A-Z
     const sorted = Object.values(grouped).sort((a, b) => {
         if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
         if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
@@ -450,12 +439,9 @@ function drawFaultyRateChart(data) {
         return a.part.localeCompare(b.part);
     });
 
-    // Langkah 4: Siapkan label & nilai untuk grafik
-    // Tampilkan PART sebagai label, karena hasil Excel menampilkan Part di kolom pertama
-    const labels = sorted.length ? sorted.map(item => item.part) : ["Tidak ada data Faulty"];
+    const labels = sorted.length ? sorted.map(item => item.part) : ["Tidak ada data"];
     const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
 
-    // Warna beragam agar mudah dibedakan
     const colors = [
         "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
         "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
@@ -463,7 +449,6 @@ function drawFaultyRateChart(data) {
     ];
     const barColors = labels.map((_, i) => colors[i % colors.length]);
 
-    // Langkah 5: Gambar Grafik
     if (chartFaulty) chartFaulty.destroy();
     chartFaulty = new Chart(document.getElementById("chartFaulty"), {
         type: "bar",
@@ -516,7 +501,6 @@ function drawFaultyRateChart(data) {
     });
 }
 
-// === 📊 GRAFIK STOK PER SCOPE ===
 function drawStockPerScopeChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const scopeQty = {};
@@ -543,7 +527,6 @@ function drawStockPerScopeChart(data) {
     });
 }
 
-// === RESET FILTER ===
 function resetFilters() {
     document.getElementById("filterScope").value = "";
     document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
@@ -553,29 +536,20 @@ function resetFilters() {
     updateDashboard(allData);
 }
 
-// === EVENT LISTENER ===
-document.getElementById("filterScope").addEventListener("change", () => {
-    syncFilterMaterialType(); syncFilterBrand(); syncFilterPart(); updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
-document.getElementById("filterMaterialType").addEventListener("change", () => {
-    syncFilterBrand(); syncFilterPart(); updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
-document.getElementById("filterBrand").addEventListener("change", () => {
-    syncFilterPart(); updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
-document.getElementById("filterPart").addEventListener("change", () => {
+document.getElementById("filterScope").addEventListener("change", updateView);
+document.getElementById("filterMaterialType").addEventListener("change", updateView);
+document.getElementById("filterBrand").addEventListener("change", updateView);
+document.getElementById("filterPart").addEventListener("change", updateView);
+
+function updateView() {
+    syncFilterMaterialType();
+    syncFilterBrand();
+    syncFilterPart();
     updatePartDetail();
     const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
+    updateDashboard(filtered);
+}
 
-// === MULAI ===
 fetchData();
 setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
 </script>
