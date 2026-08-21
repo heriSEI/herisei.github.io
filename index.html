@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DASHBOARD SPAREPARTS — BAKTI MSS 2026</title>
+    <title>Dashboard Spareparts — BAKTI MSS 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
@@ -27,6 +27,7 @@
         h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
         .sub { color: var(--muted); font-size: 13px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
+        .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
 
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
@@ -126,9 +127,10 @@
 
 <div class="container">
     <header>
-        <h1>📦 Stok Material — BAKTI MSS 186</h1>
-        <p class="sub">Sparepart Operation · Transaction Raw Data</p>
-        <p class="refresh-info" id="refreshInfo">Mengambil data...</p>
+        <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
+        <p class="sub">Sparepart Operation · Transaction Data · Faulty Rate Analysis</p>
+        <p class="refresh-info" id="refreshInfo">Data diperbarui: 21/8/2026, 14.49.49 · Auto-refresh tiap 3 menit</p>
+        <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
 
     <div class="cards">
@@ -207,18 +209,24 @@ const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
 
-// === ✅ ATURAN: Cek apakah baris ini = Perlu Penggantian ===
+// === Cek Perlu Penggantian ===
 function isNeedsReplacement(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
     const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
-
-    // Syarat 1: USAGE STATUS = Replacement Faulty ATAU Replacement Force Majure
     const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
-
-    // Syarat 2: STATUS REPLACEMENT = "Open"
     const statusOk = replStatus === "Open";
-
     return usageOk && statusOk;
+}
+
+// === Format Tanggal Indonesia ===
+function formatDateID(date) {
+    const d = date.getDate();
+    const m = date.getMonth() + 1;
+    const y = date.getFullYear();
+    const h = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const s = String(date.getSeconds()).padStart(2, '0');
+    return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
 async function fetchData() {
@@ -246,8 +254,9 @@ async function fetchData() {
         });
 
         updateDashboard(allData);
+        const now = new Date();
         document.getElementById("refreshInfo").textContent = 
-            `✅ Data diperbarui: ${new Date().toLocaleString("id-ID")} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
+            `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
     } catch (err) {
         console.error(err);
         document.getElementById("refreshInfo").innerHTML = 
@@ -255,7 +264,6 @@ async function fetchData() {
     }
 }
 
-// === Terapkan semua filter yang aktif ===
 function getFilteredData() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -285,23 +293,16 @@ function fillSelect(id, arr) {
     sel.value = keep;
 }
 
-// === ✅ UPDATE SEMUA KARTU & GRAFIK — IKUT FILTER ===
 function updateDashboard(data) {
     const total = data.length;
-
-    // Stok = USAGE STATUS = "Stock"
     const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
     const inStock = stockRows.length;
     const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
-
-    // ✅ PERLU PENGGANTIAN = USAGE STATUS(Replacement) + STATUS REPLACEMENT = "Open"
     const faultyData = data.filter(r => isNeedsReplacement(r));
     const needReplaceCount = faultyData.length;
-
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
 
-    // ✅ UPDATE ANGKA KARTU — SEMUA IKUT FILTER
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
@@ -309,7 +310,6 @@ function updateDashboard(data) {
     document.getElementById("typePart").textContent = unikPart;
     document.getElementById("location").textContent = unikLoc;
 
-    // Isi pilihan filter
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
     syncFilterBrand();
@@ -317,7 +317,6 @@ function updateDashboard(data) {
 
     updatePartDetail();
     const filtered = getFilteredData();
-
     drawStockPartChart(filtered);
     drawFaultyRateChart(filtered);
     drawStockPerScopeChart(filtered);
@@ -410,12 +409,8 @@ function drawStockPartChart(data) {
     });
 }
 
-// === ✅ GRAFIK FAULTY RATE — SAMA SUMBER DENGAN KARTU ===
 function drawFaultyRateChart(data) {
-    // Ambil yang memenuhi syarat: Usage=Replacement + Status=Open
     const faultyData = data.filter(r => isNeedsReplacement(r));
-
-    // GROUP BY: Scope, Material Type, Brand, Part → SUM QTY
     const grouped = {};
     faultyData.forEach(r => {
         const scope = (r["SCOPE"] || "").trim();
@@ -431,7 +426,6 @@ function drawFaultyRateChart(data) {
         grouped[key].totalQty += qty;
     });
 
-    // Urutkan berdasarkan Scope A-Z
     const sorted = Object.values(grouped).sort((a, b) => {
         if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
         if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
