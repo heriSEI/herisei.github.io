@@ -294,12 +294,12 @@ function updateDashboard(data) {
     const inStock = stockRows.length;
     const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
 
-    // ✅ MENCARI FAULTY DENGAN NILAI PERSIS SEPERTI DI EXCEL
-    const faulty = data.filter(r => {
+    // ✅ FILTER FAULTY SESUAI RUMUS EXCEL: W='Replacement Faulty' OR W='Replacement Force Majure'
+    const faultyDataAll = data.filter(r => {
         const s = (r["STATUS REPLACEMENT"] || "").trim();
-        // Cari salah satu dari dua nilai ini
         return s === "Replacement Faulty" || s === "Replacement Force Majure";
-    }).length;
+    });
+    const faulty = faultyDataAll.length;
 
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
@@ -415,23 +415,55 @@ function drawStockPartChart(data) {
     });
 }
 
-// === 🔧 GRAFIK FAULTY RATE — DIPERBAIKI SESUAI NILAI DI EXCEL ===
+// === 🔧 GRAFIK FAULTY RATE — SESUAI RUMUS EXCEL ===
+// QUERY: SELECT J,H,E,G, SUM(M) WHERE W IN ('Replacement Faulty','Replacement Force Majure') GROUP BY J,H,E,G ORDER BY E ASC
 function drawFaultyRateChart(data) {
-    // ✅ HANYA ambil yang STATUS REPLACEMENT = "Replacement Faulty" ATAU "Replacement Force Majure"
+    // Langkah 1: Filter sesuai kolom W = STATUS REPLACEMENT
     const faultyData = data.filter(r => {
         const s = (r["STATUS REPLACEMENT"] || "").trim();
         return s === "Replacement Faulty" || s === "Replacement Force Majure";
     });
 
-    const partQty = {};
+    // Langkah 2: GROUP BY SCOPE (E) → MATERIAL TYPE (G) → BRAND (H) → PART (J)
+    // Lalu ORDER BY SCOPE ASC, lalu SUM(M) = QTY
+    const grouped = {};
     faultyData.forEach(r => {
-        const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
-    });
-    const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
-    const labels = sorted.length ? sorted.map(i => i[0]) : ["Tidak ada data"];
-    const values = sorted.length ? sorted.map(i => i[1]) : [0];
+        const scope = (r["SCOPE"] || "").trim();
+        const matType = (r["MATERIAL TYPE"] || "").trim();
+        const brand = (r["BRAND"] || "").trim();
+        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
+        const qty = Number(r["QTY"]) || 0;
 
+        // Key gabungan untuk urutan: SCOPE | MATERIAL TYPE | BRAND | PART
+        const key = `${scope}||${matType}||${brand}||${part}`;
+        if (!grouped[key]) {
+            grouped[key] = { scope, matType, brand, part, totalQty: 0 };
+        }
+        grouped[key].totalQty += qty;
+    });
+
+    // Langkah 3: Ubah ke Array → URUTKAN BERDASARKAN SCOPE ASC (sesuai ORDER BY E ASC)
+    const sorted = Object.values(grouped).sort((a, b) => {
+        if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
+        if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
+        if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
+        return a.part.localeCompare(b.part);
+    });
+
+    // Langkah 4: Siapkan label & nilai untuk grafik
+    // Tampilkan PART sebagai label, karena hasil Excel menampilkan Part di kolom pertama
+    const labels = sorted.length ? sorted.map(item => item.part) : ["Tidak ada data Faulty"];
+    const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
+
+    // Warna beragam agar mudah dibedakan
+    const colors = [
+        "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
+        "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
+        "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"
+    ];
+    const barColors = labels.map((_, i) => colors[i % colors.length]);
+
+    // Langkah 5: Gambar Grafik
     if (chartFaulty) chartFaulty.destroy();
     chartFaulty = new Chart(document.getElementById("chartFaulty"), {
         type: "bar",
@@ -440,16 +472,45 @@ function drawFaultyRateChart(data) {
             datasets: [{
                 label: "Faulty QTY",
                 data: values,
-                backgroundColor: ["#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63"],
+                backgroundColor: barColors,
                 borderRadius: 4
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "#1a1f2e",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    borderColor: "#ffc107",
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(ctx) {
+                            const idx = ctx.dataIndex;
+                            const item = sorted[idx];
+                            if (!item) return `QTY: ${ctx.raw}`;
+                            return [
+                                `QTY: ${ctx.raw}`,
+                                `Scope: ${item.scope || "-"}`,
+                                `Material: ${item.matType || "-"}`,
+                                `Brand: ${item.brand || "-"}`
+                            ];
+                        }
+                    }
+                }
+            },
             scales: {
-                y: { beginAtZero: true, ticks: { color: "#8892a6" }, grid: { color: "#2c344b" } },
-                x: { ticks: { color: "#8892a6", maxRotation: 60 }, grid: { display: false } }
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: "#8892a6" },
+                    grid: { color: "#2c344b" }
+                },
+                x: {
+                    ticks: { color: "#8892a6", maxRotation: 60 },
+                    grid: { display: false }
+                }
             }
         }
     });
