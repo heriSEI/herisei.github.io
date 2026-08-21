@@ -77,8 +77,9 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        .table-container { max-height: 550px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
         th { background: var(--bg-card-2); color: var(--accent); font-weight: 600; position: sticky; top: 0; }
         tr:hover { background: rgba(0,212,255,0.04); }
         .status-stock { color: var(--green); font-weight: 500; }
@@ -121,29 +122,32 @@
         <input type="text" id="search" placeholder="🔍 Cari Part / No. Part / Site...">
         <select id="filterScope"><option value="">Semua Scope</option></select>
         <select id="filterBrand"><option value="">Semua Brand</option></select>
-        <select id="filterStatus"><option value="">Semua Status</option><option value="Stock">Stock</option><option value="Replacement Faulty">Replacement Faulty</option><option value="Replacement Force Majure">Replacement Force Majure</option></select>
+        <select id="filterStatus"><option value="">Semua Status</option></select>
         <button onclick="fetchData()">🔄 Refresh</button>
     </div>
 
     <div class="content-grid">
         <!-- TABEL DATA -->
         <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Part</th>
-                        <th>Brand</th>
-                        <th>Type</th>
-                        <th>Scope</th>
-                        <th>Part Number</th>
-                        <th>QTY</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="7" class="loading">Memuat data dari Google Sheets...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Part</th>
+                            <th>Brand</th>
+                            <th>Scope</th>
+                            <th>Part Number</th>
+                            <th>SN</th>
+                            <th>QTY</th>
+                            <th>Status</th>
+                            <th>Site</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="8" class="loading">Memuat data dari Google Sheets...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- GRAFIK -->
@@ -163,8 +167,9 @@
 <script>
 // === KONFIGURASI ===
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
-const SHEET_NAME = "Raw_File_Update"; // Ganti nama sheet jika perlu
-const REFRESH_MINUTES = 3; // Auto refresh tiap berapa menit
+// Ganti nama sheet di bawah ini sesuai nama TAB asli di Google Sheets kamu
+const SHEET_NAME = "Raw_File_Update"; 
+const REFRESH_MINUTES = 3;
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
 let allData = [];
@@ -178,21 +183,32 @@ async function fetchData() {
         const txt = await res.text();
         const json = JSON.parse(txt.substr(47).slice(0, -2));
 
+        // Kolom sesuai urutan yang kamu berikan
+        const cols = [
+            "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
+            "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
+            "PART NUMBER","SN","QTY","UOM","REQUEST STATUS",
+            "ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME",
+            "INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME",
+            "TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT",
+            "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
+            "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
+        ];
+
         // Konversi data
-        const rows = json.table.rows;
-        const cols = json.table.cols.map(c => c.label || "");
-        allData = rows.map(r => {
+        allData = json.table.rows.map(r => {
             let obj = {};
-            r.c.forEach((cell, i) => obj[cols[i] || `col${i}`] = cell?.v ?? "");
+            r.c.forEach((cell, i) => {
+                obj[cols[i]] = cell?.v ?? "";
+            });
             return obj;
         });
 
-        // Perbarui tampilan
         updateDashboard(allData);
         document.getElementById("refreshInfo").textContent = `✅ Data diperbarui: ${new Date().toLocaleString("id-ID")} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
     } catch (err) {
         console.error(err);
-        document.getElementById("refreshInfo").innerHTML = `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik!<br>Error: ${err.message}`;
+        document.getElementById("refreshInfo").innerHTML = `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
     }
 }
 
@@ -200,10 +216,24 @@ async function fetchData() {
 function updateDashboard(data) {
     // Hitung ringkasan
     const total = data.length;
-    const stock = data.filter(r => r["Status"]?.toString().trim().includes("Stock")).length;
-    const faulty = data.filter(r => r["Status"]?.toString().trim().includes("Faulty") || r["Status"]?.toString().trim().includes("Force")).length;
-    const unikPart = new Set(data.map(r => r["Part"] || r["PART"] || "")).size;
-    const unikLoc = new Set(data.map(r => r["Site"] || r["SITE"] || r["Gudang"] || "")).size;
+    
+    // Unit di Stock = USAGE STATUS berisi "Stock"
+    const stock = data.filter(r => {
+        const s = (r["USAGE STATUS"] || "").toString().trim().toLowerCase();
+        return s.includes("stock");
+    }).length;
+
+    // Perlu Penggantian = STATUS REPLACEMENT berisi Faulty / Force
+    const faulty = data.filter(r => {
+        const s = (r["STATUS REPLACEMENT"] || "").toString().trim().toLowerCase();
+        return s.includes("faulty") || s.includes("force");
+    }).length;
+
+    // Jenis Part unik
+    const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
+    
+    // Site / Gudang unik
+    const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
 
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = stock;
@@ -212,10 +242,13 @@ function updateDashboard(data) {
     document.getElementById("location").textContent = unikLoc;
 
     // Isi filter pilihan
-    const scopes = [...new Set(data.map(r => r["Scope"] || r["SCOPE"] || "").filter(v => v))].sort();
-    const brands = [...new Set(data.map(r => r["Brand"] || r["BRAND"] || "").filter(v => v))].sort();
+    const scopes = [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort();
+    const brands = [...new Set(data.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort();
+    const statuses = [...new Set(data.map(r => (r["USAGE STATUS"] || "").trim()).filter(v => v))].sort();
+    
     fillSelect("filterScope", scopes);
     fillSelect("filterBrand", brands);
+    fillSelect("filterStatus", statuses);
 
     // Gambar grafik
     drawCharts(data);
@@ -229,7 +262,7 @@ function drawCharts(data) {
     // Per Scope
     const scopeCount = {};
     data.forEach(r => {
-        const s = (r["Scope"] || r["SCOPE"] || "Lainnya").trim();
+        const s = (r["SCOPE"] || "Lainnya").toString().trim() || "Lainnya";
         scopeCount[s] = (scopeCount[s] || 0) + 1;
     });
     const sLabels = Object.keys(scopeCount);
@@ -257,29 +290,37 @@ function drawCharts(data) {
         }
     });
 
-    // Per Status
-    const stCount = { Stock:0, Faulty:0, Force:0 };
+    // Per Usage Status
+    const stCount = {};
     data.forEach(r => {
-        const s = (r["Status"] || r["STATUS"] || "").toString().trim();
-        if (s.includes("Stock")) stCount.Stock++;
-        else if (s.includes("Faulty")) stCount.Faulty++;
-        else if (s.includes("Force")) stCount.Force++;
+        const s = (r["USAGE STATUS"] || "Lainnya").toString().trim() || "Lainnya";
+        stCount[s] = (stCount[s] || 0) + 1;
+    });
+
+    const stLabels = Object.keys(stCount);
+    const stData = Object.values(stCount);
+    const stColors = stLabels.map(l => {
+        const lc = l.toLowerCase();
+        if (lc.includes("stock")) return "#00d084";
+        if (lc.includes("faulty")) return "#ffc107";
+        if (lc.includes("force")) return "#ff5252";
+        return "#8892a6";
     });
 
     if (chartStatus) chartStatus.destroy();
     chartStatus = new Chart(document.getElementById("chartStatus"), {
         type: "doughnut",
         data: {
-            labels: ["Stock", "Replacement Faulty", "Force Majure"],
+            labels: stLabels,
             datasets: [{
-                data: [stCount.Stock, stCount.Faulty, stCount.Force],
-                backgroundColor: ["#00d084", "#ffc107", "#ff5252"],
+                data: stData,
+                backgroundColor: stColors,
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size:12 } } } }
+            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size:11 } } } }
         }
     });
 }
@@ -293,29 +334,30 @@ function renderTable(data) {
 
     const filtered = data.filter(r => {
         const txt = Object.values(r).join(" ").toLowerCase();
-        const st = (r["Status"] || r["STATUS"] || "").toString().trim();
         return (!search || txt.includes(search)) &&
-               (!fScope || (r["Scope"]||r["SCOPE"]||"") === fScope) &&
-               (!fBrand || (r["Brand"]||r["BRAND"]||"") === fBrand) &&
-               (!fStatus || st.includes(fStatus));
+               (!fScope || (r["SCOPE"] || "") === fScope) &&
+               (!fBrand || (r["BRAND"] || "") === fBrand) &&
+               (!fStatus || (r["USAGE STATUS"] || "") === fStatus);
     });
 
     const tbody = document.getElementById("tableBody");
     tbody.innerHTML = filtered.map(r => {
-        const st = (r["Status"] || r["STATUS"] || "").toString().trim();
+        const st = (r["USAGE STATUS"] || "").toString().trim();
         let cls = "";
-        if (st.includes("Stock")) cls = "status-stock";
-        else if (st.includes("Faulty")) cls = "status-faulty";
-        else if (st.includes("Force")) cls = "status-force";
+        const stLow = st.toLowerCase();
+        if (stLow.includes("stock")) cls = "status-stock";
+        else if (stLow.includes("faulty")) cls = "status-faulty";
+        else if (stLow.includes("force")) cls = "status-force";
 
         return `<tr>
-            <td>${(r["Part"] || r["PART"] || "-")}</td>
-            <td>${(r["Brand"] || r["BRAND"] || "-")}</td>
-            <td>${(r["Type"] || r["TYPE"] || "-")}</td>
-            <td>${(r["Scope"] || r["SCOPE"] || "-")}</td>
-            <td>${(r["Part Number"] || r["PART NUMBER"] || "-")}</td>
-            <td>${(r["QTY"] || r["Qty"] || r["qty"] || "-")}</td>
+            <td>${(r["PART"] || "-")}</td>
+            <td>${(r["BRAND"] || "-")}</td>
+            <td>${(r["SCOPE"] || "-")}</td>
+            <td>${(r["PART NUMBER"] || "-")}</td>
+            <td>${(r["SN"] || "-")}</td>
+            <td>${(r["QTY"] || "-")}</td>
             <td class="${cls}">${st || "-"}</td>
+            <td>${(r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "-")}</td>
         </tr>`;
     }).join("");
 }
