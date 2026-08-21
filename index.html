@@ -28,7 +28,7 @@
         .sub { color: var(--muted); font-size: 13px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-        /* === KARTU RINGKASAN — Versi SUKA KAMU + TAMBAH TOTAL STOCK === */
+        /* KARTU RINGKASAN */
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
@@ -40,34 +40,74 @@
         }
         .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
         .card .num { font-size: 28px; font-weight: 700; }
+        .card:nth-child(1) .num { color: var(--accent); }
+        .card:nth-child(2) .num { color: var(--green); }
+        .card:nth-child(3) .num { color: var(--orange); }
+        .card:nth-child(4) .num { color: var(--red); }
+        .card:nth-child(5) .num { color: var(--yellow); }
+        .card:nth-child(6) .num { color: var(--purple); }
 
-        .card:nth-child(1) .num { color: var(--accent); }     /* TOTAL UNIT */
-        .card:nth-child(2) .num { color: var(--green); }       /* UNIT DI STOCK */
-        .card:nth-child(3) .num { color: var(--orange); }      /* TOTAL STOCK QTY — BARU */
-        .card:nth-child(4) .num { color: var(--red); }         /* PERLU PENGGANTIAN */
-        .card:nth-child(5) .num { color: var(--yellow); }      /* JENIS PART */
-        .card:nth-child(6) .num { color: var(--purple); }      /* SITE / GUDANG */
-
-        /* FILTER */
-        .filter-bar {
+        /* FILTER BAR — Urutan: Scope → Material Type → Brand → Part */
+        .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 14px 16px;
-            margin-bottom: 18px;
-            display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+            padding: 16px 20px;
+            margin-bottom: 20px;
         }
-        input, select, button {
+        .filter-header {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) auto;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        @media (max-width: 1000px) {
+            .filter-header { grid-template-columns: repeat(2, 1fr) auto; }
+        }
+        @media (max-width: 600px) {
+            .filter-header { grid-template-columns: 1fr; }
+        }
+        .filter-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        select, button {
+            width: 100%;
             background: var(--bg-card-2);
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 8px 12px;
+            padding: 10px 12px;
             border-radius: 6px;
             outline: none;
             font-size: 13px;
         }
-        button { background: var(--accent); color: #000; font-weight: 600; cursor: pointer; border: none; }
-        button:hover { background: #33e5ff; }
+        .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; }
+        .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+
+        /* DETAIL PART INFO */
+        .part-detail {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .part-detail.show { display: block; }
+        .part-detail h4 { color: var(--accent); margin-bottom: 12px; font-size: 15px; }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .detail-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .detail-item span:first-child { color: var(--muted); font-size: 13px; }
+        .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
+        .wh-list { margin-top: 10px; }
+        .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
 
         /* GRAFIK */
         .chart-full { margin-bottom: 24px; }
@@ -101,7 +141,7 @@
         <p class="refresh-info" id="refreshInfo">Mengambil data...</p>
     </header>
 
-    <!-- === KARTU: Versi Sebelumnya + TAMBAH TOTAL STOCK === -->
+    <!-- KARTU RINGKASAN -->
     <div class="cards">
         <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
@@ -111,16 +151,48 @@
         <div class="card"><h3>SITE / GUDANG</h3><div class="num" id="location">—</div></div>
     </div>
 
-    <!-- FILTER & PENCARIAN -->
-    <div class="filter-bar">
-        <input type="text" id="search" placeholder="🔍 Cari Part / No. Part / Site...">
-        <select id="filterScope"><option value="">Semua Scope</option></select>
-        <select id="filterBrand"><option value="">Semua Brand</option></select>
-        <select id="filterStatus"><option value="">Semua Status</option></select>
-        <button onclick="fetchData()">🔄 Refresh</button>
+    <!-- 🔹 FILTER URUTAN: SCOPE → MATERIAL TYPE → BRAND → PART + TOMBOL RESET -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <div class="filter-group">
+                <label>SCOPE</label>
+                <select id="filterScope"><option value="">Semua Scope</option></select>
+            </div>
+            <div class="filter-group">
+                <label>MATERIAL TYPE</label>
+                <select id="filterMaterialType"><option value="">Semua Type</option></select>
+            </div>
+            <div class="filter-group">
+                <label>BRAND</label>
+                <select id="filterBrand"><option value="">Semua Brand</option></select>
+            </div>
+            <div class="filter-group">
+                <label>PART</label>
+                <select id="filterPart"><option value="">Semua Part</option></select>
+            </div>
+            <div style="display:flex; gap:8px; flex-direction:column;">
+                <button class="btn-refresh" onclick="fetchData()">🔄 Refresh</button>
+                <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
+            </div>
+        </div>
     </div>
 
-    <!-- 📈 GRAFIK: SEMUA PART YANG STATUS = STOCK -->
+    <!-- 🔹 DETAIL PART — MUNCUL SAAT PART DIPILIH -->
+    <div class="part-detail" id="partDetail">
+        <h4>📋 Detail Part Terpilih</h4>
+        <div class="detail-grid">
+            <div class="detail-item"><span>Part:</span><span id="dPart"></span></div>
+            <div class="detail-item"><span>Deskripsi:</span><span id="dDesc"></span></div>
+            <div class="detail-item"><span>Part Number:</span><span id="dPartNo"></span></div>
+            <div class="detail-item"><span>Total Stok:</span><span id="dStock"></span></div>
+        </div>
+        <div class="wh-list">
+            <strong>📍 Lokasi Gudang & Stok:</strong>
+            <div id="dWHList"></div>
+        </div>
+    </div>
+
+    <!-- 📈 GRAFIK: SPAREPART STOCK AVAILABILITY (BERUBAH JIKA PART DIFILTER) -->
     <div class="chart-full">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
@@ -128,15 +200,15 @@
         </div>
     </div>
 
-    <!-- GRAFIK BAWAH -->
+    <!-- 📊 GRAFIK BAWAH: Faulty Rate + Stok Per Scope -->
     <div class="chart-row">
         <div class="chart-box">
-            <h4>📊 Per Scope</h4>
-            <canvas id="chartScope"></canvas>
+            <h4>🔧 FAULTY RATE SPAREPART <span>(Replacement Faulty + Force Majure)</span></h4>
+            <canvas id="chartFaulty"></canvas>
         </div>
         <div class="chart-box">
-            <h4>🔧 Per Usage Status</h4>
-            <canvas id="chartStatus"></canvas>
+            <h4>📊 STOK PER SCOPE</h4>
+            <canvas id="chartScope"></canvas>
         </div>
     </div>
 </div>
@@ -144,12 +216,12 @@
 <script>
 // === KONFIGURASI ===
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
-const SHEET_NAME = "Raw_File_Update"; // Ubah nama sheet jika perlu
+const SHEET_NAME = "Raw_File_Update";
 const REFRESH_MINUTES = 3;
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
 let allData = [];
-let chartStockPart, chartScope, chartStatus;
+let chartStockPart, chartFaulty, chartScope;
 
 // === AMBIL DATA ===
 async function fetchData() {
@@ -187,35 +259,35 @@ async function fetchData() {
     }
 }
 
-// === HITUNG & TAMPILKAN KARTU ===
+// === AMBIL DATA YANG SUDAH DIFILTER ===
+function getFilteredData() {
+    const fScope = document.getElementById("filterScope").value;
+    const fMaterial = document.getElementById("filterMaterialType").value;
+    const fBrand = document.getElementById("filterBrand").value;
+    const fPart = document.getElementById("filterPart").value;
+
+    return allData.filter(r => {
+        return (!fScope || (r["SCOPE"] || "").trim() === fScope) &&
+               (!fMaterial || (r["MATERIAL TYPE"] || "").trim() === fMaterial) &&
+               (!fBrand || (r["BRAND"] || "").trim() === fBrand) &&
+               (!fPart || (r["PART"] || "").trim() === fPart);
+    });
+}
+
+// === UPDATE SEMUA ===
 function updateDashboard(data) {
-    // 1. TOTAL UNIT = jumlah baris
+    // Hitung kartu dari SEMUA data
     const total = data.length;
-
-    // 2. UNIT DI STOCK = jumlah baris yang Usage Status berisi "Stock"
-    const stockRows = data.filter(r => 
-        (r["USAGE STATUS"] || "").toString().trim().toLowerCase().includes("stock")
-    );
+    const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase().includes("stock"));
     const inStock = stockRows.length;
-
-    // 3. TOTAL STOCK (QTY) = JUMLAH TOTAL QTY yang berstatus Stock ← KARTU BARU
     const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
-
-    // 4. PERLU PENGGANTIAN = jumlah baris Status Replacement berisi Faulty / Force
     const faulty = data.filter(r => {
         const s = (r["STATUS REPLACEMENT"] || "").toString().trim().toLowerCase();
         return s.includes("faulty") || s.includes("force");
     }).length;
-
-    // 5. JENIS PART = jumlah nama part yang berbeda
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
+    const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
 
-    // 6. SITE / GUDANG = jumlah site yang berbeda
-    const unikLoc = new Set(data.map(r => 
-        (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()
-    ).filter(v => v)).size;
-
-    // TAMPILKAN KE KARTU
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
@@ -223,101 +295,155 @@ function updateDashboard(data) {
     document.getElementById("typePart").textContent = unikPart;
     document.getElementById("location").textContent = unikLoc;
 
-    // Isi pilihan filter
+    // Isi pilihan filter BERANTAKAN: Scope → Material Type → Brand → Part
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
-    fillSelect("filterBrand", [...new Set(data.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
-    fillSelect("filterStatus", [...new Set(data.map(r => (r["USAGE STATUS"] || "").trim()).filter(v => v))].sort());
+    syncFilterMaterialType();
+    syncFilterBrand();
+    syncFilterPart();
 
-    // Gambar semua grafik
-    drawStockPartChart(data);
-    drawScopeChart(data);
-    drawStatusChart(data);
+    // Tampilkan Detail Part jika Part terpilih
+    updatePartDetail();
+
+    // Ambil data terfilter untuk grafik
+    const filtered = getFilteredData();
+
+    // Gambar grafik dari data TERFILTER
+    drawStockPartChart(filtered);
+    drawFaultyRateChart(filtered);
+    drawStockPerScopeChart(filtered);
 }
 
-// === 📈 GRAFIK: SEMUA PART YANG STATUS = STOCK ===
-function drawStockPartChart(data) {
-    // Filter hanya Usage Status = Stock
-    const stockData = data.filter(r => 
-        (r["USAGE STATUS"] || "").toString().trim().toLowerCase().includes("stock")
-    );
+// === SINKRONISASI FILTER (bergantung pilihan sebelumnya) ===
+function syncFilterMaterialType() {
+    const fScope = document.getElementById("filterScope").value;
+    let filtered = allData;
+    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
+    const types = [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort();
+    fillSelect("filterMaterialType", types);
+}
+function syncFilterBrand() {
+    const fScope = document.getElementById("filterScope").value;
+    const fMaterial = document.getElementById("filterMaterialType").value;
+    let filtered = allData;
+    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
+    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
+    const brands = [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort();
+    fillSelect("filterBrand", brands);
+}
+function syncFilterPart() {
+    const fScope = document.getElementById("filterScope").value;
+    const fMaterial = document.getElementById("filterMaterialType").value;
+    const fBrand = document.getElementById("filterBrand").value;
+    let filtered = allData;
+    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
+    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
+    if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
+    const parts = [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort();
+    fillSelect("filterPart", parts);
+}
 
-    // Hitung QTY per Nama Part
+// === TAMPILKAN DETAIL PART ===
+function updatePartDetail() {
+    const fPart = document.getElementById("filterPart").value;
+    const detailBox = document.getElementById("partDetail");
+
+    if (!fPart) {
+        detailBox.classList.remove("show");
+        return;
+    }
+
+    const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
+    if (partData.length === 0) {
+        detailBox.classList.remove("show");
+        return;
+    }
+
+    // Ambil info umum
+    const info = partData[0];
+    const desc = (info["DESCRIPTION"] || "-").trim();
+    const partNo = (info["PART NUMBER"] || "-").trim();
+
+    // Hitung stok total (hanya status Stock)
+    const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase().includes("stock"));
+    const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
+
+    // Hitung stok per Gudang/Lokasi
+    const whMap = {};
+    stockData.forEach(r => {
+        const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
+        whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || 0);
+    });
+    const whListHtml = Object.entries(whMap)
+        .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
+        .join("");
+
+    // Tampilkan
+    document.getElementById("dPart").textContent = fPart;
+    document.getElementById("dDesc").textContent = desc;
+    document.getElementById("dPartNo").textContent = partNo;
+    document.getElementById("dStock").textContent = totalQty + " unit";
+    document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
+
+    detailBox.classList.add("show");
+}
+
+// === 📈 GRAFIK STOCK AVAILABILITY (DINAMIS BERDASARKAN FILTER) ===
+function drawStockPartChart(data) {
+    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase().includes("stock"));
     const partQty = {};
     stockData.forEach(r => {
-        const partName = (r["PART"] || "UNKNOWN").toString().trim() || "UNKNOWN";
-        const qty = Number(r["QTY"]) || 0;
-        partQty[partName] = (partQty[partName] || 0) + qty;
+        const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
+        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
     });
-
-    // Urutkan dari terbanyak
     const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
-    const labels = sorted.map(item => item[0]);
-    const values = sorted.map(item => item[1]);
+    const labels = sorted.map(i => i[0]);
+    const values = sorted.map(i => i[1]);
 
-    // Warna hijau
-    const greenColors = values.map((_, i) => {
-        const alpha = 0.4 + ((values[i] / Math.max(...values)) * 0.6);
-        return `rgba(0, 208, 132, ${alpha})`;
+    const greenColors = values.map(v => {
+        const maxV = Math.max(...values) || 1;
+        return `rgba(0, 208, 132, ${0.4 + ((v / maxV) * 0.6)})`;
     });
 
     if (chartStockPart) chartStockPart.destroy();
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Total QTY (Stock)",
-                data: values,
-                backgroundColor: greenColors,
-                borderWidth: 0,
-                borderRadius: 4
-            }]
-        },
+        data: { labels, datasets: [{ label: "QTY Stock", data: values, backgroundColor: greenColors, borderRadius: 4 }] },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: "#1a1f2e",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#00d084",
-                    borderWidth: 1
-                }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: "#8892a6" },
-                    grid: { color: "#2c344b" }
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60, minRotation: 45 },
-                    grid: { display: false }
-                }
+                y: { ticks: { color: "#8892a6" }, grid: { color: "#2c344b" } },
+                x: { ticks: { color: "#8892a6", maxRotation: 60 }, grid: { display: false } }
             }
         }
     });
 }
 
-// === GRAFIK PER SCOPE ===
-function drawScopeChart(data) {
-    const scopeQty = {};
-    data.forEach(r => {
-        const s = (r["SCOPE"] || "Lainnya").trim() || "Lainnya";
-        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
+// === 🔧 GRAFIK FAULTY RATE (Replacement Faulty + Force Majure) ===
+function drawFaultyRateChart(data) {
+    const faultyData = data.filter(r => {
+        const s = (r["STATUS REPLACEMENT"] || "").trim().toLowerCase();
+        return s.includes("faulty") || s.includes("force");
     });
 
-    if (chartScope) chartScope.destroy();
-    chartScope = new Chart(document.getElementById("chartScope"), {
+    const partQty = {};
+    faultyData.forEach(r => {
+        const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
+        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
+    });
+    const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.map(i => i[0]);
+    const values = sorted.map(i => i[1]);
+
+    if (chartFaulty) chartFaulty.destroy();
+    chartFaulty = new Chart(document.getElementById("chartFaulty"), {
         type: "bar",
         data: {
-            labels: Object.keys(scopeQty),
+            labels,
             datasets: [{
-                label: "Total QTY",
-                data: Object.values(scopeQty),
-                backgroundColor: "#00d4ff",
+                label: "Faulty QTY",
+                data: values,
+                backgroundColor: ["#ffc107", "#ff9800", "#ff5252"],
                 borderRadius: 4
             }]
         },
@@ -325,54 +451,78 @@ function drawScopeChart(data) {
             responsive: true,
             plugins: { legend: { display: false } },
             scales: {
-                y: { ticks: { color: "#8892a6" }, grid: { color: "#2c344b" } },
-                x: { ticks: { color: "#8892a6" }, grid: { display: false } }
+                y: { beginAtZero: true, ticks: { color: "#8892a6" }, grid: { color: "#2c344b" } },
+                x: { ticks: { color: "#8892a6", maxRotation: 60 }, grid: { display: false } }
             }
         }
     });
 }
 
-// === GRAFIK PER STATUS ===
-function drawStatusChart(data) {
-    const statusQty = {};
-    data.forEach(r => {
-        const s = (r["USAGE STATUS"] || "Lainnya").trim() || "Lainnya";
-        statusQty[s] = (statusQty[s] || 0) + (Number(r["QTY"]) || 0);
+// === 📊 GRAFIK DONAT: STOK PER SCOPE ===
+function drawStockPerScopeChart(data) {
+    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase().includes("stock"));
+    const scopeQty = {};
+    stockData.forEach(r => {
+        const s = (r["SCOPE"] || "Lainnya").trim() || "Lainnya";
+        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
     });
 
-    const colors = Object.keys(statusQty).map(k => {
-        const l = k.toLowerCase();
-        if (l.includes("stock")) return "#00d084";
-        if (l.includes("faulty")) return "#ffc107";
-        if (l.includes("force")) return "#ff5252";
-        return "#8892a6";
-    });
-
-    if (chartStatus) chartStatus.destroy();
-    chartStatus = new Chart(document.getElementById("chartStatus"), {
+    if (chartScope) chartScope.destroy();
+    chartScope = new Chart(document.getElementById("chartScope"), {
         type: "doughnut",
         data: {
-            labels: Object.keys(statusQty),
+            labels: Object.keys(scopeQty),
             datasets: [{
-                data: Object.values(statusQty),
-                backgroundColor: colors,
+                data: Object.values(scopeQty),
+                backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"],
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6" } } }
+            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size: 12 } } } }
         }
     });
 }
 
+// === FUNGSI BANTUAN ===
 function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
-    sel.innerHTML = `<option value="">Semua</option>` +
-        arr.map(v => `<option value="${v}">${v}</option>`).join("");
+    sel.innerHTML = `<option value="">Semua</option>` + arr.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.value = keep;
 }
+
+function resetFilters() {
+    document.getElementById("filterScope").value = "";
+    document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
+    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
+    document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
+    document.getElementById("partDetail").classList.remove("show");
+    updateDashboard(allData);
+}
+
+// === EVENT FILTER BERANTAKAN ===
+document.getElementById("filterScope").addEventListener("change", () => {
+    syncFilterMaterialType(); syncFilterBrand(); syncFilterPart(); updatePartDetail();
+    const filtered = getFilteredData();
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
+document.getElementById("filterMaterialType").addEventListener("change", () => {
+    syncFilterBrand(); syncFilterPart(); updatePartDetail();
+    const filtered = getFilteredData();
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
+document.getElementById("filterBrand").addEventListener("change", () => {
+    syncFilterPart(); updatePartDetail();
+    const filtered = getFilteredData();
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
+document.getElementById("filterPart").addEventListener("change", () => {
+    updatePartDetail();
+    const filtered = getFilteredData();
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
 
 // === MULAI ===
 fetchData();
