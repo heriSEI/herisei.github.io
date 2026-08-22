@@ -28,7 +28,6 @@
         .sub { color: var(--muted); font-size: 13px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
         .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
-
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
@@ -46,7 +45,6 @@
         .card:nth-child(4) .num { color: var(--red); }
         .card:nth-child(5) .num { color: var(--yellow); }
         .card:nth-child(6) .num { color: var(--purple); }
-
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -81,7 +79,6 @@
         .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; }
         .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; }
         button:hover { opacity: 0.9; }
-
         .part-detail {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -102,7 +99,6 @@
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
-
         .chart-full { margin-bottom: 24px; }
         .chart-box {
             background: var(--bg-card);
@@ -124,7 +120,6 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
@@ -132,7 +127,6 @@
         <p class="refresh-info" id="refreshInfo">Data diperbarui: 21/8/2026, 14.49.49 · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
-
     <div class="cards">
         <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
@@ -141,7 +135,6 @@
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
         <div class="card"><h3>SITE / GUDANG</h3><div class="num" id="location">—</div></div>
     </div>
-
     <div class="filter-section">
         <div class="filter-header">
             <div class="filter-group">
@@ -166,12 +159,12 @@
             </div>
         </div>
     </div>
-
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
             <div class="detail-item"><span>Part:</span><span id="dPart"></span></div>
             <div class="detail-item"><span>Deskripsi:</span><span id="dDesc"></span></div>
+            <div class="detail-item"><span>Merk:</span><span id="dBrand"></span></div>
             <div class="detail-item"><span>Part Number:</span><span id="dPartNo"></span></div>
             <div class="detail-item"><span>Total Stok:</span><span id="dStock"></span></div>
         </div>
@@ -180,14 +173,12 @@
             <div id="dWHList"></div>
         </div>
     </div>
-
     <div class="chart-full">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
             <canvas id="chartStockPart"></canvas>
         </div>
     </div>
-
     <div class="chart-row">
         <div class="chart-box">
             <h4>🔧 FAULTY RATE SPAREPART <span>(Usage=Replacement + Status=Open)</span></h4>
@@ -199,16 +190,13 @@
         </div>
     </div>
 </div>
-
 <script>
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
 const REFRESH_MINUTES = 3;
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
-
 // === Cek Perlu Penggantian ===
 function isNeedsReplacement(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
@@ -217,7 +205,6 @@ function isNeedsReplacement(row) {
     const statusOk = replStatus === "Open";
     return usageOk && statusOk;
 }
-
 // === Format Tanggal Indonesia ===
 function formatDateID(date) {
     const d = date.getDate();
@@ -228,14 +215,12 @@ function formatDateID(date) {
     const s = String(date.getSeconds()).padStart(2, '0');
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
-
 async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
         const res = await fetch(URL);
         const txt = await res.text();
         const json = JSON.parse(txt.substr(47).slice(0, -2));
-
         const cols = [
             "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
             "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
@@ -246,13 +231,11 @@ async function fetchData() {
             "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
             "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
         ];
-
         allData = json.table.rows.map(r => {
             let obj = {};
             r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
             return obj;
         });
-
         updateDashboard(allData);
         const now = new Date();
         document.getElementById("refreshInfo").textContent = 
@@ -263,13 +246,11 @@ async function fetchData() {
             `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
     }
 }
-
 function getFilteredData() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
     const fBrand = document.getElementById("filterBrand").value;
     const fPart = document.getElementById("filterPart").value;
-
     return allData.filter(r => {
         return (!fScope || (r["SCOPE"] || "").trim() === fScope) &&
                (!fMaterial || (r["MATERIAL TYPE"] || "").trim() === fMaterial) &&
@@ -277,7 +258,6 @@ function getFilteredData() {
                (!fPart || (r["PART"] || "").trim() === fPart);
     });
 }
-
 function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
@@ -292,7 +272,6 @@ function fillSelect(id, arr) {
         filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.value = keep;
 }
-
 function updateDashboard(data) {
     const total = data.length;
     const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
@@ -302,26 +281,22 @@ function updateDashboard(data) {
     const needReplaceCount = faultyData.length;
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
-
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
     document.getElementById("needReplace").textContent = needReplaceCount;
     document.getElementById("typePart").textContent = unikPart;
     document.getElementById("location").textContent = unikLoc;
-
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
     syncFilterBrand();
     syncFilterPart();
-
     updatePartDetail();
     const filtered = getFilteredData();
     drawStockPartChart(filtered);
     drawFaultyRateChart(filtered);
     drawStockPerScopeChart(filtered);
 }
-
 function syncFilterMaterialType() {
     const fScope = document.getElementById("filterScope").value;
     let filtered = allData;
@@ -346,21 +321,18 @@ function syncFilterPart() {
     if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
     fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
 }
-
 function updatePartDetail() {
     const fPart = document.getElementById("filterPart").value;
     const detailBox = document.getElementById("partDetail");
     if (!fPart) { detailBox.classList.remove("show"); return; }
-
     const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
     if (partData.length === 0) { detailBox.classList.remove("show"); return; }
-
     const info = partData[0];
     const desc = (info["DESCRIPTION"] || "-").trim();
+    const brand = (info["BRAND"] || "-").trim();
     const partNo = (info["PART NUMBER"] || "-").trim();
     const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
-
     const whMap = {};
     stockData.forEach(r => {
         const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
@@ -369,15 +341,14 @@ function updatePartDetail() {
     const whListHtml = Object.entries(whMap)
         .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
         .join("");
-
     document.getElementById("dPart").textContent = fPart;
     document.getElementById("dDesc").textContent = desc;
+    document.getElementById("dBrand").textContent = brand;
     document.getElementById("dPartNo").textContent = partNo;
     document.getElementById("dStock").textContent = totalQty + " unit";
     document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
     detailBox.classList.add("show");
 }
-
 function drawStockPartChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
@@ -388,12 +359,10 @@ function drawStockPartChart(data) {
     const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
     const labels = sorted.map(i => i[0]);
     const values = sorted.map(i => i[1]);
-
     const greenColors = values.map(v => {
         const maxV = Math.max(...values) || 1;
         return `rgba(0, 208, 132, ${0.4 + ((v / maxV) * 0.6)})`;
     });
-
     if (chartStockPart) chartStockPart.destroy();
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
@@ -408,7 +377,6 @@ function drawStockPartChart(data) {
         }
     });
 }
-
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isNeedsReplacement(r));
     const grouped = {};
@@ -418,31 +386,26 @@ function drawFaultyRateChart(data) {
         const brand = (r["BRAND"] || "").trim();
         const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         const qty = Number(r["QTY"]) || 0;
-
         const key = `${scope}||${matType}||${brand}||${part}`;
         if (!grouped[key]) {
             grouped[key] = { scope, matType, brand, part, totalQty: 0 };
         }
         grouped[key].totalQty += qty;
     });
-
     const sorted = Object.values(grouped).sort((a, b) => {
         if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
         if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
         if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
         return a.part.localeCompare(b.part);
     });
-
     const labels = sorted.length ? sorted.map(item => item.part) : ["Tidak ada data"];
     const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
-
     const colors = [
         "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
         "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
         "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"
     ];
     const barColors = labels.map((_, i) => colors[i % colors.length]);
-
     if (chartFaulty) chartFaulty.destroy();
     chartFaulty = new Chart(document.getElementById("chartFaulty"), {
         type: "bar",
@@ -494,7 +457,6 @@ function drawFaultyRateChart(data) {
         }
     });
 }
-
 function drawStockPerScopeChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const scopeQty = {};
@@ -502,7 +464,6 @@ function drawStockPerScopeChart(data) {
         const s = (r["SCOPE"] || "Lainnya").trim() || "Lainnya";
         scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
     });
-
     if (chartScope) chartScope.destroy();
     chartScope = new Chart(document.getElementById("chartScope"), {
         type: "doughnut",
@@ -520,7 +481,6 @@ function drawStockPerScopeChart(data) {
         }
     });
 }
-
 function resetFilters() {
     document.getElementById("filterScope").value = "";
     document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
@@ -529,12 +489,10 @@ function resetFilters() {
     document.getElementById("partDetail").classList.remove("show");
     updateDashboard(allData);
 }
-
 document.getElementById("filterScope").addEventListener("change", updateView);
 document.getElementById("filterMaterialType").addEventListener("change", updateView);
 document.getElementById("filterBrand").addEventListener("change", updateView);
 document.getElementById("filterPart").addEventListener("change", updateView);
-
 function updateView() {
     syncFilterMaterialType();
     syncFilterBrand();
@@ -543,7 +501,6 @@ function updateView() {
     const filtered = getFilteredData();
     updateDashboard(filtered);
 }
-
 fetchData();
 setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
 </script>
