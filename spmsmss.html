@@ -47,16 +47,29 @@
         body { background: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; }
         
-        /* === LOGO PERUSAHAAN === */
-        .logo-container { text-align: center; margin-bottom: 24px; }
-        .logo-img { height: 100px; max-width: 100%; object-fit: contain; }
-        @media (max-width: 600px) { .logo-img { height: 65px; } }
-
-        header { margin-bottom: 24px; text-align: center; }
-        h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
-        .sub { color: var(--muted); font-size: 13px; }
-        .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
-        .credit { color: var(--muted); font-size: 12px; margin-top: 4px; font-style: italic; }
+        /* === HEADER: LOGO KIRI + JUDUL KANAN — SEJAJAR === */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo-img { height: 70px; max-width: 100%; object-fit: contain; }
+        .header-text { text-align: left; }
+        .header-text h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
+        .header-text .sub { color: var(--muted); font-size: 13px; }
+        .refresh-info { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .credit { color: var(--muted); font-size: 12px; margin-top: 2px; font-style: italic; }
+        
+        /* === RESPONSIF DI HP === */
+        @media (max-width: 600px) {
+            .header-bar { flex-direction: column; text-align: center; gap: 12px; }
+            .header-text { text-align: center; }
+            .logo-img { height: 55px; }
+        }
         
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
@@ -157,17 +170,16 @@
 <body>
 <div class="container">
 
-    <!-- === LOGO PERUSAHAAN — Alamat Sudah Diperbaiki === -->
-    <div class="logo-container">
+    <!-- === HEADER: LOGO KIRI, JUDUL KANAN — SEJAJAR === -->
+    <div class="header-bar">
         <img src="https://herisei.github.io/Logo PT SEI (A Len Industri Company).png" alt="PT Surya Energi Indotama — A Len Industri Company" class="logo-img">
+        <div class="header-text">
+            <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
+            <p class="sub">Sparepart Operation · Transaction Data · Faulty Rate Analysis</p>
+            <p class="refresh-info" id="refreshInfo">Data diperbarui: 22/8/2026, 19.00.00 · Auto-refresh tiap 3 menit</p>
+            <p class="credit">Designed & Developed with Precision by — Elmaz</p>
+        </div>
     </div>
-
-    <header>
-        <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
-        <p class="sub">Sparepart Operation · Transaction Data · Faulty Rate Analysis</p>
-        <p class="refresh-info" id="refreshInfo">Data diperbarui: 22/8/2026, 19.00.00 · Auto-refresh tiap 3 menit</p>
-        <p class="credit">Designed & Developed with Precision by — Elmaz</p>
-    </header>
 
     <div class="cards">
         <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
@@ -536,34 +548,4 @@ function drawStockPerScopeChart(data) {
 function resetFilters() {
     document.getElementById("filterScope").value = "";
     document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
-    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
-    document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
-    updateDashboard(allData);
-}
-
-// Event Filter Berantai
-document.getElementById("filterScope").addEventListener("change", () => {
-    syncFilterMaterialType(); syncFilterBrand(); syncFilterPart(); updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
-document.getElementById("filterMaterialType").addEventListener("change", () => {
-    syncFilterBrand(); syncFilterPart(); updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
-document.getElementById("filterBrand").addEventListener("change", () => {
-    syncFilterPart(); updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
-});
-document.getElementById("filterPart").addEventListener("change", updatePartDetail);
-
-// Muat Data Saat Halaman Dibuka
-fetchData();
-
-// Auto-refresh tiap 3 menit
-setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
-</script>
-</body>
-</html>
+    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option
