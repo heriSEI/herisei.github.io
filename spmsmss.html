@@ -11,8 +11,8 @@
         /* === TEMA OTOMATIS: MODE GELAP === */
         :root {
             --bg: #0f1419;
-            --bg-card: #1a1f2e;
-            --bg-card-2: #21283c;
+            --bg-card: rgba(26, 31, 46, 0.75);
+            --bg-card-2: rgba(33, 40, 60, 0.65);
             --accent: #00d4ff;
             --accent-2: #00a82d;
             --green: #00d084;
@@ -21,16 +21,17 @@
             --purple: #a855f7;
             --orange: #ff9f29;
             --text: #e6e6e6;
-            --muted: #8892a6;
-            --border: #2c344b;
+            --muted: #9ca8c0;
+            --border: rgba(60, 80, 110, 0.35);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
         }
 
         /* === TEMA OTOMATIS: MODE TERANG === */
         @media (prefers-color-scheme: light) {
             :root {
                 --bg: #f0f4f8;
-                --bg-card: #ffffff;
-                --bg-card-2: #eef2f7;
+                --bg-card: rgba(255, 255, 255, 0.85);
+                --bg-card-2: rgba(238, 242, 247, 0.75);
                 --accent: #0091b3;
                 --accent-2: #008024;
                 --green: #00a86b;
@@ -40,7 +41,8 @@
                 --orange: #e68a00;
                 --text: #1f2937;
                 --muted: #6b7280;
-                --border: #d1d5db;
+                --border: rgba(209, 213, 219, 0.5);
+                --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             }
         }
 
@@ -50,25 +52,26 @@
             min-height: 100vh;
             font-family: 'Segoe UI', Roboto, sans-serif;
             color: var(--text);
-            /* Background Gradien Biru-Hijau SEI */
             background:
-                radial-gradient(circle at top left, rgba(0,212,255,0.14), transparent 35%),
-                radial-gradient(circle at top right, rgba(0,168,45,0.12), transparent 35%),
-                linear-gradient(135deg, #0e141a 0%, #111827 45%, #0f172a 100%);
+                radial-gradient(circle at top left, rgba(0,212,255,0.14), transparent 40%),
+                radial-gradient(circle at top right, rgba(0,168,45,0.10), transparent 40%),
+                linear-gradient(180deg, #0e141a 0%, #111827 45%, #0f172a 100%);
+            background-attachment: fixed;
             transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         .container { max-width: 1400px; margin: 0 auto; }
         
-        /* === HEADER: LOGO KIRI + JUDUL KANAN — SEJAJAR === */
+        /* === HEADER: LOGO KIRI, JUDUL KANAN — SEJAJAR === */
         .header-bar {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 24px;
             margin-bottom: 28px;
-            padding-bottom: 16px;
+            padding-bottom: 20px;
             border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
         }
         .logo-img { height: 70px; max-width: 100%; object-fit: contain; }
         .header-text { text-align: left; }
@@ -84,18 +87,20 @@
             .logo-img { height: 55px; }
         }
         
-        .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
+        .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
         
         .card {
-            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-2));
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
+            border-radius: 14px;
+            padding: 20px 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
         }
-        .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
-        .card .num { font-size: 28px; font-weight: 700; }
+        .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+        .card .num { font-size: 30px; font-weight: 700; line-height: 1.2; }
         .card:nth-child(1) .num { color: var(--accent); }
         .card:nth-child(2) .num { color: var(--green); }
         .card:nth-child(3) .num { color: var(--orange); }
@@ -106,14 +111,16 @@
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
         }
         .filter-header {
             display: grid;
             grid-template-columns: repeat(4, 1fr) auto;
-            gap: 12px;
+            gap: 14px;
             align-items: flex-end;
         }
         @media (max-width: 1000px) { .filter-header { grid-template-columns: repeat(2, 1fr) auto; } }
@@ -130,25 +137,37 @@
             background: var(--bg-card-2);
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 10px 12px;
-            border-radius: 6px;
+            padding: 10px 14px;
+            border-radius: 8px;
             outline: none;
             font-size: 13px;
+            backdrop-filter: blur(6px);
         }
-        .btn-refresh { background: var(--accent); color: #fff; font-weight: 600; border: none; cursor: pointer; }
-        .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; }
-        button:hover { opacity: 0.9; }
+        select:focus { border-color: var(--accent); }
+        .btn-refresh { 
+            background: linear-gradient(135deg, #00d4ff, #0091b3); 
+            color: #fff; font-weight: 600; border: none; cursor: pointer; 
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25);
+        }
+        .btn-reset { 
+            background: linear-gradient(135deg, #ff5252, #d93838); 
+            color: #fff; font-weight: 600; border: none; cursor: pointer; 
+            box-shadow: 0 2px 8px rgba(255, 82, 82, 0.25);
+        }
+        button:hover { transform: translateY(-1px); opacity: 0.95; }
         
         .part-detail {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 24px;
             display: none;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
         }
         .part-detail.show { display: block; }
-        .part-detail h4 { color: var(--accent); margin-bottom: 12px; font-size: 15px; }
+        .part-detail h4 { color: var(--accent); margin-bottom: 14px; font-size: 15px; }
         .detail-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -157,26 +176,28 @@
         .detail-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
         .detail-item span:first-child { color: var(--muted); font-size: 13px; }
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
-        .wh-list { margin-top: 10px; }
-        .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
+        .wh-list { margin-top: 12px; }
+        .wh-item { padding: 8px 12px; background: var(--bg-card-2); border-radius: 8px; margin: 6px 0; font-size: 13px; }
         
         .chart-full { margin-bottom: 24px; }
         .chart-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
         }
         .chart-box h4 {
             font-size: 15px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             color: var(--accent);
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .chart-box h4 span { font-size: 12px; color: var(--muted); font-weight: normal; }
-        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -449,18 +470,24 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const greenColors = values.map(v => {
         const maxV = Math.max(...values) || 1;
-        return `rgba(0, 208, 132, ${0.4 + ((v / maxV) * 0.6)})`;
+        return `rgba(0, 208, 132, ${0.5 + ((v / maxV) * 0.5)})`;
     });
     if (chartStockPart) chartStockPart.destroy();
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
-        data: { labels, datasets: [{ label: "QTY Stock", data: values, backgroundColor: greenColors, borderRadius: 4 }] },
+        data: { labels, datasets: [{ label: "QTY Stock", data: values, backgroundColor: greenColors, borderRadius: 6 }] },
         options: {
             responsive: true,
             plugins: { legend: { display: false } },
             scales: {
-                y: { ticks: { color: "var(--muted)" }, grid: { color: "var(--border)" } },
-                x: { ticks: { color: "var(--muted)", maxRotation: 60 }, grid: { display: false } }
+                y: { 
+                    ticks: { color: "var(--muted)" }, 
+                    grid: { color: "rgba(100, 120, 150, 0.15)" } 
+                },
+                x: { 
+                    ticks: { color: "var(--muted)", maxRotation: 60 }, 
+                    grid: { display: false } 
+                }
             }
         }
     });
@@ -498,18 +525,20 @@ function drawFaultyRateChart(data) {
         type: "bar",
         data: {
             labels: labels,
-            datasets: [{ label: "Faulty QTY", data: values, backgroundColor: barColors, borderRadius: 4 }]
+            datasets: [{ label: "Faulty QTY", data: values, backgroundColor: barColors, borderRadius: 6 }]
         },
         options: {
             responsive: true,
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: "var(--bg-card)",
-                    titleColor: "var(--text)",
-                    bodyColor: "var(--text)",
+                    backgroundColor: "rgba(15, 20, 25, 0.92)",
+                    titleColor: "#fff",
+                    bodyColor: "#e6e6e6",
                     borderColor: "var(--accent)",
                     borderWidth: 1,
+                    cornerRadius: 10,
+                    padding: 12,
                     callbacks: {
                         label: function(ctx) {
                             const idx = ctx.dataIndex;
@@ -526,8 +555,15 @@ function drawFaultyRateChart(data) {
                 }
             },
             scales: {
-                y: { beginAtZero: true, ticks: { color: "var(--muted)" }, grid: { color: "var(--border)" } },
-                x: { ticks: { color: "var(--muted)", maxRotation: 60 }, grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { color: "var(--muted)" }, 
+                    grid: { color: "rgba(100, 120, 150, 0.15)" } 
+                },
+                x: { 
+                    ticks: { color: "var(--muted)", maxRotation: 60 }, 
+                    grid: { display: false } 
+                }
             }
         }
     });
@@ -553,7 +589,12 @@ function drawStockPerScopeChart(data) {
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: "bottom", labels: { color: "var(--text)", font: { size: 12 } } } }
+            plugins: { 
+                legend: { 
+                    position: "bottom", 
+                    labels: { color: "var(--text)", font: { size: 13 }, padding: 15 } 
+                } 
+            }
         }
     });
 }
