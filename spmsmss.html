@@ -6,12 +6,15 @@
     <title>Dashboard Spareparts — BAKTI MSS 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        
+        /* === TEMA OTOMATIS: MODE GELAP === */
         :root {
             --bg: #0f1419;
             --bg-card: #1a1f2e;
             --bg-card-2: #21283c;
             --accent: #00d4ff;
+            --accent-2: #00a82d;
             --green: #00d084;
             --yellow: #ffc107;
             --red: #ff5252;
@@ -21,16 +24,44 @@
             --muted: #8892a6;
             --border: #2c344b;
         }
+
+        /* === TEMA OTOMATIS: MODE TERANG === */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f0f4f8;
+                --bg-card: #ffffff;
+                --bg-card-2: #eef2f7;
+                --accent: #0091b3;
+                --accent-2: #008024;
+                --green: #00a86b;
+                --yellow: #e6a800;
+                --red: #e03e3e;
+                --purple: #8b5cf6;
+                --orange: #e68a00;
+                --text: #1f2937;
+                --muted: #6b7280;
+                --border: #d1d5db;
+            }
+        }
+
         body { background: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; }
-        header { margin-bottom: 24px; }
+        
+        /* === LOGO PERUSAHAAN === */
+        .logo-container { text-align: center; margin-bottom: 24px; }
+        .logo-img { height: 100px; max-width: 100%; object-fit: contain; }
+        @media (max-width: 600px) { .logo-img { height: 65px; } }
+
+        header { margin-bottom: 24px; text-align: center; }
         h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
         .sub { color: var(--muted); font-size: 13px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
-        .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
+        .credit { color: var(--muted); font-size: 12px; margin-top: 4px; font-style: italic; }
+        
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+        
         .card {
             background: linear-gradient(135deg, var(--bg-card), var(--bg-card-2));
             border: 1px solid var(--border);
@@ -45,6 +76,7 @@
         .card:nth-child(4) .num { color: var(--red); }
         .card:nth-child(5) .num { color: var(--yellow); }
         .card:nth-child(6) .num { color: var(--purple); }
+        
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -60,6 +92,7 @@
         }
         @media (max-width: 1000px) { .filter-header { grid-template-columns: repeat(2, 1fr) auto; } }
         @media (max-width: 600px) { .filter-header { grid-template-columns: 1fr; } }
+        
         .filter-group label {
             display: block;
             font-size: 12px;
@@ -76,9 +109,10 @@
             outline: none;
             font-size: 13px;
         }
-        .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; }
+        .btn-refresh { background: var(--accent); color: #fff; font-weight: 600; border: none; cursor: pointer; }
         .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; }
         button:hover { opacity: 0.9; }
+        
         .part-detail {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -99,6 +133,7 @@
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
+        
         .chart-full { margin-bottom: 24px; }
         .chart-box {
             background: var(--bg-card);
@@ -121,12 +156,19 @@
 </head>
 <body>
 <div class="container">
+
+    <!-- === LOGO PERUSAHAAN — Alamat Sudah Diperbaiki === -->
+    <div class="logo-container">
+        <img src="https://herisei.github.io/Logo PT SEI (A Len Industri Company).png" alt="PT Surya Energi Indotama — A Len Industri Company" class="logo-img">
+    </div>
+
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
         <p class="sub">Sparepart Operation · Transaction Data · Faulty Rate Analysis</p>
-        <p class="refresh-info" id="refreshInfo">Data diperbarui: 21/8/2026, 14.49.49 · Auto-refresh tiap 3 menit</p>
+        <p class="refresh-info" id="refreshInfo">Data diperbarui: 22/8/2026, 19.00.00 · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
+
     <div class="cards">
         <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
@@ -135,6 +177,7 @@
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
         <div class="card"><h3>SITE / GUDANG</h3><div class="num" id="location">—</div></div>
     </div>
+
     <div class="filter-section">
         <div class="filter-header">
             <div class="filter-group">
@@ -159,6 +202,7 @@
             </div>
         </div>
     </div>
+
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
@@ -173,12 +217,14 @@
             <div id="dWHList"></div>
         </div>
     </div>
+
     <div class="chart-full">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
             <canvas id="chartStockPart"></canvas>
         </div>
     </div>
+
     <div class="chart-row">
         <div class="chart-box">
             <h4>🔧 FAULTY RATE SPAREPART <span>(Usage=Replacement + Status=Open)</span></h4>
@@ -190,6 +236,7 @@
         </div>
     </div>
 </div>
+
 <script>
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
@@ -197,7 +244,7 @@ const REFRESH_MINUTES = 3;
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
-// === Cek Perlu Penggantian ===
+
 function isNeedsReplacement(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
     const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
@@ -205,7 +252,7 @@ function isNeedsReplacement(row) {
     const statusOk = replStatus === "Open";
     return usageOk && statusOk;
 }
-// === Format Tanggal Indonesia ===
+
 function formatDateID(date) {
     const d = date.getDate();
     const m = date.getMonth() + 1;
@@ -215,6 +262,7 @@ function formatDateID(date) {
     const s = String(date.getSeconds()).padStart(2, '0');
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
+
 async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
@@ -246,6 +294,7 @@ async function fetchData() {
             `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
     }
 }
+
 function getFilteredData() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -258,6 +307,7 @@ function getFilteredData() {
                (!fPart || (r["PART"] || "").trim() === fPart);
     });
 }
+
 function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
@@ -272,6 +322,7 @@ function fillSelect(id, arr) {
         filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.value = keep;
 }
+
 function updateDashboard(data) {
     const total = data.length;
     const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
@@ -281,28 +332,33 @@ function updateDashboard(data) {
     const needReplaceCount = faultyData.length;
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
+    
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
     document.getElementById("needReplace").textContent = needReplaceCount;
     document.getElementById("typePart").textContent = unikPart;
     document.getElementById("location").textContent = unikLoc;
+    
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
     syncFilterBrand();
     syncFilterPart();
     updatePartDetail();
+    
     const filtered = getFilteredData();
     drawStockPartChart(filtered);
     drawFaultyRateChart(filtered);
     drawStockPerScopeChart(filtered);
 }
+
 function syncFilterMaterialType() {
     const fScope = document.getElementById("filterScope").value;
     let filtered = allData;
     if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
     fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
 }
+
 function syncFilterBrand() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -311,6 +367,7 @@ function syncFilterBrand() {
     if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
     fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
 }
+
 function syncFilterPart() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -321,26 +378,31 @@ function syncFilterPart() {
     if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
     fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
 }
+
 function updatePartDetail() {
     const fPart = document.getElementById("filterPart").value;
     const detailBox = document.getElementById("partDetail");
     if (!fPart) { detailBox.classList.remove("show"); return; }
     const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
     if (partData.length === 0) { detailBox.classList.remove("show"); return; }
+    
     const info = partData[0];
     const desc = (info["DESCRIPTION"] || "-").trim();
     const brand = (info["BRAND"] || "-").trim();
     const partNo = (info["PART NUMBER"] || "-").trim();
     const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
+    
     const whMap = {};
     stockData.forEach(r => {
         const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
         whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || 0);
     });
+    
     const whListHtml = Object.entries(whMap)
         .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
         .join("");
+    
     document.getElementById("dPart").textContent = fPart;
     document.getElementById("dDesc").textContent = desc;
     document.getElementById("dBrand").textContent = brand;
@@ -349,6 +411,7 @@ function updatePartDetail() {
     document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
     detailBox.classList.add("show");
 }
+
 function drawStockPartChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
@@ -371,12 +434,13 @@ function drawStockPartChart(data) {
             responsive: true,
             plugins: { legend: { display: false } },
             scales: {
-                y: { ticks: { color: "#8892a6" }, grid: { color: "#2c344b" } },
-                x: { ticks: { color: "#8892a6", maxRotation: 60 }, grid: { display: false } }
+                y: { ticks: { color: "var(--muted)" }, grid: { color: "var(--border)" } },
+                x: { ticks: { color: "var(--muted)", maxRotation: 60 }, grid: { display: false } }
             }
         }
     });
 }
+
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isNeedsReplacement(r));
     const grouped = {};
@@ -387,9 +451,7 @@ function drawFaultyRateChart(data) {
         const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         const qty = Number(r["QTY"]) || 0;
         const key = `${scope}||${matType}||${brand}||${part}`;
-        if (!grouped[key]) {
-            grouped[key] = { scope, matType, brand, part, totalQty: 0 };
-        }
+        if (!grouped[key]) grouped[key] = { scope, matType, brand, part, totalQty: 0 };
         grouped[key].totalQty += qty;
     });
     const sorted = Object.values(grouped).sort((a, b) => {
@@ -411,22 +473,17 @@ function drawFaultyRateChart(data) {
         type: "bar",
         data: {
             labels: labels,
-            datasets: [{
-                label: "Faulty QTY",
-                data: values,
-                backgroundColor: barColors,
-                borderRadius: 4
-            }]
+            datasets: [{ label: "Faulty QTY", data: values, backgroundColor: barColors, borderRadius: 4 }]
         },
         options: {
             responsive: true,
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: "#1a1f2e",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#ffc107",
+                    backgroundColor: "var(--bg-card)",
+                    titleColor: "var(--text)",
+                    bodyColor: "var(--text)",
+                    borderColor: "var(--accent)",
                     borderWidth: 1,
                     callbacks: {
                         label: function(ctx) {
@@ -444,19 +501,13 @@ function drawFaultyRateChart(data) {
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: "#8892a6" },
-                    grid: { color: "#2c344b" }
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60 },
-                    grid: { display: false }
-                }
+                y: { beginAtZero: true, ticks: { color: "var(--muted)" }, grid: { color: "var(--border)" } },
+                x: { ticks: { color: "var(--muted)", maxRotation: 60 }, grid: { display: false } }
             }
         }
     });
 }
+
 function drawStockPerScopeChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const scopeQty = {};
@@ -477,31 +528,41 @@ function drawStockPerScopeChart(data) {
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size: 12 } } } }
+            plugins: { legend: { position: "bottom", labels: { color: "var(--text)", font: { size: 12 } } } }
         }
     });
 }
+
 function resetFilters() {
     document.getElementById("filterScope").value = "";
     document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
     document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
     document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
-    document.getElementById("partDetail").classList.remove("show");
     updateDashboard(allData);
 }
-document.getElementById("filterScope").addEventListener("change", updateView);
-document.getElementById("filterMaterialType").addEventListener("change", updateView);
-document.getElementById("filterBrand").addEventListener("change", updateView);
-document.getElementById("filterPart").addEventListener("change", updateView);
-function updateView() {
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
+
+// Event Filter Berantai
+document.getElementById("filterScope").addEventListener("change", () => {
+    syncFilterMaterialType(); syncFilterBrand(); syncFilterPart(); updatePartDetail();
     const filtered = getFilteredData();
-    updateDashboard(filtered);
-}
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
+document.getElementById("filterMaterialType").addEventListener("change", () => {
+    syncFilterBrand(); syncFilterPart(); updatePartDetail();
+    const filtered = getFilteredData();
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
+document.getElementById("filterBrand").addEventListener("change", () => {
+    syncFilterPart(); updatePartDetail();
+    const filtered = getFilteredData();
+    drawStockPartChart(filtered); drawFaultyRateChart(filtered); drawStockPerScopeChart(filtered);
+});
+document.getElementById("filterPart").addEventListener("change", updatePartDetail);
+
+// Muat Data Saat Halaman Dibuka
 fetchData();
+
+// Auto-refresh tiap 3 menit
 setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
 </script>
 </body>
