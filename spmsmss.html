@@ -170,6 +170,47 @@
         }
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
+
+        /* === PERKECIL TEKS HAK CIPA PETA === */
+        .leaflet-control-attribution {
+            font-size: 8px !important;
+            opacity: 0.45 !important;
+            padding: 0 4px !important;
+            background: transparent !important;
+            color: #666 !important;
+        }
+        .leaflet-control-attribution a {
+            color: #888 !important;
+        }
+
+        /* === ANIMASI TITIK BERDENYUT === */
+        .pulse-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00d084;
+            position: relative;
+            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7);
+            animation: pulse 2s infinite;
+        }
+        .pulse-marker::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(0, 208, 132, 0.4);
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 208, 132, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0); }
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -263,6 +304,14 @@ let chartStockPart, chartFaulty, chartScope;
 let mapWH = null;
 let markers = [];
 
+// === CUSTOM ICON BERDENYUT ===
+const PulseIcon = L.divIcon({
+    className: 'pulse-icon',
+    html: '<div class="pulse-marker"></div>',
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+});
+
 function isNeedsReplacement(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
     const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
@@ -307,8 +356,7 @@ function initOrUpdateMap(whList) {
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-            maxZoom: 18
+            attribution: '' // Dikosongkan, teks tetap muncul otomatis tapi diperkecil CSS
         }).addTo(mapWH);
     } else {
         markers.forEach(m => mapWH.removeLayer(m));
@@ -327,14 +375,8 @@ function initOrUpdateMap(whList) {
 
         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
             validCoords.push([lat, lng]);
-            const marker = L.circleMarker([lat, lng], {
-                radius: 7,
-                fillColor: "#00d084",
-                color: "#ffffff",
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.9
-            }).addTo(mapWH);
+            // ✅ Titik BERDENYUT menggantikan titik biasa
+            const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
             marker.bindPopup(`
                 <strong>${name}</strong><br>
                 ${kab}<br>
@@ -514,7 +556,6 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
-    // Skala batang diperbesar → lebih proporsional dan enak dilihat
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 210));
 
     const greenColors = values.map(v => {
