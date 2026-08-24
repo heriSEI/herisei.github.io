@@ -1,509 +1,3 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Spareparts — BAKTI MSS 2026</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        :root {
-            --bg: #0f1419;
-            --bg-card: rgba(26, 31, 46, 0.72);
-            --bg-card-2: rgba(33, 40, 60, 0.65);
-            --accent: #00d4ff;
-            --green: #00d084;
-            --yellow: #ffc107;
-            --red: #ff5252;
-            --purple: #a855f7;
-            --orange: #ff9f29;
-            --text: #e6e6e6;
-            --muted: #8892a6;
-            --border: rgba(44, 52, 75, 0.5);
-        }
-        body { 
-            color: var(--text); 
-            padding: 20px; 
-            min-height: 100vh; 
-            background:
-                linear-gradient(rgba(15, 20, 25, 0.45), rgba(15, 20, 25, 0.55)),
-                url("https://herisei.github.io/Fix%20PLTS%20BTS.png");
-            background-size: cover;
-            background-position: center center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
-        header { 
-            margin-bottom: 24px; 
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(8px);
-        }
-        h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
-        .sub { color: var(--muted); font-size: 13px; }
-        .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
-        .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
-        .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
-        @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
-        .card .num { font-size: 28px; font-weight: 700; }
-        .card:nth-child(1) .num { color: var(--red); }
-        .card:nth-child(2) .num { color: var(--green); }
-        .card:nth-child(3) .num { color: var(--orange); }
-        .card:nth-child(4) .num { color: var(--yellow); }
-        .card:nth-child(5) .num { color: var(--purple); }
-        .card:nth-child(6) .num { color: var(--accent); }
-        .filter-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .filter-header {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr) auto;
-            gap: 12px;
-            align-items: flex-end;
-        }
-        @media (max-width: 1000px) { .filter-header { grid-template-columns: repeat(2, 1fr) auto; } }
-        @media (max-width: 600px) { .filter-header { grid-template-columns: 1fr; } }
-        .filter-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-        select, button {
-            width: 100%;
-            background: var(--bg-card-2);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 12px;
-            border-radius: 6px;
-            outline: none;
-            font-size: 13px;
-            backdrop-filter: blur(6px);
-        }
-        .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25); }
-        .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 82, 82, 0.25); }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
-        .part-detail {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .part-detail.show { display: block; }
-        .part-detail h4 { color: var(--accent); margin-bottom: 12px; font-size: 15px; }
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-        }
-        .detail-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
-        .detail-item span:first-child { color: var(--muted); font-size: 13px; }
-        .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
-        .wh-list { margin-top: 10px; }
-        .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
-        
-        /* === GRAFIK + PETA BERDAMPINGAN === */
-        .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
-        @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
-        
-        .chart-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .chart-box h4 {
-            font-size: 15px;
-            margin-bottom: 14px;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .chart-box h4 span { font-size: 12px; color: var(--muted); font-weight: normal; }
-        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-        @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
-        
-        /* === PETA WH CLUSTER === */
-        .map-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .map-box h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: var(--green);
-        }
-        #mapWH {
-            height: 280px;
-            border-radius: 8px;
-        }
-        .leaflet-popup-content strong { color: #00d084; }
-        .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <header>
-        <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
-        <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
-        <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
-        <p class="credit">Designed & Developed with Precision by — Elmaz</p>
-    </header>
-    <div class="cards">
-        <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
-        <div class="card"><h3>JUMLAH WH CLUSTER</h3><div class="num" id="whCluster">—</div></div>
-        <div class="card"><h3>TOTAL STOCK (QTY)</h3><div class="num" id="totalStock">—</div></div>
-        <div class="card"><h3>PERLU PENGGANTIAN</h3><div class="num" id="needReplace">—</div></div>
-        <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
-        <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
-    </div>
-    <div class="filter-section">
-        <div class="filter-header">
-            <div class="filter-group">
-                <label>SCOPE</label>
-                <select id="filterScope"><option value="">Semua Scope</option></select>
-            </div>
-            <div class="filter-group">
-                <label>MATERIAL TYPE</label>
-                <select id="filterMaterialType"><option value="">Semua Type</option></select>
-            </div>
-            <div class="filter-group">
-                <label>BRAND</label>
-                <select id="filterBrand"><option value="">Semua Brand</option></select>
-            </div>
-            <div class="filter-group">
-                <label>PART</label>
-                <select id="filterPart"><option value="">Semua Part</option></select>
-            </div>
-            <div style="display:flex; gap:8px; flex-direction:column;">
-                <button class="btn-refresh" onclick="fetchData()">🔄 Refresh</button>
-                <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
-            </div>
-        </div>
-    </div>
-    <div class="part-detail" id="partDetail">
-        <h4>📋 Detail Part Terpilih</h4>
-        <div class="detail-grid">
-            <div class="detail-item"><span>Part:</span><span id="dPart"></span></div>
-            <div class="detail-item"><span>Deskripsi:</span><span id="dDesc"></span></div>
-            <div class="detail-item"><span>Merk:</span><span id="dBrand"></span></div>
-            <div class="detail-item"><span>Part Number:</span><span id="dPartNo"></span></div>
-            <div class="detail-item"><span>Total Stok:</span><span id="dStock"></span></div>
-        </div>
-        <div class="wh-list">
-            <strong>📍 Lokasi Gudang & Stok:</strong>
-            <div id="dWHList"></div>
-        </div>
-    </div>
-
-    <!-- === GRAFIK STOK + PETA === -->
-    <div class="chart-map-row">
-        <div class="chart-box">
-            <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
-            <canvas id="chartStockPart" height="220"></canvas>
-        </div>
-        <div class="map-box">
-            <h4>🗺️ LOKASI WH CLUSTER</h4>
-            <div id="mapWH"></div>
-        </div>
-    </div>
-
-    <div class="chart-row">
-        <div class="chart-box">
-            <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
-            <canvas id="chartFaulty"></canvas>
-        </div>
-        <div class="chart-box">
-            <h4>📊 STOK PER SCOPE</h4>
-            <canvas id="chartScope"></canvas>
-        </div>
-    </div>
-</div>
-<script>
-const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
-const SHEET_NAME = "Raw_File_Update";
-const WH_CLUSTER_SHEET = "WH Cluster";
-const REFRESH_MINUTES = 3;
-const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
-
-let allData = [];
-let chartStockPart, chartFaulty, chartScope;
-let mapWH = null;
-let markers = [];
-
-function isNeedsReplacement(row) {
-    const usage = (row["USAGE STATUS"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
-    const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
-    const statusOk = replStatus === "Open";
-    return usageOk && statusOk;
-}
-
-function formatDateID(date) {
-    const d = date.getDate();
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    const h = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const s = String(date.getSeconds()).padStart(2, '0');
-    return `${d}/${m}/${y}, ${h}.${min}.${s}`;
-}
-
-async function fetchWHClusterData() {
-    try {
-        const res = await fetch(URL_WH_CLUSTER);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => (c.label || "").trim());
-        console.log("Kolom WH Cluster:", cols);
-        const data = json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => {
-                const val = cell?.v ?? "";
-                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
-            });
-            return obj;
-        }).filter(row => row["WH Name"]); // hapus baris kosong
-        return data;
-    } catch (err) {
-        console.warn("Gagal ambil WH Cluster:", err);
-        return [];
-    }
-}
-
-function initOrUpdateMap(whList) {
-    if (!mapWH) {
-        // Inisialisasi Peta — tengah Indonesia
-        mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-            maxZoom: 18
-        }).addTo(mapWH);
-    } else {
-        markers.forEach(m => mapWH.removeLayer(m));
-        markers = [];
-    }
-
-    const validCoords = [];
-    whList.forEach(wh => {
-        const lat = parseFloat(wh["Latt"]);
-        const lng = parseFloat(wh["Long"]);
-        const name = wh["WH Name"] || "WH";
-        const kab = wh["Kabupaten"] || "-";
-        const addr = wh["Alamat"] || "-";
-        const pic = wh["PIC"] || "-";
-        const hp = wh["Kontak"] || "-";
-
-        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-            validCoords.push([lat, lng]);
-            const marker = L.circleMarker([lat, lng], {
-                radius: 7,
-                fillColor: "#00d084",
-                color: "#ffffff",
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.9
-            }).addTo(mapWH);
-            marker.bindPopup(`
-                <strong>${name}</strong><br>
-                ${kab}<br>
-                <small>${addr}</small>
-                <hr style="margin:4px 0; border:none; border-top:1px solid #eee;">
-                PIC: ${pic}<br>
-                Kontak: ${hp}
-            `);
-            markers.push(marker);
-        }
-    });
-
-    // Sesuaikan tampilan peta agar semua titik terlihat
-    if (validCoords.length > 0) {
-        mapWH.fitBounds(validCoords, { padding: [15, 15] });
-    }
-}
-
-async function fetchData() {
-    try {
-        document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
-        
-        // Ambil data WH Cluster
-        const whData = await fetchWHClusterData();
-        document.getElementById("whCluster").textContent = whData.length;
-        initOrUpdateMap(whData);
-
-        // Ambil data utama
-        const resMain = await fetch(URL_MAIN);
-        const txtMain = await resMain.text();
-        const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
-        const cols = [
-            "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
-            "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
-            "PART NUMBER","SN","QTY","UOM","REQUEST STATUS",
-            "ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME",
-            "INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME",
-            "TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT",
-            "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
-            "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
-        ];
-        allData = jsonMain.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
-            return obj;
-        });
-
-        updateDashboard(allData);
-        const now = new Date();
-        document.getElementById("refreshInfo").textContent = 
-            `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
-    } catch (err) {
-        console.error(err);
-        document.getElementById("refreshInfo").innerHTML = 
-            `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
-    }
-}
-
-function getFilteredData() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    const fPart = document.getElementById("filterPart").value;
-    return allData.filter(r => {
-        return (!fScope || (r["SCOPE"] || "").trim() === fScope) &&
-               (!fMaterial || (r["MATERIAL TYPE"] || "").trim() === fMaterial) &&
-               (!fBrand || (r["BRAND"] || "").trim() === fBrand) &&
-               (!fPart || (r["PART"] || "").trim() === fPart);
-    });
-}
-
-function fillSelect(id, arr) {
-    const sel = document.getElementById(id);
-    const keep = sel.value;
-    const exclude = {
-        "filterScope": ["SCOPE"],
-        "filterMaterialType": ["MATERIAL TYPE"],
-        "filterBrand": ["BRAND"],
-        "filterPart": ["PART"]
-    };
-    const filteredArr = arr.filter(v => !exclude[id]?.includes(v));
-    sel.innerHTML = `<option value="">Semua</option>` +
-        filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
-    sel.value = keep;
-}
-
-function updateDashboard(data) {
-    const total = data.length;
-    const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
-    const inStock = stockRows.length;
-    const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
-    const unfulfilledData = data.filter(r => isNeedsReplacement(r));
-    const needReplaceCount = unfulfilledData.length;
-    const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
-    
-    document.getElementById("totalUnit").textContent = total;
-    document.getElementById("inStock").textContent = inStock;
-    document.getElementById("totalStock").textContent = totalStock;
-    document.getElementById("needReplace").textContent = needReplaceCount;
-    document.getElementById("typePart").textContent = unikPart;
-    
-    fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-    
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered);
-    drawUnfulfilledChart(filtered);
-    drawStockPerScopeChart(filtered);
-}
-
-function syncFilterMaterialType() {
-    const fScope = document.getElementById("filterScope").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
-}
-
-function syncFilterBrand() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
-    fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
-}
-
-function syncFilterPart() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
-    if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
-    fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
-}
-
-function updatePartDetail() {
-    const fPart = document.getElementById("filterPart").value;
-    const detailBox = document.getElementById("partDetail");
-    if (!fPart) { detailBox.classList.remove("show"); return; }
-    const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
-    if (partData.length === 0) { detailBox.classList.remove("show"); return; }
-    const info = partData[0];
-    const desc = (info["DESCRIPTION"] || "-").trim();
-    const brand = (info["BRAND"] || "-").trim();
-    const partNo = (info["PART NUMBER"] || "-").trim();
-    const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
-    const whMap = {};
-    stockData.forEach(r => {
-        const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
-        whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || 0);
-    });
-    const whListHtml = Object.entries(whMap)
-        .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
-        .join("");
-    document.getElementById("dPart").textContent = fPart;
-    document.getElementById("dDesc").textContent = desc;
-    document.getElementById("dBrand").textContent = brand;
-    document.getElementById("dPartNo").textContent = partNo;
-    document.getElementById("dStock").textContent = totalQty + " unit";
-    document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
-    detailBox.classList.add("show");
-}
-
 function drawStockPartChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
@@ -511,160 +5,79 @@ function drawStockPartChart(data) {
         const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
     });
+
     const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
     const labels = sorted.map(i => i[0]);
     const values = sorted.map(i => i[1]);
-    const greenColors = values.map(v => {
-        const maxV = Math.max(...values) || 1;
-        return `rgba(0, 208, 132, ${0.4 + ((v / maxV) * 0.6)})`;
-    });
-    if (chartStockPart) chartStockPart.destroy();
-    chartStockPart = new Chart(document.getElementById("chartStockPart"), {
-        type: "bar",
-        data: { labels, datasets: [{ label: "Stock QTY", data: values, backgroundColor: greenColors, borderRadius: 4 }] },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { ticks: { color: "#8892a6" }, grid: { color: "rgba(44, 52, 75, 0.3)" } },
-                x: { ticks: { color: "#8892a6", maxRotation: 60 }, grid: { display: false } }
-            }
-        }
-    });
-}
 
-function drawUnfulfilledChart(data) {
-    const unfulfilledData = data.filter(r => isNeedsReplacement(r));
-    const grouped = {};
-    unfulfilledData.forEach(r => {
-        const scope = (r["SCOPE"] || "").trim();
-        const matType = (r["MATERIAL TYPE"] || "").trim();
-        const brand = (r["BRAND"] || "").trim();
-        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        const qty = Number(r["QTY"]) || 0;
-        const key = `${scope}||${matType}||${brand}||${part}`;
-        if (!grouped[key]) {
-            grouped[key] = { scope, matType, brand, part, totalQty: 0 };
-        }
-        grouped[key].totalQty += qty;
+    const maxValue = Math.max(...values) || 1;
+
+    // Skala proporsional: tinggi batang maksimal 100px
+    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 100));
+
+    const greenColors = values.map(v => {
+        return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
     });
-    const sorted = Object.values(grouped).sort((a, b) => {
-        if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
-        if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
-        if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
-        return a.part.localeCompare(b.part);
-    });
-    const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
-    const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
-    const colors = [
-        "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
-        "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
-        "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"
-    ];
-    const barColors = labels.map((_, i) => colors[i % colors.length]);
-    if (chartFaulty) chartFaulty.destroy();
-    chartFaulty = new Chart(document.getElementById("chartFaulty"), {
+
+    if (chartStockPart) chartStockPart.destroy();
+
+    chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
         data: {
             labels: labels,
             datasets: [{
-                label: "Unfulfilled QTY",
-                data: values,
-                backgroundColor: barColors,
+                label: "Stock QTY",
+                data: scaledValues,
+                backgroundColor: greenColors,
                 borderRadius: 4
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 8,
+                    bottom: 8
+                }
+            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#ffc107",
+                    titleColor: "#00d4ff",
+                    bodyColor: "#ffffff",
+                    borderColor: "#00d084",
                     borderWidth: 1,
+                    padding: 10,
+                    displayColors: false,
                     callbacks: {
                         label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            const item = sorted[idx];
-                            if (!item) return `QTY: ${ctx.raw}`;
-                            return [
-                                `QTY: ${ctx.raw}`,
-                                `Scope: ${item.scope || "-"}`,
-                                `Material: ${item.matType || "-"}`,
-                                `Brand: ${item.brand || "-"}`
-                            ];
+                            const index = ctx.dataIndex;
+                            const originalValue = values[index];
+                            return `Stock QTY: ${originalValue}`;
                         }
                     }
                 }
             },
             scales: {
                 y: {
+                    display: false,
                     beginAtZero: true,
-                    ticks: { color: "#8892a6" },
-                    grid: { color: "rgba(44, 52, 75, 0.3)" }
+                    max: 100
                 },
                 x: {
-                    ticks: { color: "#8892a6", maxRotation: 60 },
+                    ticks: {
+                        color: "#8892a6",
+                        maxRotation: 60,
+                        minRotation: 0,
+                        font: {
+                            size: 11
+                        }
+                    },
                     grid: { display: false }
                 }
             }
         }
     });
 }
-
-function drawStockPerScopeChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const scopeQty = {};
-    stockData.forEach(r => {
-        const s = (r["SCOPE"] || "Others").trim() || "Others";
-        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
-    });
-    if (chartScope) chartScope.destroy();
-    chartScope = new Chart(document.getElementById("chartScope"), {
-        type: "doughnut",
-        data: {
-            labels: Object.keys(scopeQty),
-            datasets: [{
-                data: Object.values(scopeQty),
-                backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size: 12 } } } }
-        }
-    });
-}
-
-function resetFilters() {
-    document.getElementById("filterScope").value = "";
-    document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
-    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
-    document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
-    document.getElementById("partDetail").classList.remove("show");
-    updateDashboard(allData);
-}
-
-document.getElementById("filterScope").addEventListener("change", updateView);
-document.getElementById("filterMaterialType").addEventListener("change", updateView);
-document.getElementById("filterBrand").addEventListener("change", updateView);
-document.getElementById("filterPart").addEventListener("change", updateView);
-
-function updateView() {
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-    const filtered = getFilteredData();
-    updateDashboard(filtered);
-}
-
-fetchData();
-setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
-</script>
-</body>
-</html>
