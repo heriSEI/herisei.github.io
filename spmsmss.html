@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Spareparts — BAKTI MSS 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         :root {
@@ -122,7 +124,11 @@
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
-        .chart-full { margin-bottom: 24px; }
+        
+        /* === GRAFIK + PETA BERDAMPINGAN === */
+        .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
+        @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
+        
         .chart-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -142,6 +148,27 @@
         .chart-box h4 span { font-size: 12px; color: var(--muted); font-weight: normal; }
         .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
+        
+        /* === PETA WH CLUSTER === */
+        .map-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .map-box h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: var(--green);
+        }
+        #mapWH {
+            height: 280px;
+            border-radius: 8px;
+        }
+        .leaflet-popup-content strong { color: #00d084; }
+        .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -198,12 +225,19 @@
             <div id="dWHList"></div>
         </div>
     </div>
-    <div class="chart-full">
+
+    <!-- === GRAFIK STOK + PETA === -->
+    <div class="chart-map-row">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
-            <canvas id="chartStockPart"></canvas>
+            <canvas id="chartStockPart" height="260"></canvas>
+        </div>
+        <div class="map-box">
+            <h4>🗺️ LOKASI WH CLUSTER</h4>
+            <div id="mapWH"></div>
         </div>
     </div>
+
     <div class="chart-row">
         <div class="chart-box">
             <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
@@ -225,6 +259,8 @@ const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/
 
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
+let mapWH = null;
+let markers = [];
 
 function isNeedsReplacement(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
@@ -244,16 +280,76 @@ function formatDateID(date) {
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
-async function fetchWHClusterCount() {
+async function fetchWHClusterData() {
     try {
         const res = await fetch(URL_WH_CLUSTER);
         const txt = await res.text();
         const json = JSON.parse(txt.substr(47).slice(0, -2));
-        // Hitung jumlah baris data (kecuali baris header)
-        return json.table.rows.length;
+        const cols = json.table.cols.map(c => (c.label || "").trim());
+        console.log("Kolom WH Cluster:", cols);
+        const data = json.table.rows.map(r => {
+            let obj = {};
+            r.c.forEach((cell, i) => {
+                const val = cell?.v ?? "";
+                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
+            });
+            return obj;
+        }).filter(row => row["WH Name"]); // hapus baris kosong
+        return data;
     } catch (err) {
         console.warn("Gagal ambil WH Cluster:", err);
-        return 0;
+        return [];
+    }
+}
+
+function initOrUpdateMap(whList) {
+    if (!mapWH) {
+        // Inisialisasi Peta — tengah Indonesia
+        mapWH = L.map('mapWH').setView([-2.5, 118], 5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            maxZoom: 18
+        }).addTo(mapWH);
+    } else {
+        markers.forEach(m => mapWH.removeLayer(m));
+        markers = [];
+    }
+
+    const validCoords = [];
+    whList.forEach(wh => {
+        const lat = parseFloat(wh["Latt"]);
+        const lng = parseFloat(wh["Long"]);
+        const name = wh["WH Name"] || "WH";
+        const kab = wh["Kabupaten"] || "-";
+        const addr = wh["Alamat"] || "-";
+        const pic = wh["PIC"] || "-";
+        const hp = wh["Kontak"] || "-";
+
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+            validCoords.push([lat, lng]);
+            const marker = L.circleMarker([lat, lng], {
+                radius: 7,
+                fillColor: "#00d084",
+                color: "#ffffff",
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9
+            }).addTo(mapWH);
+            marker.bindPopup(`
+                <strong>${name}</strong><br>
+                ${kab}<br>
+                <small>${addr}</small>
+                <hr style="margin:4px 0; border:none; border-top:1px solid #eee;">
+                PIC: ${pic}<br>
+                Kontak: ${hp}
+            `);
+            markers.push(marker);
+        }
+    });
+
+    // Sesuaikan tampilan peta agar semua titik terlihat
+    if (validCoords.length > 0) {
+        mapWH.fitBounds(validCoords, { padding: [15, 15] });
     }
 }
 
@@ -261,9 +357,10 @@ async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
         
-        // Ambil jumlah WH Cluster
-        const whClusterCount = await fetchWHClusterCount();
-        document.getElementById("whCluster").textContent = whClusterCount;
+        // Ambil data WH Cluster
+        const whData = await fetchWHClusterData();
+        document.getElementById("whCluster").textContent = whData.length;
+        initOrUpdateMap(whData);
 
         // Ambil data utama
         const resMain = await fetch(URL_MAIN);
@@ -427,6 +524,7 @@ function drawStockPartChart(data) {
         data: { labels, datasets: [{ label: "Stock QTY", data: values, backgroundColor: greenColors, borderRadius: 4 }] },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 y: { ticks: { color: "#8892a6" }, grid: { color: "rgba(44, 52, 75, 0.3)" } },
