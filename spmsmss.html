@@ -57,12 +57,12 @@
         }
         .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
         .card .num { font-size: 28px; font-weight: 700; }
-        .card:nth-child(1) .num { color: var(--accent); }
+        .card:nth-child(1) .num { color: var(--red); }
         .card:nth-child(2) .num { color: var(--green); }
         .card:nth-child(3) .num { color: var(--orange); }
-        .card:nth-child(4) .num { color: var(--red); }
-        .card:nth-child(5) .num { color: var(--yellow); }
-        .card:nth-child(6) .num { color: var(--purple); }
+        .card:nth-child(4) .num { color: var(--yellow); }
+        .card:nth-child(5) .num { color: var(--purple); }
+        .card:nth-child(6) .num { color: var(--accent); }
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -149,16 +149,16 @@
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
         <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
-        <p class="refresh-info" id="refreshInfo">Data diperbarui: 21/8/2026, 14.49.49 · Auto-refresh tiap 3 menit</p>
+        <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
     <div class="cards">
-        <div class="card"><h3>TOTAL UNIT</h3><div class="num" id="totalUnit">—</div></div>
-        <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
+        <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
+        <div class="card"><h3>JUMLAH SITE · GUDANG</h3><div class="num" id="location">—</div></div>
         <div class="card"><h3>TOTAL STOCK (QTY)</h3><div class="num" id="totalStock">—</div></div>
         <div class="card"><h3>PERLU PENGGANTIAN</h3><div class="num" id="needReplace">—</div></div>
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
-        <div class="card"><h3>SITE / GUDANG</h3><div class="num" id="location">—</div></div>
+        <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
     </div>
     <div class="filter-section">
         <div class="filter-header">
@@ -218,8 +218,12 @@
 <script>
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
+const DB_SHEET_NAME = "Database";
 const REFRESH_MINUTES = 3;
-const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const URL_DB = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DB_SHEET_NAME)}`;
+const EXCLUDE_NAME = "SPMS HUAWEI";
+
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
 
@@ -241,12 +245,31 @@ function formatDateID(date) {
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
+async function fetchDatabaseData() {
+    try {
+        const res = await fetch(URL_DB);
+        const txt = await res.text();
+        const json = JSON.parse(txt.substr(47).slice(0, -2));
+        const cols = json.table.cols.map(c => c.label || "");
+        return json.table.rows.map(r => {
+            let obj = {};
+            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
+            return obj;
+        });
+    } catch (err) {
+        console.warn("Gagal ambil Database:", err);
+        return [];
+    }
+}
+
 async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
-        const res = await fetch(URL);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substr(47).slice(0, -2));
+        
+        // Ambil data utama
+        const resMain = await fetch(URL_MAIN);
+        const txtMain = await resMain.text();
+        const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
         const cols = [
             "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
             "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
@@ -257,11 +280,28 @@ async function fetchData() {
             "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
             "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
         ];
-        allData = json.table.rows.map(r => {
+        allData = jsonMain.table.rows.map(r => {
             let obj = {};
             r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
             return obj;
         });
+
+        // Ambil data Database untuk hitung SITE & GUDANG
+        const dbData = await fetchDatabaseData();
+        let siteCount = 0, whCount = 0;
+        if (dbData.length > 0) {
+            dbData.forEach(row => {
+                const name = String(row["Site Name"] || "").trim();
+                if (name !== EXCLUDE_NAME) {
+                    siteCount++;
+                    if (name.startsWith("WH ")) {
+                        whCount++;
+                    }
+                }
+            });
+        }
+        document.getElementById("location").textContent = `${siteCount} / ${whCount}`;
+
         updateDashboard(allData);
         const now = new Date();
         document.getElementById("refreshInfo").textContent = 
@@ -309,14 +349,12 @@ function updateDashboard(data) {
     const unfulfilledData = data.filter(r => isNeedsReplacement(r));
     const needReplaceCount = unfulfilledData.length;
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
-    const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
     
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
     document.getElementById("needReplace").textContent = needReplaceCount;
     document.getElementById("typePart").textContent = unikPart;
-    document.getElementById("location").textContent = unikLoc;
     
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
