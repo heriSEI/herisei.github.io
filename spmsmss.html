@@ -125,7 +125,7 @@
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
         
-        /* === GRAFIK + PETA BERDAMPINGAN === */
+        /* === GRAFIK STOK + PETA BERDAMPINGAN === */
         .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
         @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
         
@@ -146,13 +146,14 @@
             gap: 8px;
         }
         .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
+        #chartStockPart { height: 340px !important; max-height: 340px; }
         
-        /* === BARIS 2 GRAFIK SEJAJAR — DIKECILKAN === */
+        /* === BARIS 2 GRAFIK SEJAJAR — UKURAN SEDANG === */
         .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
-        .chart-row canvas { max-height: 220px !important; }
+        .chart-row canvas { max-height: 240px !important; }
         
-        /* === GRAFIK FAULTY RATE BARU === */
+        /* === GRAFIK FAULTY RATE — TINGGI SEDANG === */
         .chart-row-full { margin-bottom: 24px; }
         .chart-row-full canvas { max-height: 260px !important; }
         
@@ -286,7 +287,7 @@
         </div>
     </div>
 
-    <!-- === BARIS 1: DIKECILKAN === -->
+    <!-- === BARIS 1: UNFULFILLED + STOK PER SCOPE === -->
     <div class="chart-row">
         <div class="chart-box">
             <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
@@ -580,6 +581,7 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
+    // ✅ KEMBALI KE SKALA AWAL — TIDAK MEMANJANG KE BAWAH
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
 
     const greenColors = values.map(v => {
@@ -719,7 +721,7 @@ function drawUnfulfilledChart(data) {
     });
 }
 
-// === ✅ GRAFIK BARU: FAULTY RATE ===
+// === ✅ GRAFIK FAULTY RATE ===
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
@@ -728,9 +730,8 @@ function drawFaultyRateChart(data) {
         const usage = (r["USAGE STATUS"] || "").trim();
         const status = (r["STATUS REPLACEMENT"] || "").trim();
         const qty = Number(r["QTY"]) || 0;
-        const key = part;
-        if (!grouped[key]) {
-            grouped[key] = { 
+        if (!grouped[part]) {
+            grouped[part] = { 
                 part, 
                 totalQty: 0, 
                 faultyQty: 0, 
@@ -739,11 +740,11 @@ function drawFaultyRateChart(data) {
                 closeQty: 0
             };
         }
-        grouped[key].totalQty += qty;
-        if (usage === "Replacement Faulty") grouped[key].faultyQty += qty;
-        if (usage === "Replacement Force Majure") grouped[key].forceMajureQty += qty;
-        if (status === "Open") grouped[key].openQty += qty;
-        if (status === "Close") grouped[key].closeQty += qty;
+        grouped[part].totalQty += qty;
+        if (usage === "Replacement Faulty") grouped[part].faultyQty += qty;
+        if (usage === "Replacement Force Majure") grouped[part].forceMajureQty += qty;
+        if (status === "Open") grouped[part].openQty += qty;
+        if (status === "Close") grouped[part].closeQty += qty;
     });
 
     const sorted = Object.values(grouped).sort((a, b) => b.totalQty - a.totalQty);
