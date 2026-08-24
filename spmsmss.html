@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Spareparts — BAKTI MSS 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -155,7 +156,7 @@
         
         /* === GRAFIK FAULTY RATE — TINGGI SEDANG === */
         .chart-row-full { margin-bottom: 24px; }
-        .chart-row-full canvas { max-height: 260px !important; }
+        .chart-row-full canvas { max-height: 280px !important; }
         
         /* === PETA WH CLUSTER === */
         .map-box {
@@ -581,7 +582,7 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
-    // ✅ KEMBALI KE SKALA AWAL — TIDAK MEMANJANG KE BAWAH
+    // ✅ SKALA TETAP KOMPAK — TIDAK MEMANJANG
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
 
     const greenColors = values.map(v => {
@@ -721,7 +722,7 @@ function drawUnfulfilledChart(data) {
     });
 }
 
-// === ✅ GRAFIK FAULTY RATE ===
+// === ✅ GRAFIK FAULTY RATE — DENGAN ANGKA DI ATAS BATANG ===
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
@@ -763,20 +764,24 @@ function drawFaultyRateChart(data) {
                     label: "Replacement Faulty",
                     data: faultyValues,
                     backgroundColor: "#ff5252",
-                    borderRadius: 4
+                    borderRadius: 3,
+                    borderWidth: 1,
+                    borderColor: "#ff7b7b"
                 },
                 {
                     label: "Replacement Force Majure",
                     data: forceValues,
                     backgroundColor: "#ff9f29",
-                    borderRadius: 4
+                    borderRadius: 3,
+                    borderWidth: 1,
+                    borderColor: "#ffc070"
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 10, bottom: 10 } },
+            layout: { padding: { top: 25, bottom: 10 } },
             plugins: {
                 legend: { 
                     display: true,
@@ -801,13 +806,26 @@ function drawFaultyRateChart(data) {
                             ];
                         }
                     }
+                },
+                // ✅ ANGKA DI ATAS BATANG
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    color: '#ffffff',
+                    font: { size: 9, weight: 'bold' },
+                    formatter: function(value) {
+                        return value > 0 ? value : '';
+                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { color: "#8892a6", font: { size: 11 } },
-                    grid: { color: "rgba(44, 52, 75, 0.3)" },
+                    ticks: { 
+                        color: "#8892a6", 
+                        font: { size: 11 }
+                    },
+                    grid: { color: "rgba(44, 52, 75, 0.4)" },
                     stacked: true
                 },
                 x: {
@@ -816,7 +834,8 @@ function drawFaultyRateChart(data) {
                     stacked: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
