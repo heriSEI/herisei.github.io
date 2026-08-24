@@ -146,7 +146,7 @@
             gap: 8px;
         }
         .chart-box h4 span { font-size: 12px; color: var(--muted); font-weight: normal; }
-        #chartStockPart { height: 160px !important; max-height: 160px; }
+        #chartStockPart { height: 180px !important; max-height: 180px; }
         .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
         
@@ -514,8 +514,8 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
-    // Skala proporsional — tinggi maksimal 100
-    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 100));
+    // Skala diperbesar ke 140 → lebih penuh, tidak banyak ruang kosong
+    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 140));
 
     const greenColors = values.map(v => {
         return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
@@ -557,7 +557,7 @@ function drawStockPartChart(data) {
                 }
             },
             scales: {
-                y: { display: false, beginAtZero: true, max: 100 },
+                y: { display: false, beginAtZero: true, max: 140 },
                 x: {
                     ticks: { color: "#8892a6", maxRotation: 60, minRotation: 0, font: { size: 11 } },
                     grid: { display: false }
