@@ -146,7 +146,7 @@
             gap: 8px;
         }
         .chart-box h4 span { font-size: 12px; color: var(--muted); font-weight: normal; }
-        #chartStockPart { height: 240px !important; max-height: 240px; }
+        #chartStockPart { height: 300px !important; max-height: 300px; }
         .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
         
@@ -165,7 +165,7 @@
             color: var(--green);
         }
         #mapWH {
-            height: 280px;
+            height: 300px;
             border-radius: 8px;
         }
         .leaflet-popup-content strong { color: #00d084; }
@@ -514,8 +514,8 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
-    // Skala diperbesar → batang lebih penuh, ruang kosong berkurang
-    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 200));
+    // Skala batang diperbesar → lebih proporsional, tidak terlalu panjang
+    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 180));
 
     const greenColors = values.map(v => {
         return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
@@ -537,7 +537,7 @@ function drawStockPartChart(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 12, bottom: 30 } },
+            layout: { padding: { top: 15, bottom: 40 } },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -557,13 +557,13 @@ function drawStockPartChart(data) {
                 }
             },
             scales: {
-                y: { display: false, beginAtZero: true, max: 200 },
+                y: { display: false, beginAtZero: true, max: 180 },
                 x: {
                     ticks: { 
                         color: "#8892a6", 
-                        maxRotation: 45, 
-                        minRotation: 30, 
-                        font: { size: 9 } // Font nama part diperkecil
+                        maxRotation: 60, 
+                        minRotation: 45, 
+                        font: { size: 8 } // Font diperkecil lagi → semua nama part tampil
                     },
                     grid: { display: false }
                 }
