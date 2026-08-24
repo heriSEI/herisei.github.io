@@ -356,7 +356,7 @@ function initOrUpdateMap(whList) {
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '' // Dikosongkan, teks tetap muncul otomatis tapi diperkecil CSS
+            attribution: ''
         }).addTo(mapWH);
     } else {
         markers.forEach(m => mapWH.removeLayer(m));
@@ -375,7 +375,6 @@ function initOrUpdateMap(whList) {
 
         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
             validCoords.push([lat, lng]);
-            // ✅ Titik BERDENYUT menggantikan titik biasa
             const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
             marker.bindPopup(`
                 <strong>${name}</strong><br>
@@ -556,7 +555,8 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
-    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 210));
+    // ✅ Diperbesar agar batang memenuhi ruang grafik
+    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
 
     const greenColors = values.map(v => {
         return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
@@ -578,7 +578,7 @@ function drawStockPartChart(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 15, bottom: 40 } },
+            layout: { padding: { top: 5, bottom: 45 } },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -598,7 +598,7 @@ function drawStockPartChart(data) {
                 }
             },
             scales: {
-                y: { display: false, beginAtZero: true, max: 210 },
+                y: { display: false, beginAtZero: true, max: 280 },
                 x: {
                     ticks: { 
                         color: "#8892a6", 
