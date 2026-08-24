@@ -722,7 +722,7 @@ function drawUnfulfilledChart(data) {
     });
 }
 
-// === ✅ GRAFIK FAULTY RATE — DENGAN ANGKA DI ATAS BATANG ===
+// === ✅ GRAFIK FAULTY RATE — TAMPILKAN TOTAL SAJA DI ATAS BATANG ===
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
@@ -752,6 +752,7 @@ function drawFaultyRateChart(data) {
     const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
     const faultyValues = sorted.length ? sorted.map(item => item.faultyQty) : [0];
     const forceValues = sorted.length ? sorted.map(item => item.forceMajureQty) : [0];
+    const totalValues = sorted.length ? sorted.map(item => item.totalQty) : [0];
 
     if (chartFaultyRate) chartFaultyRate.destroy();
 
@@ -807,14 +808,15 @@ function drawFaultyRateChart(data) {
                         }
                     }
                 },
-                // ✅ ANGKA DI ATAS BATANG
+                // ✅ TAMPILKAN TOTAL SAJA DI ATAS BATANG PALING ATAS
                 datalabels: {
                     anchor: 'end',
                     align: 'top',
                     color: '#ffffff',
-                    font: { size: 9, weight: 'bold' },
-                    formatter: function(value) {
-                        return value > 0 ? value : '';
+                    font: { size: 10, weight: 'bold' },
+                    formatter: function(value, context) {
+                        const total = totalValues[context.dataIndex];
+                        return total > 0 ? total : '';
                     }
                 }
             },
