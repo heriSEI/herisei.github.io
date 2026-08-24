@@ -154,7 +154,7 @@
     </header>
     <div class="cards">
         <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
-        <div class="card"><h3>JUMLAH SITE · GUDANG</h3><div class="num" id="location">—</div></div>
+        <div class="card"><h3>JUMLAH WH CLUSTER</h3><div class="num" id="whCluster">—</div></div>
         <div class="card"><h3>TOTAL STOCK (QTY)</h3><div class="num" id="totalStock">—</div></div>
         <div class="card"><h3>PERLU PENGGANTIAN</h3><div class="num" id="needReplace">—</div></div>
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
@@ -218,11 +218,10 @@
 <script>
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
-const DB_SHEET_NAME = "Database";
+const WH_CLUSTER_SHEET = "WH Cluster";
 const REFRESH_MINUTES = 3;
 const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-const URL_DB = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DB_SHEET_NAME)}`;
-const EXCLUDE_NAME = "SPMS HUAWEI";
+const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
 
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
@@ -245,20 +244,16 @@ function formatDateID(date) {
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
-async function fetchDatabaseData() {
+async function fetchWHClusterCount() {
     try {
-        const res = await fetch(URL_DB);
+        const res = await fetch(URL_WH_CLUSTER);
         const txt = await res.text();
         const json = JSON.parse(txt.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => c.label || "");
-        return json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
-            return obj;
-        });
+        // Hitung jumlah baris data (kecuali baris header)
+        return json.table.rows.length;
     } catch (err) {
-        console.warn("Gagal ambil Database:", err);
-        return [];
+        console.warn("Gagal ambil WH Cluster:", err);
+        return 0;
     }
 }
 
@@ -266,6 +261,10 @@ async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
         
+        // Ambil jumlah WH Cluster
+        const whClusterCount = await fetchWHClusterCount();
+        document.getElementById("whCluster").textContent = whClusterCount;
+
         // Ambil data utama
         const resMain = await fetch(URL_MAIN);
         const txtMain = await resMain.text();
@@ -285,22 +284,6 @@ async function fetchData() {
             r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
             return obj;
         });
-
-        // Ambil data Database untuk hitung SITE & GUDANG
-        const dbData = await fetchDatabaseData();
-        let siteCount = 0, whCount = 0;
-        if (dbData.length > 0) {
-            dbData.forEach(row => {
-                const name = String(row["Site Name"] || "").trim();
-                if (name !== EXCLUDE_NAME) {
-                    siteCount++;
-                    if (name.startsWith("WH ")) {
-                        whCount++;
-                    }
-                }
-            });
-        }
-        document.getElementById("location").textContent = `${siteCount} / ${whCount}`;
 
         updateDashboard(allData);
         const now = new Date();
