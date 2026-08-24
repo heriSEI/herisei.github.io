@@ -582,7 +582,6 @@ function drawStockPartChart(data) {
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
 
-    // ✅ SKALA TETAP KOMPAK — TIDAK MEMANJANG
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
 
     const greenColors = values.map(v => {
@@ -722,7 +721,7 @@ function drawUnfulfilledChart(data) {
     });
 }
 
-// === ✅ GRAFIK FAULTY RATE — TAMPILKAN TOTAL SAJA DI ATAS BATANG ===
+// === ✅ GRAFIK FAULTY RATE — HANYA 1 ANGKA TOTAL DI ATAS ===
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
@@ -767,7 +766,9 @@ function drawFaultyRateChart(data) {
                     backgroundColor: "#ff5252",
                     borderRadius: 3,
                     borderWidth: 1,
-                    borderColor: "#ff7b7b"
+                    borderColor: "#ff7b7b",
+                    // ❌ JANGAN TAMPILKAN LABEL DI SINI
+                    datalabels: { display: false }
                 },
                 {
                     label: "Replacement Force Majure",
@@ -775,7 +776,18 @@ function drawFaultyRateChart(data) {
                     backgroundColor: "#ff9f29",
                     borderRadius: 3,
                     borderWidth: 1,
-                    borderColor: "#ffc070"
+                    borderColor: "#ffc070",
+                    // ✅ HANYA TAMPILKAN ANGKA TOTAL DI SINI (dataset paling atas)
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#ffffff',
+                        font: { size: 10, weight: 'bold' },
+                        formatter: function(value, context) {
+                            const total = totalValues[context.dataIndex];
+                            return total > 0 ? total : '';
+                        }
+                    }
                 }
             ]
         },
@@ -806,17 +818,6 @@ function drawFaultyRateChart(data) {
                                 `Status Close: ${item?.closeQty || 0}`
                             ];
                         }
-                    }
-                },
-                // ✅ TAMPILKAN TOTAL SAJA DI ATAS BATANG PALING ATAS
-                datalabels: {
-                    anchor: 'end',
-                    align: 'top',
-                    color: '#ffffff',
-                    font: { size: 10, weight: 'bold' },
-                    formatter: function(value, context) {
-                        const total = totalValues[context.dataIndex];
-                        return total > 0 ? total : '';
                     }
                 }
             },
