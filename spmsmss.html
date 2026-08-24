@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Spareparts — BAKTI MSS 2026</title>
+    <title>Dashboard Spareparts & BMN — BAKTI MSS 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -23,6 +23,9 @@
             --text: #e6e6e6;
             --muted: #8892a6;
             --border: rgba(44, 52, 75, 0.5);
+            --bmn-blue: #4285F4;
+            --bmn-green: #00C853;
+            --bmn-red: #EA4335;
         }
         body { 
             color: var(--text); 
@@ -126,7 +129,6 @@
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
         
-        /* === GRAFIK STOK + PETA BERDAMPINGAN === */
         .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
         @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
         
@@ -149,66 +151,33 @@
         .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
         #chartStockPart { height: 340px !important; max-height: 340px; }
         
-        /* === BARIS 2 GRAFIK SEJAJAR — UKURAN SEDANG === */
         .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
         .chart-row canvas { max-height: 240px !important; }
         
-        /* === GRAFIK FAULTY RATE — TINGGI SEDANG === */
         .chart-row-full { margin-bottom: 24px; }
         .chart-row-full canvas { max-height: 280px !important; }
+
+        /* === BARIS BMN: 2 × 2 === */
+        .bmn-section { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 24px; }
+        .bmn-section h2 { font-size: 18px; color: var(--bmn-blue); margin-bottom: 16px; }
+        .bmn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        @media (max-width: 900px) { .bmn-grid { grid-template-columns: 1fr; } }
+        .bmn-grid canvas { max-height: 260px !important; }
         
-        /* === PETA WH CLUSTER === */
-        .map-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .map-box h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: var(--green);
-        }
-        #mapWH {
-            height: 340px;
-            border-radius: 8px;
-        }
+        #mapWH { height: 340px; border-radius: 8px; }
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
+        .leaflet-control-attribution { font-size: 8px !important; opacity: 0.45 !important; padding: 0 4px !important; background: transparent !important; color: #666 !important; }
+        .leaflet-control-attribution a { color: #888 !important; }
 
-        /* === PERKECIL TEKS HAK CIPTA PETA === */
-        .leaflet-control-attribution {
-            font-size: 8px !important;
-            opacity: 0.45 !important;
-            padding: 0 4px !important;
-            background: transparent !important;
-            color: #666 !important;
-        }
-        .leaflet-control-attribution a {
-            color: #888 !important;
-        }
-
-        /* === ANIMASI TITIK BERDENYUT === */
         .pulse-marker {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #00d084;
-            position: relative;
-            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7);
-            animation: pulse 2s infinite;
+            width: 14px; height: 14px; border-radius: 50%; background: #00d084; position: relative;
+            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7); animation: pulse 2s infinite;
         }
         .pulse-marker::after {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: rgba(0, 208, 132, 0.4);
-            animation: pulse-ring 2s infinite;
+            content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(0, 208, 132, 0.4); animation: pulse-ring 2s infinite;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.6); }
@@ -224,11 +193,13 @@
 <body>
 <div class="container">
     <header>
-        <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
-        <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
+        <h1>📊 DASHBOARD SPAREPARTS & BMN — BAKTI MSS 2026</h1>
+        <p class="sub">Sparepart Operation · Transaction Data · BMN Asset Labeling</p>
         <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
+
+    <!-- === KARTU RINGKASAN SPAREPART === -->
     <div class="cards">
         <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>JUMLAH WH CLUSTER</h3><div class="num" id="whCluster">—</div></div>
@@ -237,6 +208,8 @@
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
     </div>
+
+    <!-- === FILTER SPAREPART === -->
     <div class="filter-section">
         <div class="filter-header">
             <div class="filter-group">
@@ -261,6 +234,8 @@
             </div>
         </div>
     </div>
+
+    <!-- === DETAIL PART === -->
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
@@ -300,604 +275,261 @@
         </div>
     </div>
 
-    <!-- === GRAFIK BARU: FAULTY RATE === -->
+    <!-- === GRAFIK FAULTY RATE === -->
     <div class="chart-row-full">
         <div class="chart-box">
             <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
             <canvas id="chartFaultyRate"></canvas>
         </div>
     </div>
+
+    <!-- ===================================================== -->
+    <!-- === BAGIAN BARU: GRAFIK LABEL BMN PER KABUPATEN === -->
+    <!-- ===================================================== -->
+    <div class="bmn-section">
+        <h2>🏷️ LABEL ASSET BMN — PER KABUPATEN</h2>
+        <div class="bmn-grid">
+            <!-- Grafik 1: Per Kabupaten -->
+            <div class="chart-box">
+                <h4>📈 PROGRES LABEL BMN PER KABUPATEN</h4>
+                <canvas id="chartBMN"></canvas>
+            </div>
+            <!-- Grafik 2: Total vs Terpasang -->
+            <div class="chart-box">
+                <h4>📊 TOTAL SITE vs BMN TERPASANG</h4>
+                <canvas id="chartBMNCompare"></canvas>
+            </div>
+            <!-- Grafik 3: Persentase -->
+            <div class="chart-box">
+                <h4>✅ PERSENTASE TERPASANG LABEL BMN</h4>
+                <canvas id="chartBMNPct"></canvas>
+            </div>
+            <!-- Grafik 4: Sisa Belum Terpasang -->
+            <div class="chart-box">
+                <h4>🔴 SISA BELUM TERPASANG LABEL BMN</h4>
+                <canvas id="chartBMNRemain"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+
 <script>
-const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
-const SHEET_NAME = "Raw_File_Update";
+// ============================================================
+// === KONFIGURASI SHEET ===
+// ============================================================
+const SHEET_ID_SPAREPART = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
+const SHEET_NAME_SPAREPART = "Raw_File_Update";
 const WH_CLUSTER_SHEET = "WH Cluster";
+
+const SHEET_ID_BMN = "1f8ihfSSYAa1KtE3ynhe6JdCdzMNBxlf_SaR7foyd5_8";
+const SHEET_NAME_BMN = "Site List"; // Nama tab sheet BMN
 const REFRESH_MINUTES = 3;
-const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
 
-let allData = [];
+const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID_SPAREPART}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME_SPAREPART)}`;
+const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID_SPAREPART}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
+const URL_BMN = `https://docs.google.com/spreadsheets/d/${SHEET_ID_BMN}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME_BMN)}`;
+
+let allData = [], allBMNData = [];
 let chartStockPart, chartFaulty, chartScope, chartFaultyRate;
-let mapWH = null;
-let markers = [];
+let chartBMN, chartBMNCompare, chartBMNPct, chartBMNRemain;
+let mapWH = null, markers = [];
 
-// === CUSTOM ICON BERDENYUT ===
-const PulseIcon = L.divIcon({
-    className: 'pulse-icon',
-    html: '<div class="pulse-marker"></div>',
-    iconSize: [14, 14],
-    iconAnchor: [7, 7]
-});
+const PulseIcon = L.divIcon({className:'pulse-icon',html:'<div class="pulse-marker"></div>',iconSize:[14,14],iconAnchor:[7,7]});
 
-// === UNFULFILLED = Usage=Replacement + Status=Open ===
-function isUnfulfilled(row) {
-    const usage = (row["USAGE STATUS"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
-    const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
-    const statusOk = replStatus === "Open";
-    return usageOk && statusOk;
+// === FUNGSI FILTER SPAREPART ===
+function isUnfulfilled(r){
+    const u=(r["USAGE STATUS"]||"").trim(), s=(r["STATUS REPLACEMENT"]||"").trim();
+    return (u==="Replacement Faulty"||u==="Replacement Force Majure") && s==="Open";
+}
+function isFaultyRate(r){
+    const u=(r["USAGE STATUS"]||"").trim(), s=(r["STATUS REPLACEMENT"]||"").trim();
+    return (u==="Replacement Faulty"||u==="Replacement Force Majure") && (s==="Open"||s==="Close");
+}
+function formatDateID(d){
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}, ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')}.${String(d.getSeconds()).padStart(2,'0')}`;
 }
 
-// === FAULTY RATE = Usage=Replacement Faulty/Force Majure + Status=Open/Close ===
-function isFaultyRate(row) {
-    const usage = (row["USAGE STATUS"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
-    const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
-    const statusOk = replStatus === "Open" || replStatus === "Close";
-    return usageOk && statusOk;
+// === AMBIL DATA WH CLUSTER ===
+async function fetchWHClusterData(){
+    try{
+        const t=await(await fetch(URL_WH_CLUSTER)).text();
+        const j=JSON.parse(t.substr(47).slice(0,-2)), c=j.table.cols.map(x=>(x.label||"").trim());
+        return j.table.rows.map(r=>{let o={};r.c.forEach((x,i)=>{o[c[i]]=typeof x?.v=="string"?x.v.trim():x?.v||""});return o}).filter(x=>x["WH Name"]);
+    }catch{return[]}
 }
-
-function formatDateID(date) {
-    const d = date.getDate();
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    const h = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const s = String(date.getSeconds()).padStart(2, '0');
-    return `${d}/${m}/${y}, ${h}.${min}.${s}`;
-}
-
-async function fetchWHClusterData() {
-    try {
-        const res = await fetch(URL_WH_CLUSTER);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => (c.label || "").trim());
-        const data = json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => {
-                const val = cell?.v ?? "";
-                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
-            });
-            return obj;
-        }).filter(row => row["WH Name"]);
-        return data;
-    } catch (err) {
-        console.warn("Gagal ambil WH Cluster:", err);
-        return [];
-    }
-}
-
-function initOrUpdateMap(whList) {
-    if (!mapWH) {
-        mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: ''
-        }).addTo(mapWH);
-    } else {
-        markers.forEach(m => mapWH.removeLayer(m));
-        markers = [];
-    }
-
-    const validCoords = [];
-    whList.forEach(wh => {
-        const lat = parseFloat(wh["Latt"]);
-        const lng = parseFloat(wh["Long"]);
-        const name = wh["WH Name"] || "WH";
-        const kab = wh["Kabupaten"] || "-";
-        const addr = wh["Alamat"] || "-";
-        const pic = wh["PIC"] || "-";
-        const hp = wh["Kontak"] || "-";
-
-        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-            validCoords.push([lat, lng]);
-            const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
-            marker.bindPopup(`
-                <strong>${name}</strong><br>
-                ${kab}<br>
-                <small>${addr}</small>
-                <hr style="margin:4px 0; border:none; border-top:1px solid #eee;">
-                PIC: ${pic}<br>
-                Kontak: ${hp}
-            `);
-            markers.push(marker);
+function initOrUpdateMap(wl){
+    if(!mapWH){mapWH=L.map('mapWH').setView([-2.5,118],5);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:''}).addTo(mapWH);}
+    else{markers.forEach(m=>mapWH.removeLayer(m));markers=[]}
+    const bc=[];wl.forEach(w=>{
+        const la=parseFloat(w["Latt"]),ln=parseFloat(w["Long"]),n=w["WH Name"]||"WH",k=w["Kabupaten"]||"-",a=w["Alamat"]||"-",p=w["PIC"]||"-",h=w["Kontak"]||"-";
+        if(!isNaN(la)&&!isNaN(ln)&&la!==0&&ln!==0){
+            bc.push([la,ln]);const m=L.marker([la,ln],{icon:PulseIcon}).addTo(mapWH);
+            m.bindPopup(`<strong>${n}</strong><br>${k}<br><small>${a}</small><hr style="margin:4px 0;border:none;border-top:1px solid #eee;">PIC: ${p}<br>Kontak: ${h}`);
+            markers.push(m);
         }
     });
-
-    if (validCoords.length > 0) {
-        mapWH.fitBounds(validCoords, { padding: [15, 15] });
-    }
+    bc.length&&mapWH.fitBounds(bc,{padding:[15,15]});
 }
 
-async function fetchData() {
-    try {
-        document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
-        
-        const whData = await fetchWHClusterData();
-        document.getElementById("whCluster").textContent = whData.length;
+// === AMBIL DATA BMN ===
+async function fetchBMNData(){
+    try{
+        const t=await(await fetch(URL_BMN)).text();
+        const j=JSON.parse(t.substr(47).slice(0,-2));
+        const cols=["NUP BMN","SITE ID","SITE NAME","MITRA O&M","PROVINSI","KAB/KOTA","KECAMATAN","TANGGAL PEROLEHAN BMN","STATUS PEROLEHAN LABEL BMN","MERK","TRANSMISI","HO MSS 2026","LABEL UPLOAD","DATE UPLOADED","WEEK UPLOADED","STATUS LABEL BMN","STATUS HALO BAKTI","DATE DOCUMENTATION BMN","DATE DOCUMENTATION HALO BAKTI","GDRIVE LINK"];
+        allBMNData=j.table.rows.map(r=>{let o={};r.c.forEach((x,i)=>{o[cols[i]]=typeof x?.v=="string"?x.v.trim():x?.v||""});return o});
+        drawAllBMNCharts();
+    }catch(e){console.error("BMN Data Error:",e);}
+}
+
+// === PROSES & GAMBAR GRAFIK BMN ===
+function drawAllBMNCharts(){
+    const kabMap={};
+    allBMNData.forEach(r=>{
+        const kab=(r["KAB/KOTA"]||"TIDAK DIKETAHUI").trim();
+        const statusLabel=(r["STATUS LABEL BMN"]||"").trim();
+        if(!kabMap[kab]) kabMap[kab]={total:0,terpasang:0};
+        kabMap[kab].total++;
+        if(statusLabel==="TERPASANG LABEL BMN") kabMap[kab].terpasang++;
+    });
+    const list=Object.entries(kabMap).map(([k,v])=>({kab:k,...v,sisa:v.total-v.terpasang}))
+        .sort((a,b)=>b.total-a.total);
+    const labels=list.map(x=>x.kab);
+    const totalV=list.map(x=>x.total);
+    const pasangV=list.map(x=>x.terpasang);
+    const sisaV=list.map(x=>x.sisa);
+    const pctV=list.map(x=>x.total>0?Math.round((x.terpasang/x.total)*100):0);
+
+    // 1 — Batang Berkelompok
+    if(chartBMN) chartBMN.destroy();
+    chartBMN=new Chart(document.getElementById("chartBMN"),{type:"bar",data:{labels,datasets:[
+        {label:"Total Site",data:totalV,backgroundColor:"#4285F4",borderRadius:4},
+        {label:"BMN Terpasang",data:pasangV,backgroundColor:"#00C853",borderRadius:4},
+        {label:"Belum Terpasang",data:sisaV,backgroundColor:"#EA4335",borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:"#e6e6e6",boxWidth:12}},tooltip:{backgroundColor:"rgba(26,31,46,0.95)",borderColor:"#4285F4",borderWidth:1}},scales:{y:{beginAtZero:true,ticks:{color:"#8892a6"},grid:{color:"rgba(44,52,75,0.3)"}},x:{ticks:{color:"#8892a6",maxRotation:60},grid:{display:false}}}}});
+
+    // 2 — Total vs Terpasang
+    if(chartBMNCompare) chartBMNCompare.destroy();
+    chartBMNCompare=new Chart(document.getElementById("chartBMNCompare"),{type:"bar",data:{labels,datasets:[
+        {label:"Total Site",data:totalV,backgroundColor:"#4285F4",borderRadius:4},
+        {label:"Terpasang Label",data:pasangV,backgroundColor:"#00C853",borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:"#e6e6e6",boxWidth:12}}},scales:{y:{beginAtZero:true,ticks:{color:"#8892a6"},grid:{color:"rgba(44,52,75,0.3)"}},x:{ticks:{color:"#8892a6",maxRotation:60},grid:{display:false}}}}});
+
+    // 3 — Persentase
+    if(chartBMNPct) chartBMNPct.destroy();
+    chartBMNPct=new Chart(document.getElementById("chartBMNPct"),{type:"bar",data:{labels,datasets:[
+        {label:"% Terpasang",data:pctV,backgroundColor:pctV.map(v=>v>=80?"#00C853":v>=50?"#FFC107":"#EA4335"),borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:"#e6e6e6"}},scales:{y:{beginAtZero:true,max:100,ticks:{color:"#8892a6",callback:v=>v+"%"},grid:{color:"rgba(44,52,75,0.3)"}},x:{ticks:{color:"#8892a6",maxRotation:60},grid:{display:false}}}}});
+
+    // 4 — Sisa Belum Terpasang
+    if(chartBMNRemain) chartBMNRemain.destroy();
+    chartBMNRemain=new Chart(document.getElementById("chartBMNRemain"),{type:"bar",data:{labels,datasets:[
+        {label:"Belum Terpasang",data:sisaV,backgroundColor:"#EA4335",borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:"#e6e6e6"}}},scales:{y:{beginAtZero:true,ticks:{color:"#8892a6"},grid:{color:"rgba(44,52,75,0.3)"}},x:{ticks:{color:"#8892a6",maxRotation:60},grid:{display:false}}}}});
+}
+
+// === AMBIL DATA SPAREPART ===
+async function fetchData(){
+    try{
+        document.getElementById("refreshInfo").textContent="⏳ Mengambil data...";
+        const whData=await fetchWHClusterData();
+        document.getElementById("whCluster").textContent=whData.length;
         initOrUpdateMap(whData);
-
-        const resMain = await fetch(URL_MAIN);
-        const txtMain = await resMain.text();
-        const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
-        const cols = [
-            "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
-            "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
-            "PART NUMBER","SN","QTY","UOM","REQUEST STATUS",
-            "ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME",
-            "INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME",
-            "TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT",
-            "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
-            "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
-        ];
-        allData = jsonMain.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
-            return obj;
-        });
-
+        const t=await(await fetch(URL_MAIN)).text();
+        const j=JSON.parse(t.substr(47).slice(0,-2));
+        const cols=["REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE","MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION","PART NUMBER","SN","QTY","UOM","REQUEST STATUS","ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME","INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME","TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT","COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE","DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"];
+        allData=j.table.rows.map(r=>{let o={};r.c.forEach((x,i)=>{o[cols[i]]=x?.v??""});return o});
         updateDashboard(allData);
-        const now = new Date();
-        document.getElementById("refreshInfo").textContent = 
-            `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
-    } catch (err) {
-        console.error(err);
-        document.getElementById("refreshInfo").innerHTML = 
-            `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
+        const now=new Date();
+        document.getElementById("refreshInfo").textContent=`Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
+    }catch(e){
+        document.getElementById("refreshInfo").innerHTML=`❌ Gagal ambil data.<br>Error: ${e.message}`;
     }
+    fetchBMNData();
 }
 
-function getFilteredData() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    const fPart = document.getElementById("filterPart").value;
-    return allData.filter(r => {
-        return (!fScope || (r["SCOPE"] || "").trim() === fScope) &&
-               (!fMaterial || (r["MATERIAL TYPE"] || "").trim() === fMaterial) &&
-               (!fBrand || (r["BRAND"] || "").trim() === fBrand) &&
-               (!fPart || (r["PART"] || "").trim() === fPart);
+function getFilteredData(){
+    const fS=document.getElementById("filterScope").value,fM=document.getElementById("filterMaterialType").value,fB=document.getElementById("filterBrand").value,fP=document.getElementById("filterPart").value;
+    return allData.filter(r=>{
+        return (!fS||(r["SCOPE"]||"").trim()===fS)&&(!fM||(r["MATERIAL TYPE"]||"").trim()===fM)&&(!fB||(r["BRAND"]||"").trim()===fB)&&(!fP||(r["PART"]||"").trim()===fP);
     });
 }
-
-function fillSelect(id, arr) {
-    const sel = document.getElementById(id);
-    const keep = sel.value;
-    const exclude = {
-        "filterScope": ["SCOPE"],
-        "filterMaterialType": ["MATERIAL TYPE"],
-        "filterBrand": ["BRAND"],
-        "filterPart": ["PART"]
-    };
-    const filteredArr = arr.filter(v => !exclude[id]?.includes(v));
-    sel.innerHTML = `<option value="">Semua</option>` +
-        filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
-    sel.value = keep;
+function fillSelect(id,arr){
+    const s=document.getElementById(id),k=s.value;
+    const ex={filterScope:["SCOPE"],filterMaterialType:["MATERIAL TYPE"],filterBrand:["BRAND"],filterPart:["PART"]};
+    s.innerHTML=`<option value="">Semua</option>`+arr.filter(v=>!ex[id]?.includes(v)).sort().map(v=>`<option value="${v}">${v}</option>`).join("");
+    s.value=k;
 }
-
-function updateDashboard(data) {
-    const total = data.length;
-    const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
-    const inStock = stockRows.length;
-    const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
-    const unfulfilledData = data.filter(r => isUnfulfilled(r));
-    const needReplaceCount = unfulfilledData.length;
-    const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
-    
-    document.getElementById("totalUnit").textContent = total;
-    document.getElementById("inStock").textContent = inStock;
-    document.getElementById("totalStock").textContent = totalStock;
-    document.getElementById("needReplace").textContent = needReplaceCount;
-    document.getElementById("typePart").textContent = unikPart;
-    
-    fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-    
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered);
-    drawUnfulfilledChart(filtered);
-    drawStockPerScopeChart(filtered);
-    drawFaultyRateChart(filtered);
+function updateDashboard(data){
+    const total=data.length,stock=data.filter(r=>(r["USAGE STATUS"]||"").trim().toLowerCase()==="stock");
+    const inS=stock.length,totS=stock.reduce((s,r)=>s+(Number(r["QTY"])||0),0),unful=data.filter(r=>isUnfulfilled(r));
+    const needR=unful.length,typeP=new Set(data.map(r=>(r["PART"]||"").trim()).filter(v=>v)).size;
+    document.getElementById("totalUnit").textContent=total;
+    document.getElementById("inStock").textContent=inS;
+    document.getElementById("totalStock").textContent=totS;
+    document.getElementById("needReplace").textContent=needR;
+    document.getElementById("typePart").textContent=typeP;
+    fillSelect("filterScope",[...new Set(data.map(r=>(r["SCOPE"]||"").trim()).filter(v=>v))]);
+    syncMT();syncB();syncP();updatePD();
+    const fd=getFilteredData();
+    drawStock(fd);drawUnful(fd);drawScopePie(fd);drawFaultyRate(fd);
 }
-
-function syncFilterMaterialType() {
-    const fScope = document.getElementById("filterScope").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
+function syncMT(){const fS=document.getElementById("filterScope").value;let d=allData;if(fS)d=d.filter(r=>(r["SCOPE"]||"").trim()===fS);fillSelect("filterMaterialType",[...new Set(d.map(r=>(r["MATERIAL TYPE"]||"").trim()).filter(v=>v))])}
+function syncB(){const fS=document.getElementById("filterScope").value,fM=document.getElementById("filterMaterialType").value;let d=allData;if(fS)d=d.filter(r=>(r["SCOPE"]||"").trim()===fS);if(fM)d=d.filter(r=>(r["MATERIAL TYPE"]||"").trim()===fM);fillSelect("filterBrand",[...new Set(d.map(r=>(r["BRAND"]||"").trim()).filter(v=>v))])}
+function syncP(){const fS=document.getElementById("filterScope").value,fM=document.getElementById("filterMaterialType").value,fB=document.getElementById("filterBrand").value;let d=allData;if(fS)d=d.filter(r=>(r["SCOPE"]||"").trim()===fS);if(fM)d=d.filter(r=>(r["MATERIAL TYPE"]||"").trim()===fM);if(fB)d=d.filter(r=>(r["BRAND"]||"").trim()===fB);fillSelect("filterPart",[...new Set(d.map(r=>(r["PART"]||"").trim()).filter(v=>v))])}
+function updatePD(){
+    const p=document.getElementById("filterPart").value,d=document.getElementById("partDetail");
+    if(!p){d.classList.remove("show");return}
+    const pd=allData.filter(r=>(r["PART"]||"").trim()===p);
+    if(!pd.length){d.classList.remove("show");return}
+    const i=pd[0],desc=(i["DESCRIPTION"]||"-").trim(),br=(i["BRAND"]||"-").trim(),pn=(i["PART NUMBER"]||"-").trim();
+    const stk=pd.filter(r=>(r["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),tot=stk.reduce((s,r)=>s+(Number(r["QTY"])||0),0);
+    const wh={};stk.forEach(r=>{const l=(r["CURRENT SITE NAME"]||r["ALOCATION NAME"]||"Tidak Diketahui").trim();wh[l]=(wh[l]||0)+(Number(r["QTY"])||0)});
+    document.getElementById("dPart").textContent=p;document.getElementById("dDesc").textContent=desc;document.getElementById("dBrand").textContent=br;document.getElementById("dPartNo").textContent=pn;document.getElementById("dStock").textContent=tot+" unit";
+    document.getElementById("dWHList").innerHTML=Object.entries(wh).map(([l,q])=>`<div class="wh-item">📍 ${l} : <strong>${q}</strong> unit</div>`).join("")||"<div class='wh-item'>— Tidak ada stok</div>";
+    d.classList.add("show");
 }
-
-function syncFilterBrand() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
-    fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
+function drawStock(data){
+    const s=data.filter(r=>(r["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),q={};
+    s.forEach(r=>{const p=(r["PART"]||"UNKNOWN").trim()||"UNKNOWN";q[p]=(q[p]||0)+(Number(r["QTY"])||0)});
+    const arr=Object.entries(q).sort((a,b)=>b[1]-a[1]),lab=arr.map(x=>x[0]),val=arr.map(x=>x[1]),mx=Math.max(...val)||1;
+    const sc=val.map(v=>Math.max(1,(v/mx)*280)),clr=val.map(v=>`rgba(0,208,132,${0.45+((v/mx)*0.55)})`);
+    if(chartStockPart) chartStockPart.destroy();
+    chartStockPart=new Chart(document.getElementById("chartStockPart"),{type:"bar",data:{labels:lab,datasets:[{label:"Stock QTY",data:sc,backgroundColor:clr,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:5,bottom:45}},plugins:{legend:{display:false},tooltip:{backgroundColor:"rgba(26,31,46,0.95)",titleColor:"#00d4ff",bodyColor:"#fff",borderColor:"#00d084",borderWidth:1,callbacks:{label:ctx=>`Stock QTY: ${val[ctx.dataIndex]}`}}}},scales:{y:{display:false,beginAtZero:true,max:280},x:{ticks:{color:"#8892a6",maxRotation:60,minRotation:45,font:{size:8}},grid:{display:false}}}}});
 }
-
-function syncFilterPart() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
-    if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
-    fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
+function drawUnfulfilled(data){
+    const un=data.filter(r=>isUnfulfilled(r)),g={};
+    un.forEach(r=>{const S=(r["SCOPE"]||"").trim(),M=(r["MATERIAL TYPE"]||"").trim(),B=(r["BRAND"]||"").trim(),P=(r["PART"]||"UNKNOWN").trim()||"UNKNOWN",q=Number(r["QTY"])||0,k=`${S}||${M}||${B}||${P}`;if(!g[k])g[k]={S,M,B,P,tot:0};g[k].tot+=q});
+    const arr=Object.values(g).sort((a,b)=>a.S.localeCompare(b.S)||a.M.localeCompare(b.M)||a.B.localeCompare(b.B)||a.P.localeCompare(b.P)),lab=arr.length?arr.map(x=>x.P):["No Data"],val=arr.length?arr.map(x=>x.tot):[0];
+    const clr=["#ffc107","#ff5252","#ff9800","#ff7043","#8d6e63","#f44336","#e91e63","#9c27b0","#673ab7","#3f51b5","#2196f3","#03a9f4","#00bcd4","#009688","#4caf50"];
+    if(chartFaulty) chartFaulty.destroy();
+    chartFaulty=new Chart(document.getElementById("chartFaulty"),{type:"bar",data:{labels:lab,datasets:[{label:"Unfulfilled QTY",data:val,backgroundColor:lab.map((_,i)=>clr[i%clr.length]),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const it=arr[ctx.dataIndex];return it?[`QTY: ${ctx.raw}`,`Scope: ${it.S||"-"}`,`Material: ${it.M||"-"}`,`Brand: ${it.B||"-"}`]:`QTY: ${ctx.raw}`}}}},scales:{y:{beginAtZero:true,ticks:{color:"#8892a6",font:{size:10}},grid:{color:"rgba(44,52,75,0.3)"}},x:{ticks:{color:"#8892a6",maxRotation:60,font:{size:9}},grid:{display:false}}}}});
 }
-
-function updatePartDetail() {
-    const fPart = document.getElementById("filterPart").value;
-    const detailBox = document.getElementById("partDetail");
-    if (!fPart) { detailBox.classList.remove("show"); return; }
-    const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
-    if (partData.length === 0) { detailBox.classList.remove("show"); return; }
-    const info = partData[0];
-    const desc = (info["DESCRIPTION"] || "-").trim();
-    const brand = (info["BRAND"] || "-").trim();
-    const partNo = (info["PART NUMBER"] || "-").trim();
-    const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
-    const whMap = {};
-    stockData.forEach(r => {
-        const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
-        whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || 0);
-    });
-    const whListHtml = Object.entries(whMap)
-        .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
-        .join("");
-    document.getElementById("dPart").textContent = fPart;
-    document.getElementById("dDesc").textContent = desc;
-    document.getElementById("dBrand").textContent = brand;
-    document.getElementById("dPartNo").textContent = partNo;
-    document.getElementById("dStock").textContent = totalQty + " unit";
-    document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
-    detailBox.classList.add("show");
+function drawFaultyRate(data){
+    const fd=data.filter(r=>isFaultyRate(r)),g={};
+    fd.forEach(r=>{const p=(r["PART"]||"UNKNOWN").trim()||"UNKNOWN",u=(r["USAGE STATUS"]||"").trim(),s=(r["STATUS REPLACEMENT"]||"").trim(),q=Number(r["QTY"])||0;if(!g[p])g[p]={p,tot:0,f:0,fm:0,o:0,c:0};g[p].tot+=q;if(u==="Replacement Faulty")g[p].f+=q;if(u==="Replacement Force Majure")g[p].fm+=q;if(s==="Open")g[p].o+=q;if(s==="Close")g[p].c+=q});
+    const arr=Object.values(g).sort((a,b)=>b.tot-a.tot),lab=arr.length?arr.map(x=>x.p):["No Data"],fv=arr.length?arr.map(x=>x.f):[0],fmv=arr.length?arr.map(x=>x.fm):[0],tot=arr.length?arr.map(x=>x.tot):[0];
+    if(chartFaultyRate) chartFaultyRate.destroy();
+    chartFaultyRate=new Chart(document.getElementById("chartFaultyRate"),{type:"bar",data:{labels:lab,datasets:[
+        {label:"Replacement Faulty",data:fv,backgroundColor:"#ff5252",borderRadius:3,borderWidth:1,borderColor:"#ff7b7b",datalabels:{display:false}},
+        {label:"Replacement Force Majure",data:fmv,backgroundColor:"#ff9f29",borderRadius:3,borderWidth:1,borderColor:"#ffc070",datalabels:{anchor:"end",align:"top",color:"#fff",font:{size:10,weight:"bold"},formatter:(v,c)=>tot[c.dataIndex]>0?tot[c.dataIndex]:""}}
+    ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:25,bottom:10}},plugins:{legend:{position:"top",labels:{color:"#e6e6e6",boxWidth:15}},tooltip:{callbacks:{label:ctx=>{const it=arr[ctx.dataIndex];return[`${ctx.dataset.label}: ${ctx.raw}`,`Status Open: ${it?.o||0}`,`Status Close: ${it?.c||0}`]}}}},scales:{y:{beginAtZero:true,ticks:{color:"#8892a6",font:{size:11}},grid:{color:"rgba(44,52,75,0.4)"},stacked:true},x:{ticks:{color:"#8892a6",maxRotation:60,font:{size:10}},grid:{display:false},stacked:true}}},plugins:[ChartDataLabels]});
 }
-
-function drawStockPartChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const partQty = {};
-    stockData.forEach(r => {
-        const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
-    });
-
-    const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
-    const labels = sorted.map(i => i[0]);
-    const values = sorted.map(i => i[1]);
-    const maxValue = Math.max(...values) || 1;
-
-    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
-
-    const greenColors = values.map(v => {
-        return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
-    });
-
-    if (chartStockPart) chartStockPart.destroy();
-
-    chartStockPart = new Chart(document.getElementById("chartStockPart"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Stock QTY",
-                data: scaledValues,
-                backgroundColor: greenColors,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 5, bottom: 45 } },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#00d4ff",
-                    bodyColor: "#ffffff",
-                    borderColor: "#00d084",
-                    borderWidth: 1,
-                    padding: 10,
-                    displayColors: false,
-                    callbacks: {
-                        label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            return `Stock QTY: ${values[idx]}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: { display: false, beginAtZero: true, max: 280 },
-                x: {
-                    ticks: { 
-                        color: "#8892a6", 
-                        maxRotation: 60, 
-                        minRotation: 45, 
-                        font: { size: 8 }
-                    },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
+function drawScopePie(data){
+    const s=data.filter(r=>(r["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),q={};
+    s.forEach(r=>{const sc=(r["SCOPE"]||"Others").trim()||"Others";q[sc]=(q[sc]||0)+(Number(r["QTY"])||0)});
+    if(chartScope) chartScope.destroy();
+    chartScope=new Chart(document.getElementById("chartScope"),{type:"doughnut",data:{labels:Object.keys(q),datasets:[{data:Object.values(q),backgroundColor:["#00d4ff","#00d084","#ffc107","#ff5252","#a855f7","#8892a6"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{color:"#e6e6e6",boxWidth:12}}}}});
 }
-
-function drawUnfulfilledChart(data) {
-    const unfulfilledData = data.filter(r => isUnfulfilled(r));
-    const grouped = {};
-    unfulfilledData.forEach(r => {
-        const scope = (r["SCOPE"] || "").trim();
-        const matType = (r["MATERIAL TYPE"] || "").trim();
-        const brand = (r["BRAND"] || "").trim();
-        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        const qty = Number(r["QTY"]) || 0;
-        const key = `${scope}||${matType}||${brand}||${part}`;
-        if (!grouped[key]) {
-            grouped[key] = { scope, matType, brand, part, totalQty: 0 };
-        }
-        grouped[key].totalQty += qty;
-    });
-    const sorted = Object.values(grouped).sort((a, b) => {
-        if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
-        if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
-        if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
-        return a.part.localeCompare(b.part);
-    });
-    const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
-    const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
-    const colors = [
-        "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
-        "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
-        "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"
-    ];
-    const barColors = labels.map((_, i) => colors[i % colors.length]);
-    if (chartFaulty) chartFaulty.destroy();
-    chartFaulty = new Chart(document.getElementById("chartFaulty"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Unfulfilled QTY",
-                data: values,
-                backgroundColor: barColors,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#ffc107",
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            const item = sorted[idx];
-                            if (!item) return `QTY: ${ctx.raw}`;
-                            return [
-                                `QTY: ${ctx.raw}`,
-                                `Scope: ${item.scope || "-"}`,
-                                `Material: ${item.matType || "-"}`,
-                                `Brand: ${item.brand || "-"}`
-                            ];
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: "#8892a6", font: { size: 10 } },
-                    grid: { color: "rgba(44, 52, 75, 0.3)" }
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60, font: { size: 9 } },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-}
-
-// === ✅ GRAFIK FAULTY RATE — HANYA 1 ANGKA TOTAL DI ATAS ===
-function drawFaultyRateChart(data) {
-    const faultyData = data.filter(r => isFaultyRate(r));
-    const grouped = {};
-    faultyData.forEach(r => {
-        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        const usage = (r["USAGE STATUS"] || "").trim();
-        const status = (r["STATUS REPLACEMENT"] || "").trim();
-        const qty = Number(r["QTY"]) || 0;
-        if (!grouped[part]) {
-            grouped[part] = { 
-                part, 
-                totalQty: 0, 
-                faultyQty: 0, 
-                forceMajureQty: 0,
-                openQty: 0,
-                closeQty: 0
-            };
-        }
-        grouped[part].totalQty += qty;
-        if (usage === "Replacement Faulty") grouped[part].faultyQty += qty;
-        if (usage === "Replacement Force Majure") grouped[part].forceMajureQty += qty;
-        if (status === "Open") grouped[part].openQty += qty;
-        if (status === "Close") grouped[part].closeQty += qty;
-    });
-
-    const sorted = Object.values(grouped).sort((a, b) => b.totalQty - a.totalQty);
-    const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
-    const faultyValues = sorted.length ? sorted.map(item => item.faultyQty) : [0];
-    const forceValues = sorted.length ? sorted.map(item => item.forceMajureQty) : [0];
-    const totalValues = sorted.length ? sorted.map(item => item.totalQty) : [0];
-
-    if (chartFaultyRate) chartFaultyRate.destroy();
-
-    chartFaultyRate = new Chart(document.getElementById("chartFaultyRate"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: "Replacement Faulty",
-                    data: faultyValues,
-                    backgroundColor: "#ff5252",
-                    borderRadius: 3,
-                    borderWidth: 1,
-                    borderColor: "#ff7b7b",
-                    // ❌ JANGAN TAMPILKAN LABEL DI SINI
-                    datalabels: { display: false }
-                },
-                {
-                    label: "Replacement Force Majure",
-                    data: forceValues,
-                    backgroundColor: "#ff9f29",
-                    borderRadius: 3,
-                    borderWidth: 1,
-                    borderColor: "#ffc070",
-                    // ✅ HANYA TAMPILKAN ANGKA TOTAL DI SINI (dataset paling atas)
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        color: '#ffffff',
-                        font: { size: 10, weight: 'bold' },
-                        formatter: function(value, context) {
-                            const total = totalValues[context.dataIndex];
-                            return total > 0 ? total : '';
-                        }
-                    }
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 25, bottom: 10 } },
-            plugins: {
-                legend: { 
-                    display: true,
-                    position: "top",
-                    labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 }
-                },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#ff5252",
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            const item = sorted[idx];
-                            const label = ctx.dataset.label || "";
-                            return [
-                                `${label}: ${ctx.raw}`,
-                                `Status Open: ${item?.openQty || 0}`,
-                                `Status Close: ${item?.closeQty || 0}`
-                            ];
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { 
-                        color: "#8892a6", 
-                        font: { size: 11 }
-                    },
-                    grid: { color: "rgba(44, 52, 75, 0.4)" },
-                    stacked: true
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60, font: { size: 10 } },
-                    grid: { display: false },
-                    stacked: true
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
-}
-
-function drawStockPerScopeChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const scopeQty = {};
-    stockData.forEach(r => {
-        const s = (r["SCOPE"] || "Others").trim() || "Others";
-        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
-    });
-    if (chartScope) chartScope.destroy();
-    chartScope = new Chart(document.getElementById("chartScope"), {
-        type: "doughnut",
-        data: {
-            labels: Object.keys(scopeQty),
-            datasets: [{
-                data: Object.values(scopeQty),
-                backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { 
-                    position: "bottom", 
-                    labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 12 } 
-                } 
-            }
-        }
-    });
-}
-
-function resetFilters() {
-    document.getElementById("filterScope").value = "";
-    document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
-    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
-    document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
-    document.getElementById("partDetail").classList.remove("show");
-    updateDashboard(allData);
-}
-
-document.getElementById("filterScope").addEventListener("change", updateView);
-document.getElementById("filterMaterialType").addEventListener("change", updateView);
-document.getElementById("filterBrand").addEventListener("change", updateView);
-document.getElementById("filterPart").addEventListener("change", updateView);
-
-function updateView() {
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-    const filtered = getFilteredData();
-    updateDashboard(filtered);
-}
+function resetFilters(){document.getElementById("filterScope").value="";document.getElementById("filterMaterialType").innerHTML=`<option value="">Semua Type</option>`;document.getElementById("filterBrand").innerHTML=`<option value="">Semua Brand</option>`;document.getElementById("filterPart").innerHTML=`<option value="">Semua Part</option>`;document.getElementById("partDetail").classList.remove("show");updateDashboard(allData);}
+document.getElementById("filterScope").addEventListener("change",updateView);
+document.getElementById("filterMaterialType").addEventListener("change",updateView);
+document.getElementById("filterBrand").addEventListener("change",updateView);
+document.getElementById("filterPart").addEventListener("change",updateView);
+function updateView(){syncMT();syncB();syncP();updatePD();updateDashboard(getFilteredData())}
 
 fetchData();
-setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
+setInterval(fetchData,REFRESH_MINUTES*60*1000);
 </script>
 </body>
 </html>
