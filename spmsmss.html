@@ -25,7 +25,6 @@
             color: var(--text); 
             padding: 20px; 
             min-height: 100vh; 
-            /* === BACKGROUND GAMBAR PLTS+BTS === */
             background:
                 linear-gradient(rgba(15, 20, 25, 0.45), rgba(15, 20, 25, 0.55)),
                 url("https://herisei.github.io/Fix%20PLTS%20BTS.png");
@@ -149,7 +148,7 @@
 <div class="container">
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
-        <p class="sub">Sparepart Operation · Transaction Data · Faulty Rate Analysis</p>
+        <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
         <p class="refresh-info" id="refreshInfo">Data diperbarui: 21/8/2026, 14.49.49 · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
@@ -207,7 +206,7 @@
     </div>
     <div class="chart-row">
         <div class="chart-box">
-            <h4>🔧 FAULTY RATE SPAREPART <span>(Usage=Replacement + Status=Open)</span></h4>
+            <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
             <canvas id="chartFaulty"></canvas>
         </div>
         <div class="chart-box">
@@ -223,7 +222,7 @@ const REFRESH_MINUTES = 3;
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 let allData = [];
 let chartStockPart, chartFaulty, chartScope;
-// === Cek Perlu Penggantian ===
+
 function isNeedsReplacement(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
     const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
@@ -231,7 +230,7 @@ function isNeedsReplacement(row) {
     const statusOk = replStatus === "Open";
     return usageOk && statusOk;
 }
-// === Format Tanggal Indonesia ===
+
 function formatDateID(date) {
     const d = date.getDate();
     const m = date.getMonth() + 1;
@@ -241,6 +240,7 @@ function formatDateID(date) {
     const s = String(date.getSeconds()).padStart(2, '0');
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
+
 async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
@@ -272,6 +272,7 @@ async function fetchData() {
             `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
     }
 }
+
 function getFilteredData() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -284,6 +285,7 @@ function getFilteredData() {
                (!fPart || (r["PART"] || "").trim() === fPart);
     });
 }
+
 function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
@@ -298,37 +300,43 @@ function fillSelect(id, arr) {
         filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.value = keep;
 }
+
 function updateDashboard(data) {
     const total = data.length;
     const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
     const inStock = stockRows.length;
     const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
-    const faultyData = data.filter(r => isNeedsReplacement(r));
-    const needReplaceCount = faultyData.length;
+    const unfulfilledData = data.filter(r => isNeedsReplacement(r));
+    const needReplaceCount = unfulfilledData.length;
     const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     const unikLoc = new Set(data.map(r => (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "").trim()).filter(v => v)).size;
+    
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
     document.getElementById("totalStock").textContent = totalStock;
     document.getElementById("needReplace").textContent = needReplaceCount;
     document.getElementById("typePart").textContent = unikPart;
     document.getElementById("location").textContent = unikLoc;
+    
     fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
     syncFilterBrand();
     syncFilterPart();
     updatePartDetail();
+    
     const filtered = getFilteredData();
     drawStockPartChart(filtered);
-    drawFaultyRateChart(filtered);
+    drawUnfulfilledChart(filtered);
     drawStockPerScopeChart(filtered);
 }
+
 function syncFilterMaterialType() {
     const fScope = document.getElementById("filterScope").value;
     let filtered = allData;
     if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
     fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
 }
+
 function syncFilterBrand() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -337,6 +345,7 @@ function syncFilterBrand() {
     if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
     fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
 }
+
 function syncFilterPart() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -347,6 +356,7 @@ function syncFilterPart() {
     if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
     fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
 }
+
 function updatePartDetail() {
     const fPart = document.getElementById("filterPart").value;
     const detailBox = document.getElementById("partDetail");
@@ -375,6 +385,7 @@ function updatePartDetail() {
     document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
     detailBox.classList.add("show");
 }
+
 function drawStockPartChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
@@ -392,7 +403,7 @@ function drawStockPartChart(data) {
     if (chartStockPart) chartStockPart.destroy();
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
-        data: { labels, datasets: [{ label: "QTY Stock", data: values, backgroundColor: greenColors, borderRadius: 4 }] },
+        data: { labels, datasets: [{ label: "Stock QTY", data: values, backgroundColor: greenColors, borderRadius: 4 }] },
         options: {
             responsive: true,
             plugins: { legend: { display: false } },
@@ -403,10 +414,11 @@ function drawStockPartChart(data) {
         }
     });
 }
-function drawFaultyRateChart(data) {
-    const faultyData = data.filter(r => isNeedsReplacement(r));
+
+function drawUnfulfilledChart(data) {
+    const unfulfilledData = data.filter(r => isNeedsReplacement(r));
     const grouped = {};
-    faultyData.forEach(r => {
+    unfulfilledData.forEach(r => {
         const scope = (r["SCOPE"] || "").trim();
         const matType = (r["MATERIAL TYPE"] || "").trim();
         const brand = (r["BRAND"] || "").trim();
@@ -424,7 +436,7 @@ function drawFaultyRateChart(data) {
         if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
         return a.part.localeCompare(b.part);
     });
-    const labels = sorted.length ? sorted.map(item => item.part) : ["Tidak ada data"];
+    const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
     const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
     const colors = [
         "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
@@ -438,7 +450,7 @@ function drawFaultyRateChart(data) {
         data: {
             labels: labels,
             datasets: [{
-                label: "Faulty QTY",
+                label: "Unfulfilled QTY",
                 data: values,
                 backgroundColor: barColors,
                 borderRadius: 4
@@ -483,11 +495,12 @@ function drawFaultyRateChart(data) {
         }
     });
 }
+
 function drawStockPerScopeChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const scopeQty = {};
     stockData.forEach(r => {
-        const s = (r["SCOPE"] || "Lainnya").trim() || "Lainnya";
+        const s = (r["SCOPE"] || "Others").trim() || "Others";
         scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
     });
     if (chartScope) chartScope.destroy();
@@ -507,6 +520,7 @@ function drawStockPerScopeChart(data) {
         }
     });
 }
+
 function resetFilters() {
     document.getElementById("filterScope").value = "";
     document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
@@ -515,10 +529,12 @@ function resetFilters() {
     document.getElementById("partDetail").classList.remove("show");
     updateDashboard(allData);
 }
+
 document.getElementById("filterScope").addEventListener("change", updateView);
 document.getElementById("filterMaterialType").addEventListener("change", updateView);
 document.getElementById("filterBrand").addEventListener("change", updateView);
 document.getElementById("filterPart").addEventListener("change", updateView);
+
 function updateView() {
     syncFilterMaterialType();
     syncFilterBrand();
@@ -527,6 +543,7 @@ function updateView() {
     const filtered = getFilteredData();
     updateDashboard(filtered);
 }
+
 fetchData();
 setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
 </script>
