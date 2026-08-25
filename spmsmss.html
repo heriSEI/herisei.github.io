@@ -45,7 +45,11 @@
         }
         h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
         .sub { color: var(--muted); font-size: 13px; }
-        .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
+        .refresh-info { 
+            font-size: 12px; color: var(--muted); margin-top: 6px; 
+            padding: 8px; background: rgba(0,0,0,0.4); border-radius: 6px;
+            border: 1px solid #333;
+        }
         .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
@@ -126,17 +130,12 @@
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
         
-        /* ============================================== */
-        /* === TATA LETAK BARU SESUAI GAMBAR 2 === */
-        /* ============================================== */
         .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
         .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
-
         @media (max-width: 900px) {
             .row-1, .row-2, .row-3 { grid-template-columns: 1fr; }
         }
-
         .chart-box, .map-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -146,33 +145,18 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         .chart-box h4, .map-box h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
         }
-        .chart-box h4 span, .map-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
+        .chart-box h4 { color: var(--accent); }
         .map-box h4 { color: var(--green); }
-
+        .chart-box h4 span, .map-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
         #chartStockPart { height: 320px !important; }
         #mapWH { height: 320px; border-radius: 8px; }
         #chartFaulty, #chartScope, #chartFaultyRate { height: 260px !important; }
-
-        /* === PETA === */
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
-        .leaflet-control-attribution {
-            font-size: 8px !important;
-            opacity: 0.45 !important;
-            padding: 0 4px !important;
-            background: transparent !important;
-            color: #666 !important;
-        }
+        .leaflet-control-attribution { font-size: 8px !important; opacity: 0.45 !important; padding: 0 4px !important; background: transparent !important; color: #666 !important; }
         .leaflet-control-attribution a { color: #888 !important; }
-
-        /* === ANIMASI TITIK BERDENYUT === */
         .pulse-marker {
             width: 14px; height: 14px; border-radius: 50%; background: #00d084; position: relative;
             box-shadow: 0 0 0 rgba(0, 208, 132, 0.7); animation: pulse 2s infinite;
@@ -184,7 +168,7 @@
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.6); }
             70% { box-shadow: 0 0 0 10px rgba(0, 208, 132, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(208, 132, 0); }
         }
         @keyframes pulse-ring {
             0% { transform: scale(1); opacity: 0.8; }
@@ -197,7 +181,7 @@
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
         <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
-        <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
+        <p class="refresh-info" id="refreshInfo">⏳ Mengecek koneksi ke Google Sheet...</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
 
@@ -250,11 +234,6 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- === TATA LETAK BARU === -->
-    <!-- ============================================== -->
-
-    <!-- Baris 1: STOCK + LOKASI -->
     <div class="row-1">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
@@ -265,8 +244,6 @@
             <div id="mapWH"></div>
         </div>
     </div>
-
-    <!-- Baris 2: UNFULFILLED + STOK PER SCOPE -->
     <div class="row-2">
         <div class="chart-box">
             <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
@@ -277,27 +254,33 @@
             <canvas id="chartScope"></canvas>
         </div>
     </div>
-
-    <!-- Baris 3: FAULTY RATE + (nanti BMN) -->
     <div class="row-3">
         <div class="chart-box">
             <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
             <canvas id="chartFaultyRate"></canvas>
         </div>
         <div class="chart-box" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;">
-            <div>🏷️ <strong>LABEL ASSET BMN</strong> — Siap ditambahkan berikutnya</div>
+            <div>🏷️ LABEL ASSET BMN — Siap ditambahkan</div>
         </div>
     </div>
 
 </div>
 
 <script>
+// ==============================================
+// ⚙️ CEK DULU NAMA SHEET DI BAWAH INI!
+// ==============================================
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
-const SHEET_NAME = "Raw_File_Update";
+
+// ⚠️ PASTIKAN NAMA SHEET DI SINI SAMA PERSIS DENGAN DI GOOGLE SHEET!
+const SHEET_NAME = "Raw_File_Update";  // <-- UBAH SESUAI NAMA TAB SHEET KAMU
+
 const WH_CLUSTER_SHEET = "WH Cluster";
 const REFRESH_MINUTES = 3;
+
 const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
+
 let allData = [];
 let chartStockPart, chartFaulty, chartScope, chartFaultyRate;
 let mapWH = null;
@@ -338,8 +321,11 @@ function formatDateID(date) {
 
 async function fetchWHClusterData() {
     try {
+        console.log("🔄 Mengambil data WH Cluster...");
         const res = await fetch(URL_WH_CLUSTER);
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
         const txt = await res.text();
+        if (!txt || txt.length < 100) throw new Error("Respons kosong atau terlalu pendek");
         const json = JSON.parse(txt.substr(47).slice(0, -2));
         const cols = json.table.cols.map(c => (c.label || "").trim());
         const data = json.table.rows.map(r => {
@@ -350,9 +336,10 @@ async function fetchWHClusterData() {
             });
             return obj;
         }).filter(row => row["WH Name"]);
+        console.log("✅ WH Cluster terambil:", data.length, "baris");
         return data;
     } catch (err) {
-        console.warn("Gagal ambil WH Cluster:", err);
+        console.warn("⚠️ Gagal ambil WH Cluster:", err);
         return [];
     }
 }
@@ -386,13 +373,23 @@ function initOrUpdateMap(whList) {
 
 async function fetchData() {
     try {
-        document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
+        document.getElementById("refreshInfo").innerHTML = 
+            `⏳ Mengambil data dari Sheet: <strong>${SHEET_NAME}</strong>...<br>URL: ${URL_MAIN.substring(0,80)}...`;
+
         const whData = await fetchWHClusterData();
         document.getElementById("whCluster").textContent = whData.length;
         initOrUpdateMap(whData);
+
+        console.log("🔄 Mengambil data utama...");
         const resMain = await fetch(URL_MAIN);
+        if (!resMain.ok) throw new Error(`HTTP Error: ${res.status} — Sheet mungkin tidak Publik atau nama salah`);
+        
         const txtMain = await resMain.text();
+        if (!txtMain || txtMain.length < 100) throw new Error("Respons kosong. Cek nama Sheet & pengaturan Share!");
+
         const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
+        
+        // ⚠️ Pastikan urutan kolom sesuai dengan Sheet kamu
         const cols = [
             "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
             "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
@@ -403,19 +400,30 @@ async function fetchData() {
             "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
             "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
         ];
+
         allData = jsonMain.table.rows.map(r => {
             let obj = {};
             r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
             return obj;
         });
+
+        if (allData.length === 0) throw new Error("Data kosong! Cek apakah ada baris data di bawah judul.");
+
+        console.log("✅ Data utama terambil:", allData.length, "baris");
         updateDashboard(allData);
+
         const now = new Date();
-        document.getElementById("refreshInfo").textContent = 
-            `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
-    } catch (err) {
-        console.error(err);
         document.getElementById("refreshInfo").innerHTML = 
-            `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
+            `✅ Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit<br>` +
+            `📄 Sheet: <strong>${SHEET_NAME}</strong> · ${allData.length} baris terbaca`;
+
+    } catch (err) {
+        console.error("❌ Error:", err);
+        document.getElementById("refreshInfo").innerHTML = 
+            `<span style="color:#ff5252">❌ Gagal ambil data!</span><br>` +
+            `• <strong>Penyebab:</strong> ${err.message}<br>` +
+            `• <strong>URL:</strong> ${URL_MAIN.substring(0,90)}...<br>` +
+            `• <strong>Solusi:</strong> Pastikan nama Sheet "<strong>${SHEET_NAME}</strong>" benar & Sheet sudah diatur <strong>Siapa saja yang punya tautan → Penampil</strong>`;
     }
 }
 
