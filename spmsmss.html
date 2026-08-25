@@ -382,65 +382,42 @@ async function fetchDatabaseData() {
             });
             return obj;
         });
-        return data;
+        return { data, cols };
     } catch (err) {
         console.warn("Gagal ambil Database:", err);
-        return [];
+        return { data: [], cols: [] };
     }
 }
 
-function initOrUpdateMap(whList) {
-    if (!mapWH) {
-        mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '' }).addTo(mapWH);
-    } else {
-        markers.forEach(m => mapWH.removeLayer(m));
-        markers = [];
-    }
-    const validCoords = [];
-    whList.forEach(wh => {
-        const lat = parseFloat(wh["Latt"]);
-        const lng = parseFloat(wh["Long"]);
-        const name = wh["WH Name"] || "WH";
-        const kab = wh["Kabupaten"] || "-";
-        const addr = wh["Alamat"] || "-";
-        const pic = wh["PIC"] || "-";
-        const hp = wh["Kontak"] || "-";
-        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-            validCoords.push([lat, lng]);
-            const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
-            marker.bindPopup(`<strong>${name}</strong><br>${kab}<br><small>${addr}</small><hr style="margin:4px 0; border:none; border-top:1px solid #eee;">PIC: ${pic}<br>Kontak: ${hp}`);
-            markers.push(marker);
-        }
-    });
-    if (validCoords.length > 0) mapWH.fitBounds(validCoords, { padding: [15, 15] });
-}
-
-function drawBMNChart(dbData) {
+function drawBMNChart({ data: dbData, cols }) {
     if (!dbData || dbData.length === 0) {
-        console.warn("Data Database kosong!");
+        console.warn("⚠️ Data Database kosong!");
         return;
     }
 
-    // Ambil nama kolom yang terbaca
-    const firstRow = dbData[0];
-    const colNames = Object.keys(firstRow || {});
-    console.log("=== Nama Kolom di Sheet Database ===");
-    colNames.forEach((n, i) => console.log(`Kolom ${i+1}: "${n}"`));
+    // === Cari posisi kolom berdasarkan urutan huruf ===
+    // A=0, B=1, ..., F=5, ..., V=21, ..., AS=44
+    const idx_A = 0;          // Kolom A = Site ID
+    const idx_F = 5;          // Kolom F = Kabupaten
+    const idx_V = 21;         // Kolom V = Tipe Site
+    const idx_AS = 44;        // Kolom AS = Status Label BMN
 
-    // Filter hanya yang Tipe Site = "Site"
+    console.log("✅ Posisi Kolom: A=" + idx_A + " F=" + idx_F + " V=" + idx_V + " AS=" + idx_AS);
+
+    // Filter hanya Tipe Site = "Site"
     const siteData = dbData.filter(r => {
-        const tipeSite = String(r["Tipe Site"] || r["V"] || "").trim();
+        const values = Object.values(r);
+        const tipeSite = String(values[idx_V] || "").trim();
         return tipeSite === "Site";
     });
 
-    console.log("Jumlah baris Tipe Site='Site':", siteData.length);
+    console.log("✅ Jumlah baris Tipe Site='Site':", siteData.length);
 
     const kabMap = {};
 
     siteData.forEach(r => {
-        // Kabupaten dari Kolom F
-        const kabupaten = String(r["Kabupaten"] || r["F"] || "Tidak Diketahui").trim() || "Tidak Diketahui";
+        const values = Object.values(r);
+        const kabupaten = String(values[idx_F] || "Tidak Diketahui").trim() || "Tidak Diketahui";
 
         if (!kabMap[kabupaten]) {
             kabMap[kabupaten] = { total: 0, terpasang: 0 };
@@ -448,8 +425,7 @@ function drawBMNChart(dbData) {
 
         kabMap[kabupaten].total += 1;
 
-        // Status Label BMN dari Kolom AS
-        const statusLabel = String(r["Status Label BMN"] || r["AS"] || "").trim();
+        const statusLabel = String(values[idx_AS] || "").trim();
         if (statusLabel === "TERPASANG LABEL BMN") {
             kabMap[kabupaten].terpasang += 1;
         }
@@ -464,7 +440,12 @@ function drawBMNChart(dbData) {
         }))
         .sort((a, b) => b.total - a.total);
 
-    console.log("Data per Kabupaten:", sorted);
+    console.log("✅ Hasil Hitung per Kabupaten:", sorted);
+
+    if (sorted.length === 0) {
+        console.warn("⚠️ Tidak ada data untuk digambar!");
+        return;
+    }
 
     const labels = sorted.map(i => i.kabupaten);
     const totalValues = sorted.map(i => i.total);
@@ -520,7 +501,7 @@ async function fetchData() {
         const whData = await fetchWHClusterData();
         document.getElementById("whCluster").textContent = whData.length;
         initOrUpdateMap(whData);
-        const dbData = await fetchDatabaseData();
+        const dbResult = await fetchDatabaseData();
         const resMain = await fetch(URL_MAIN);
         const txtMain = await resMain.text();
         const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
@@ -540,7 +521,7 @@ async function fetchData() {
             return obj;
         });
         updateDashboard(allData);
-        drawBMNChart(dbData);
+        drawBMNChart(dbResult);
         const now = new Date();
         document.getElementById("refreshInfo").textContent = 
             `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
