@@ -125,8 +125,15 @@
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
-        .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
-        @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
+
+        /* === TATA LETAK BARU === */
+        .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+        @media (max-width: 900px) {
+            .row-1, .row-2, .row-3 { grid-template-columns: 1fr; }
+        }
+
         .chart-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -144,12 +151,9 @@
             gap: 8px;
         }
         .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
-        #chartStockPart { height: 340px !important; max-height: 340px; }
-        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-        @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
-        .chart-row canvas { max-height: 240px !important; }
-        .chart-row-full { margin-bottom: 24px; }
-        .chart-row-full canvas { max-height: 280px !important; }
+        canvas { max-height: 280px !important; }
+
+        /* === PETA === */
         .map-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -157,6 +161,7 @@
             padding: 14px;
             backdrop-filter: blur(12px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            height: 100%;
         }
         .map-box h4 {
             font-size: 14px;
@@ -164,7 +169,7 @@
             color: var(--green);
         }
         #mapWH {
-            height: 340px;
+            height: 280px;
             border-radius: 8px;
         }
         .leaflet-popup-content strong { color: #00d084; }
@@ -260,7 +265,9 @@
             <div id="dWHList"></div>
         </div>
     </div>
-    <div class="chart-map-row">
+
+    <!-- === BARIS 1: STOK (lebar besar) + PETA === -->
+    <div class="row-1">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
             <canvas id="chartStockPart"></canvas>
@@ -270,7 +277,9 @@
             <div id="mapWH"></div>
         </div>
     </div>
-    <div class="chart-row">
+
+    <!-- === BARIS 2: UNFULFILLED + STOK PER SCOPE — sama lebar === -->
+    <div class="row-2">
         <div class="chart-box">
             <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
             <canvas id="chartFaulty"></canvas>
@@ -280,13 +289,13 @@
             <canvas id="chartScope"></canvas>
         </div>
     </div>
-    <div class="chart-row-full">
+
+    <!-- === BARIS 3: FAULTY RATE + LABEL BMN — sama lebar === -->
+    <div class="row-3">
         <div class="chart-box">
             <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
             <canvas id="chartFaultyRate"></canvas>
         </div>
-    </div>
-    <div class="chart-row-full">
         <div class="chart-box">
             <h4>🏷️ STATUS LABEL BMN PER KABUPATEN <span>(Total vs Terpasang vs Belum Terpasang)</span></h4>
             <canvas id="chartBMN"></canvas>
