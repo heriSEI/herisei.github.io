@@ -45,11 +45,7 @@
         }
         h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
         .sub { color: var(--muted); font-size: 13px; }
-        .refresh-info { 
-            font-size: 12px; color: var(--muted); margin-top: 6px; 
-            padding: 8px; background: rgba(0,0,0,0.4); border-radius: 6px;
-            border: 1px solid #333;
-        }
+        .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
         .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
@@ -130,13 +126,10 @@
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
         
-        .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-        .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
-        @media (max-width: 900px) {
-            .row-1, .row-2, .row-3 { grid-template-columns: 1fr; }
-        }
-        .chart-box, .map-box {
+        .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
+        @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
+        
+        .chart-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -144,31 +137,76 @@
             backdrop-filter: blur(12px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-        .chart-box h4, .map-box h4 {
-            font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+        .chart-box h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .chart-box h4 { color: var(--accent); }
-        .map-box h4 { color: var(--green); }
-        .chart-box h4 span, .map-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
-        #chartStockPart { height: 320px !important; }
-        #mapWH { height: 320px; border-radius: 8px; }
-        #chartFaulty, #chartScope, #chartFaultyRate { height: 260px !important; }
+        .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
+        #chartStockPart { height: 340px !important; max-height: 340px; }
+        
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+        @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
+        .chart-row canvas { max-height: 240px !important; }
+        
+        .chart-row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+        @media (max-width: 900px) { .chart-row-3 { grid-template-columns: 1fr; } }
+        .chart-row-3 canvas { max-height: 260px !important; }
+        
+        .map-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .map-box h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: var(--green);
+        }
+        #mapWH {
+            height: 340px;
+            border-radius: 8px;
+        }
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
-        .leaflet-control-attribution { font-size: 8px !important; opacity: 0.45 !important; padding: 0 4px !important; background: transparent !important; color: #666 !important; }
-        .leaflet-control-attribution a { color: #888 !important; }
+        .leaflet-control-attribution {
+            font-size: 8px !important;
+            opacity: 0.45 !important;
+            padding: 0 4px !important;
+            background: transparent !important;
+            color: #666 !important;
+        }
+        .leaflet-control-attribution a {
+            color: #888 !important;
+        }
         .pulse-marker {
-            width: 14px; height: 14px; border-radius: 50%; background: #00d084; position: relative;
-            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7); animation: pulse 2s infinite;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00d084;
+            position: relative;
+            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7);
+            animation: pulse 2s infinite;
         }
         .pulse-marker::after {
-            content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
-            background: rgba(0, 208, 132, 0.4); animation: pulse-ring 2s infinite;
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(0, 208, 132, 0.4);
+            animation: pulse-ring 2s infinite;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.6); }
             70% { box-shadow: 0 0 0 10px rgba(0, 208, 132, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(208, 132, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0); }
         }
         @keyframes pulse-ring {
             0% { transform: scale(1); opacity: 0.8; }
@@ -181,10 +219,9 @@
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
         <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
-        <p class="refresh-info" id="refreshInfo">⏳ Mengecek koneksi ke Google Sheet...</p>
+        <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
-
     <div class="cards">
         <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>JUMLAH WH CLUSTER</h3><div class="num" id="whCluster">—</div></div>
@@ -193,7 +230,6 @@
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
     </div>
-
     <div class="filter-section">
         <div class="filter-header">
             <div class="filter-group">
@@ -218,7 +254,6 @@
             </div>
         </div>
     </div>
-
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
@@ -234,7 +269,7 @@
         </div>
     </div>
 
-    <div class="row-1">
+    <div class="chart-map-row">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
             <canvas id="chartStockPart"></canvas>
@@ -244,7 +279,8 @@
             <div id="mapWH"></div>
         </div>
     </div>
-    <div class="row-2">
+
+    <div class="chart-row">
         <div class="chart-box">
             <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
             <canvas id="chartFaulty"></canvas>
@@ -254,37 +290,45 @@
             <canvas id="chartScope"></canvas>
         </div>
     </div>
-    <div class="row-3">
+
+    <div class="chart-row-3">
         <div class="chart-box">
             <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
             <canvas id="chartFaultyRate"></canvas>
         </div>
-        <div class="chart-box" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;">
-            <div>🏷️ LABEL ASSET BMN — Siap ditambahkan</div>
+        <div class="chart-box">
+            <h4>🏷️ LABEL ASSET BMN & HALO BAKTI</h4>
+            <canvas id="chartBMN"></canvas>
         </div>
     </div>
 
 </div>
-
 <script>
 // ==============================================
-// ⚙️ CEK DULU NAMA SHEET DI BAWAH INI!
+// ✅ SUMBER DATA: CSV PUBLIK (Lebih Andal!)
 // ==============================================
-const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
+const URL_MAIN_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWBgAcUY6CDlnXcKM4rIwTKRG1i6kb2JVNYD4TBwdcOW6gWozR76RUmixWNNXCuigx7KwmorBU-KCh/pub?output=csv";
+const URL_BMN_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXHBtJ1_uyhsaB_0F1ld1m3XK8y-4-1pUJhvZqU6v0E_RJ6G3Fls8su__suwUSF68LP0xXk4hBz08A/pub?output=csv";
 
-// ⚠️ PASTIKAN NAMA SHEET DI SINI SAMA PERSIS DENGAN DI GOOGLE SHEET!
-const SHEET_NAME = "Raw_File_Update";  // <-- UBAH SESUAI NAMA TAB SHEET KAMU
-
-const WH_CLUSTER_SHEET = "WH Cluster";
 const REFRESH_MINUTES = 3;
 
-const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
-
 let allData = [];
-let chartStockPart, chartFaulty, chartScope, chartFaultyRate;
+let chartStockPart, chartFaulty, chartScope, chartFaultyRate, chartBMN;
 let mapWH = null;
 let markers = [];
+
+// === PARSE CSV SEDERHANA ===
+function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    return lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+        let obj = {};
+        headers.forEach((h, i) => { obj[h] = values[i] || ""; });
+        return obj;
+    });
+}
 
 const PulseIcon = L.divIcon({
     className: 'pulse-icon',
@@ -319,29 +363,67 @@ function formatDateID(date) {
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
-async function fetchWHClusterData() {
-    try {
-        console.log("🔄 Mengambil data WH Cluster...");
-        const res = await fetch(URL_WH_CLUSTER);
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        const txt = await res.text();
-        if (!txt || txt.length < 100) throw new Error("Respons kosong atau terlalu pendek");
-        const json = JSON.parse(txt.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => (c.label || "").trim());
-        const data = json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => {
-                const val = cell?.v ?? "";
-                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
-            });
-            return obj;
-        }).filter(row => row["WH Name"]);
-        console.log("✅ WH Cluster terambil:", data.length, "baris");
-        return data;
-    } catch (err) {
-        console.warn("⚠️ Gagal ambil WH Cluster:", err);
-        return [];
-    }
+// === AMBIL DATA WH CLUSTER DARI SHEET UTAMA ===
+function getWHClusterData(data) {
+    return data.filter(row => /^WH\s/i.test(row["ALOCATION NAME"] || ""));
+}
+
+// === GRAFIK LABEL BMN ===
+function drawBMNChart(bmnData) {
+    const labelBMN = { TERPASANG: 0, BELUM: 0, LAINNYA: 0 };
+    const labelHalo = { TERPASANG: 0, BELUM: 0, LAINNYA: 0 };
+
+    bmnData.forEach(row => {
+        const bmnStatus = (row["STATUS LABEL BMN"] || "").trim().toUpperCase();
+        const haloStatus = (row["STATUS HALO BAKTI"] || "").trim().toUpperCase();
+
+        if (/TERPASANG/.test(bmnStatus)) labelBMN.TERPASANG++;
+        else if (/TIDAK ADA|BELUM/.test(bmnStatus)) labelBMN.BELUM++;
+        else if (bmnStatus) labelBMN.LAINNYA++;
+
+        if (/TERPASANG/.test(haloStatus)) labelHalo.TERPASANG++;
+        else if (/TIDAK ADA|BELUM/.test(haloStatus)) labelHalo.BELUM++;
+        else if (haloStatus) labelHalo.LAINNYA++;
+    });
+
+    if (chartBMN) chartBMN.destroy();
+    chartBMN = new Chart(document.getElementById("chartBMN"), {
+        type: "bar",
+        data: {
+            labels: ["Terpasang", "Belum/Tidak Ada", "Lainnya"],
+            datasets: [
+                {
+                    label: "Label BMN",
+                    data: [labelBMN.TERPASANG, labelBMN.BELUM, labelBMN.LAINNYA],
+                    backgroundColor: ["#00d084", "#ff5252", "#8892a6"],
+                    borderRadius: 4
+                },
+                {
+                    label: "Label Halo BAKTI",
+                    data: [labelHalo.TERPASANG, labelHalo.BELUM, labelHalo.LAINNYA],
+                    backgroundColor: ["#00d4ff", "#ff9f29", "#6b7280"],
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } },
+                tooltip: {
+                    backgroundColor: "rgba(26, 31, 46, 0.95)",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: "#8892a6" }, grid: { color: "rgba(44, 52, 75, 0.4)" } },
+                x: { ticks: { color: "#8892a6" }, grid: { display: false } }
+            }
+        }
+    });
 }
 
 function initOrUpdateMap(whList) {
@@ -354,17 +436,14 @@ function initOrUpdateMap(whList) {
     }
     const validCoords = [];
     whList.forEach(wh => {
-        const lat = parseFloat(wh["Latt"]);
-        const lng = parseFloat(wh["Long"]);
-        const name = wh["WH Name"] || "WH";
+        const lat = parseFloat(wh["Latt"] || wh["LATITUDE"] || 0);
+        const lng = parseFloat(wh["Long"] || wh["LONGITUDE"] || 0);
+        const name = wh["WH Name"] || wh["ALOCATION NAME"] || "WH";
         const kab = wh["Kabupaten"] || "-";
-        const addr = wh["Alamat"] || "-";
-        const pic = wh["PIC"] || "-";
-        const hp = wh["Kontak"] || "-";
         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
             validCoords.push([lat, lng]);
             const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
-            marker.bindPopup(`<strong>${name}</strong><br>${kab}<br><small>${addr}</small><hr style="margin:4px 0; border:none; border-top:1px solid #eee;">PIC: ${pic}<br>Kontak: ${hp}`);
+            marker.bindPopup(`<strong>${name}</strong><br>${kab}`);
             markers.push(marker);
         }
     });
@@ -373,57 +452,36 @@ function initOrUpdateMap(whList) {
 
 async function fetchData() {
     try {
-        document.getElementById("refreshInfo").innerHTML = 
-            `⏳ Mengambil data dari Sheet: <strong>${SHEET_NAME}</strong>...<br>URL: ${URL_MAIN.substring(0,80)}...`;
+        document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
 
-        const whData = await fetchWHClusterData();
+        // Ambil data Sparepart dari CSV
+        const resMain = await fetch(URL_MAIN_CSV);
+        if (!resMain.ok) throw new Error(`Gagal ambil data utama: ${resMain.status}`);
+        const csvMain = await resMain.text();
+        allData = parseCSV(csvMain);
+        if (allData.length === 0) throw new Error("Data utama kosong");
+
+        // Ambil & tampilkan WH Cluster
+        const whData = getWHClusterData(allData);
         document.getElementById("whCluster").textContent = whData.length;
         initOrUpdateMap(whData);
 
-        console.log("🔄 Mengambil data utama...");
-        const resMain = await fetch(URL_MAIN);
-        if (!resMain.ok) throw new Error(`HTTP Error: ${res.status} — Sheet mungkin tidak Publik atau nama salah`);
-        
-        const txtMain = await resMain.text();
-        if (!txtMain || txtMain.length < 100) throw new Error("Respons kosong. Cek nama Sheet & pengaturan Share!");
+        // Ambil data BMN dari CSV
+        const resBMN = await fetch(URL_BMN_CSV);
+        if (!resBMN.ok) throw new Error(`Gagal ambil data BMN: ${resBMN.status}`);
+        const csvBMN = await resBMN.text();
+        const bmnData = parseCSV(csvBMN);
+        drawBMNChart(bmnData);
 
-        const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
-        
-        // ⚠️ Pastikan urutan kolom sesuai dengan Sheet kamu
-        const cols = [
-            "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
-            "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
-            "PART NUMBER","SN","QTY","UOM","REQUEST STATUS",
-            "ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME",
-            "INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME",
-            "TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT",
-            "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
-            "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
-        ];
-
-        allData = jsonMain.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
-            return obj;
-        });
-
-        if (allData.length === 0) throw new Error("Data kosong! Cek apakah ada baris data di bawah judul.");
-
-        console.log("✅ Data utama terambil:", allData.length, "baris");
         updateDashboard(allData);
 
         const now = new Date();
-        document.getElementById("refreshInfo").innerHTML = 
-            `✅ Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit<br>` +
-            `📄 Sheet: <strong>${SHEET_NAME}</strong> · ${allData.length} baris terbaca`;
-
+        document.getElementById("refreshInfo").textContent = 
+            `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
     } catch (err) {
-        console.error("❌ Error:", err);
+        console.error(err);
         document.getElementById("refreshInfo").innerHTML = 
-            `<span style="color:#ff5252">❌ Gagal ambil data!</span><br>` +
-            `• <strong>Penyebab:</strong> ${err.message}<br>` +
-            `• <strong>URL:</strong> ${URL_MAIN.substring(0,90)}...<br>` +
-            `• <strong>Solusi:</strong> Pastikan nama Sheet "<strong>${SHEET_NAME}</strong>" benar & Sheet sudah diatur <strong>Siapa saja yang punya tautan → Penampil</strong>`;
+            `<span style="color:#ff5252">❌ Gagal ambil data!</span><br>Error: ${err.message}<br>Pastikan link CSV publik masih aktif!`;
     }
 }
 
@@ -696,7 +754,8 @@ function updateView() {
     syncFilterBrand();
     syncFilterPart();
     updatePartDetail();
-    updateDashboard(getFilteredData());
+    const filtered = getFilteredData();
+    updateDashboard(filtered);
 }
 
 fetchData();
