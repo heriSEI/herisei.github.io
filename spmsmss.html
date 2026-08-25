@@ -126,11 +126,18 @@
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
         
-        /* === GRAFIK STOK + PETA BERDAMPINGAN === */
-        .chart-map-row { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 24px; }
-        @media (max-width: 900px) { .chart-map-row { grid-template-columns: 1fr; } }
-        
-        .chart-box {
+        /* ============================================== */
+        /* === TATA LETAK BARU SESUAI GAMBAR 2 === */
+        /* ============================================== */
+        .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+
+        @media (max-width: 900px) {
+            .row-1, .row-2, .row-3 { grid-template-columns: 1fr; }
+        }
+
+        .chart-box, .map-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -138,7 +145,7 @@
             backdrop-filter: blur(12px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
-        .chart-box h4 {
+        .chart-box h4, .map-box h4 {
             font-size: 14px;
             margin-bottom: 10px;
             color: var(--accent);
@@ -146,40 +153,16 @@
             align-items: center;
             gap: 8px;
         }
-        .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
-        #chartStockPart { height: 340px !important; max-height: 340px; }
-        
-        /* === BARIS 2 GRAFIK SEJAJAR — UKURAN SEDANG === */
-        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-        @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
-        .chart-row canvas { max-height: 240px !important; }
-        
-        /* === GRAFIK FAULTY RATE — TINGGI SEDANG === */
-        .chart-row-full { margin-bottom: 24px; }
-        .chart-row-full canvas { max-height: 280px !important; }
-        
-        /* === PETA WH CLUSTER === */
-        .map-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .map-box h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: var(--green);
-        }
-        #mapWH {
-            height: 340px;
-            border-radius: 8px;
-        }
+        .chart-box h4 span, .map-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
+        .map-box h4 { color: var(--green); }
+
+        #chartStockPart { height: 320px !important; }
+        #mapWH { height: 320px; border-radius: 8px; }
+        #chartFaulty, #chartScope, #chartFaultyRate { height: 260px !important; }
+
+        /* === PETA === */
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
-
-        /* === PERKECIL TEKS HAK CIPTA PETA === */
         .leaflet-control-attribution {
             font-size: 8px !important;
             opacity: 0.45 !important;
@@ -187,28 +170,16 @@
             background: transparent !important;
             color: #666 !important;
         }
-        .leaflet-control-attribution a {
-            color: #888 !important;
-        }
+        .leaflet-control-attribution a { color: #888 !important; }
 
         /* === ANIMASI TITIK BERDENYUT === */
         .pulse-marker {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #00d084;
-            position: relative;
-            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7);
-            animation: pulse 2s infinite;
+            width: 14px; height: 14px; border-radius: 50%; background: #00d084; position: relative;
+            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7); animation: pulse 2s infinite;
         }
         .pulse-marker::after {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: rgba(0, 208, 132, 0.4);
-            animation: pulse-ring 2s infinite;
+            content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(0, 208, 132, 0.4); animation: pulse-ring 2s infinite;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.6); }
@@ -229,6 +200,7 @@
         <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
+
     <div class="cards">
         <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>JUMLAH WH CLUSTER</h3><div class="num" id="whCluster">—</div></div>
@@ -237,6 +209,7 @@
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
     </div>
+
     <div class="filter-section">
         <div class="filter-header">
             <div class="filter-group">
@@ -261,6 +234,7 @@
             </div>
         </div>
     </div>
+
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
@@ -276,8 +250,12 @@
         </div>
     </div>
 
-    <!-- === GRAFIK STOK + PETA === -->
-    <div class="chart-map-row">
+    <!-- ============================================== -->
+    <!-- === TATA LETAK BARU === -->
+    <!-- ============================================== -->
+
+    <!-- Baris 1: STOCK + LOKASI -->
+    <div class="row-1">
         <div class="chart-box">
             <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
             <canvas id="chartStockPart"></canvas>
@@ -288,8 +266,8 @@
         </div>
     </div>
 
-    <!-- === BARIS 1: UNFULFILLED + STOK PER SCOPE === -->
-    <div class="chart-row">
+    <!-- Baris 2: UNFULFILLED + STOK PER SCOPE -->
+    <div class="row-2">
         <div class="chart-box">
             <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
             <canvas id="chartFaulty"></canvas>
@@ -300,14 +278,19 @@
         </div>
     </div>
 
-    <!-- === GRAFIK BARU: FAULTY RATE === -->
-    <div class="chart-row-full">
+    <!-- Baris 3: FAULTY RATE + (nanti BMN) -->
+    <div class="row-3">
         <div class="chart-box">
             <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
             <canvas id="chartFaultyRate"></canvas>
         </div>
+        <div class="chart-box" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;">
+            <div>🏷️ <strong>LABEL ASSET BMN</strong> — Siap ditambahkan berikutnya</div>
+        </div>
     </div>
+
 </div>
+
 <script>
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
@@ -315,13 +298,11 @@ const WH_CLUSTER_SHEET = "WH Cluster";
 const REFRESH_MINUTES = 3;
 const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
-
 let allData = [];
 let chartStockPart, chartFaulty, chartScope, chartFaultyRate;
 let mapWH = null;
 let markers = [];
 
-// === CUSTOM ICON BERDENYUT ===
 const PulseIcon = L.divIcon({
     className: 'pulse-icon',
     html: '<div class="pulse-marker"></div>',
@@ -329,7 +310,6 @@ const PulseIcon = L.divIcon({
     iconAnchor: [7, 7]
 });
 
-// === UNFULFILLED = Usage=Replacement + Status=Open ===
 function isUnfulfilled(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
     const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
@@ -338,7 +318,6 @@ function isUnfulfilled(row) {
     return usageOk && statusOk;
 }
 
-// === FAULTY RATE = Usage=Replacement Faulty/Force Majure + Status=Open/Close ===
 function isFaultyRate(row) {
     const usage = (row["USAGE STATUS"] || "").trim();
     const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
@@ -381,14 +360,11 @@ async function fetchWHClusterData() {
 function initOrUpdateMap(whList) {
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: ''
-        }).addTo(mapWH);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '' }).addTo(mapWH);
     } else {
         markers.forEach(m => mapWH.removeLayer(m));
         markers = [];
     }
-
     const validCoords = [];
     whList.forEach(wh => {
         const lat = parseFloat(wh["Latt"]);
@@ -398,35 +374,22 @@ function initOrUpdateMap(whList) {
         const addr = wh["Alamat"] || "-";
         const pic = wh["PIC"] || "-";
         const hp = wh["Kontak"] || "-";
-
         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
             validCoords.push([lat, lng]);
             const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
-            marker.bindPopup(`
-                <strong>${name}</strong><br>
-                ${kab}<br>
-                <small>${addr}</small>
-                <hr style="margin:4px 0; border:none; border-top:1px solid #eee;">
-                PIC: ${pic}<br>
-                Kontak: ${hp}
-            `);
+            marker.bindPopup(`<strong>${name}</strong><br>${kab}<br><small>${addr}</small><hr style="margin:4px 0; border:none; border-top:1px solid #eee;">PIC: ${pic}<br>Kontak: ${hp}`);
             markers.push(marker);
         }
     });
-
-    if (validCoords.length > 0) {
-        mapWH.fitBounds(validCoords, { padding: [15, 15] });
-    }
+    if (validCoords.length > 0) mapWH.fitBounds(validCoords, { padding: [15, 15] });
 }
 
 async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
-        
         const whData = await fetchWHClusterData();
         document.getElementById("whCluster").textContent = whData.length;
         initOrUpdateMap(whData);
-
         const resMain = await fetch(URL_MAIN);
         const txtMain = await resMain.text();
         const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
@@ -445,7 +408,6 @@ async function fetchData() {
             r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
             return obj;
         });
-
         updateDashboard(allData);
         const now = new Date();
         document.getElementById("refreshInfo").textContent = 
@@ -474,14 +436,11 @@ function fillSelect(id, arr) {
     const sel = document.getElementById(id);
     const keep = sel.value;
     const exclude = {
-        "filterScope": ["SCOPE"],
-        "filterMaterialType": ["MATERIAL TYPE"],
-        "filterBrand": ["BRAND"],
-        "filterPart": ["PART"]
+        "filterScope": ["SCOPE"], "filterMaterialType": ["MATERIAL TYPE"],
+        "filterBrand": ["BRAND"], "filterPart": ["PART"]
     };
     const filteredArr = arr.filter(v => !exclude[id]?.includes(v));
-    sel.innerHTML = `<option value="">Semua</option>` +
-        filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
+    sel.innerHTML = `<option value="">Semua</option>` + filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
     sel.value = keep;
 }
 
@@ -519,7 +478,6 @@ function syncFilterMaterialType() {
     if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
     fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
 }
-
 function syncFilterBrand() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -528,7 +486,6 @@ function syncFilterBrand() {
     if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
     fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
 }
-
 function syncFilterPart() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -576,65 +533,27 @@ function drawStockPartChart(data) {
         const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
     });
-
     const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
     const labels = sorted.map(i => i[0]);
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
-
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
-
-    const greenColors = values.map(v => {
-        return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
-    });
-
+    const greenColors = values.map(v => `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`);
     if (chartStockPart) chartStockPart.destroy();
-
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Stock QTY",
-                data: scaledValues,
-                backgroundColor: greenColors,
-                borderRadius: 4
-            }]
-        },
+        data: { labels: labels, datasets: [{ label: "Stock QTY", data: scaledValues, backgroundColor: greenColors, borderRadius: 4 }] },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 5, bottom: 45 } },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#00d4ff",
-                    bodyColor: "#ffffff",
-                    borderColor: "#00d084",
-                    borderWidth: 1,
-                    padding: 10,
-                    displayColors: false,
-                    callbacks: {
-                        label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            return `Stock QTY: ${values[idx]}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: { display: false, beginAtZero: true, max: 280 },
-                x: {
-                    ticks: { 
-                        color: "#8892a6", 
-                        maxRotation: 60, 
-                        minRotation: 45, 
-                        font: { size: 8 }
-                    },
-                    grid: { display: false }
-                }
-            }
+            responsive: true, maintainAspectRatio: false, layout: { padding: { top: 5, bottom: 45 } },
+            plugins: { legend: { display: false }, tooltip: {
+                backgroundColor: "rgba(26, 31, 46, 0.95)", titleColor: "#00d4ff", bodyColor: "#ffffff",
+                borderColor: "#00d084", borderWidth: 1, padding: 10, displayColors: false,
+                callbacks: { label: ctx => `Stock QTY: ${values[ctx.dataIndex]}` }
+            } } },
+            scales: { y: { display: false, beginAtZero: true, max: 280 }, x: {
+                ticks: { color: "#8892a6", maxRotation: 60, minRotation: 45, font: { size: 8 } },
+                grid: { display: false }
+            } }
         }
     });
 }
@@ -649,9 +568,7 @@ function drawUnfulfilledChart(data) {
         const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         const qty = Number(r["QTY"]) || 0;
         const key = `${scope}||${matType}||${brand}||${part}`;
-        if (!grouped[key]) {
-            grouped[key] = { scope, matType, brand, part, totalQty: 0 };
-        }
+        if (!grouped[key]) grouped[key] = { scope, matType, brand, part, totalQty: 0 };
         grouped[key].totalQty += qty;
     });
     const sorted = Object.values(grouped).sort((a, b) => {
@@ -662,66 +579,31 @@ function drawUnfulfilledChart(data) {
     });
     const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
     const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
-    const colors = [
-        "#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63",
-        "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
-        "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"
-    ];
+    const colors = ["#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63", "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"];
     const barColors = labels.map((_, i) => colors[i % colors.length]);
     if (chartFaulty) chartFaulty.destroy();
     chartFaulty = new Chart(document.getElementById("chartFaulty"), {
         type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Unfulfilled QTY",
-                data: values,
-                backgroundColor: barColors,
-                borderRadius: 4
-            }]
-        },
+        data: { labels: labels, datasets: [{ label: "Unfulfilled QTY", data: values, backgroundColor: barColors, borderRadius: 4 }] },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#ffc107",
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            const item = sorted[idx];
-                            if (!item) return `QTY: ${ctx.raw}`;
-                            return [
-                                `QTY: ${ctx.raw}`,
-                                `Scope: ${item.scope || "-"}`,
-                                `Material: ${item.matType || "-"}`,
-                                `Brand: ${item.brand || "-"}`
-                            ];
-                        }
-                    }
-                }
-            },
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: {
+                backgroundColor: "rgba(26, 31, 46, 0.95)", titleColor: "#fff", bodyColor: "#fff",
+                borderColor: "#ffc107", borderWidth: 1,
+                callbacks: { label: ctx => {
+                    const idx = ctx.dataIndex;
+                    const item = sorted[idx];
+                    return item ? [`QTY: ${ctx.raw}`, `Scope: ${item.scope || "-"}`, `Material: ${item.matType || "-"}`, `Brand: ${item.brand || "-"}`] : `QTY: ${ctx.raw}`;
+                } }
+            } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: "#8892a6", font: { size: 10 } },
-                    grid: { color: "rgba(44, 52, 75, 0.3)" }
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60, font: { size: 9 } },
-                    grid: { display: false }
-                }
+                y: { beginAtZero: true, ticks: { color: "#8892a6", font: { size: 10 } }, grid: { color: "rgba(44, 52, 75, 0.3)" } },
+                x: { ticks: { color: "#8892a6", maxRotation: 60, font: { size: 9 } }, grid: { display: false } }
             }
         }
     });
 }
 
-// === ✅ GRAFIK FAULTY RATE — HANYA 1 ANGKA TOTAL DI ATAS ===
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
@@ -730,112 +612,43 @@ function drawFaultyRateChart(data) {
         const usage = (r["USAGE STATUS"] || "").trim();
         const status = (r["STATUS REPLACEMENT"] || "").trim();
         const qty = Number(r["QTY"]) || 0;
-        if (!grouped[part]) {
-            grouped[part] = { 
-                part, 
-                totalQty: 0, 
-                faultyQty: 0, 
-                forceMajureQty: 0,
-                openQty: 0,
-                closeQty: 0
-            };
-        }
+        if (!grouped[part]) grouped[part] = { part, totalQty: 0, faultyQty: 0, forceMajureQty: 0, openQty: 0, closeQty: 0 };
         grouped[part].totalQty += qty;
         if (usage === "Replacement Faulty") grouped[part].faultyQty += qty;
         if (usage === "Replacement Force Majure") grouped[part].forceMajureQty += qty;
         if (status === "Open") grouped[part].openQty += qty;
         if (status === "Close") grouped[part].closeQty += qty;
     });
-
     const sorted = Object.values(grouped).sort((a, b) => b.totalQty - a.totalQty);
     const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
     const faultyValues = sorted.length ? sorted.map(item => item.faultyQty) : [0];
     const forceValues = sorted.length ? sorted.map(item => item.forceMajureQty) : [0];
     const totalValues = sorted.length ? sorted.map(item => item.totalQty) : [0];
-
     if (chartFaultyRate) chartFaultyRate.destroy();
-
     chartFaultyRate = new Chart(document.getElementById("chartFaultyRate"), {
         type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: "Replacement Faulty",
-                    data: faultyValues,
-                    backgroundColor: "#ff5252",
-                    borderRadius: 3,
-                    borderWidth: 1,
-                    borderColor: "#ff7b7b",
-                    // ❌ JANGAN TAMPILKAN LABEL DI SINI
-                    datalabels: { display: false }
-                },
-                {
-                    label: "Replacement Force Majure",
-                    data: forceValues,
-                    backgroundColor: "#ff9f29",
-                    borderRadius: 3,
-                    borderWidth: 1,
-                    borderColor: "#ffc070",
-                    // ✅ HANYA TAMPILKAN ANGKA TOTAL DI SINI (dataset paling atas)
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        color: '#ffffff',
-                        font: { size: 10, weight: 'bold' },
-                        formatter: function(value, context) {
-                            const total = totalValues[context.dataIndex];
-                            return total > 0 ? total : '';
-                        }
-                    }
-                }
-            ]
-        },
+        data: { labels: labels, datasets: [
+            { label: "Replacement Faulty", data: faultyValues, backgroundColor: "#ff5252", borderRadius: 3, borderWidth: 1, borderColor: "#ff7b7b", datalabels: { display: false } },
+            { label: "Replacement Force Majure", data: forceValues, backgroundColor: "#ff9f29", borderRadius: 3, borderWidth: 1, borderColor: "#ffc070", datalabels: {
+                anchor: 'end', align: 'top', color: '#ffffff', font: { size: 10, weight: 'bold' },
+                formatter: (value, context) => totalValues[context.dataIndex] > 0 ? totalValues[context.dataIndex] : ''
+            } }
+        ] },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 25, bottom: 10 } },
-            plugins: {
-                legend: { 
-                    display: true,
-                    position: "top",
-                    labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 }
-                },
+            responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 10 } },
+            plugins: { legend: { position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } },
                 tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#fff",
-                    bodyColor: "#fff",
-                    borderColor: "#ff5252",
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(ctx) {
-                            const idx = ctx.dataIndex;
-                            const item = sorted[idx];
-                            const label = ctx.dataset.label || "";
-                            return [
-                                `${label}: ${ctx.raw}`,
-                                `Status Open: ${item?.openQty || 0}`,
-                                `Status Close: ${item?.closeQty || 0}`
-                            ];
-                        }
-                    }
+                    backgroundColor: "rgba(26, 31, 46, 0.95)", titleColor: "#fff", bodyColor: "#fff", borderColor: "#ff5252", borderWidth: 1,
+                    callbacks: { label: ctx => {
+                        const idx = ctx.dataIndex;
+                        const item = sorted[idx];
+                        return [`${ctx.dataset.label}: ${ctx.raw}`, `Status Open: ${item?.openQty || 0}`, `Status Close: ${item?.closeQty || 0}`];
+                    } }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { 
-                        color: "#8892a6", 
-                        font: { size: 11 }
-                    },
-                    grid: { color: "rgba(44, 52, 75, 0.4)" },
-                    stacked: true
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60, font: { size: 10 } },
-                    grid: { display: false },
-                    stacked: true
-                }
+                y: { beginAtZero: true, ticks: { color: "#8892a6", font: { size: 11 } }, grid: { color: "rgba(44, 52, 75, 0.4)" }, stacked: true },
+                x: { ticks: { color: "#8892a6", maxRotation: 60, font: { size: 10 } }, grid: { display: false }, stacked: true }
             }
         },
         plugins: [ChartDataLabels]
@@ -852,24 +665,8 @@ function drawStockPerScopeChart(data) {
     if (chartScope) chartScope.destroy();
     chartScope = new Chart(document.getElementById("chartScope"), {
         type: "doughnut",
-        data: {
-            labels: Object.keys(scopeQty),
-            datasets: [{
-                data: Object.values(scopeQty),
-                backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { 
-                    position: "bottom", 
-                    labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 12 } 
-                } 
-            }
-        }
+        data: { labels: Object.keys(scopeQty), datasets: [{ data: Object.values(scopeQty), backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 12 } } } }
     });
 }
 
@@ -886,14 +683,12 @@ document.getElementById("filterScope").addEventListener("change", updateView);
 document.getElementById("filterMaterialType").addEventListener("change", updateView);
 document.getElementById("filterBrand").addEventListener("change", updateView);
 document.getElementById("filterPart").addEventListener("change", updateView);
-
 function updateView() {
     syncFilterMaterialType();
     syncFilterBrand();
     syncFilterPart();
     updatePartDetail();
-    const filtered = getFilteredData();
-    updateDashboard(filtered);
+    updateDashboard(getFilteredData());
 }
 
 fetchData();
