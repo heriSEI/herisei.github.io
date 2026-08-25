@@ -417,18 +417,44 @@ function initOrUpdateMap(whList) {
 }
 
 function drawBMNChart(dbData) {
+    if (!dbData || dbData.length === 0) {
+        console.warn("Data Database kosong!");
+        return;
+    }
+
+    // Ambil nama kolom yang terbaca
+    const firstRow = dbData[0];
+    const colNames = Object.keys(firstRow || {});
+    console.log("=== Nama Kolom di Sheet Database ===");
+    colNames.forEach((n, i) => console.log(`Kolom ${i+1}: "${n}"`));
+
+    // Filter hanya yang Tipe Site = "Site"
     const siteData = dbData.filter(r => {
-        const tipeSite = (r["Tipe Site"] || "").trim();
+        const tipeSite = String(r["Tipe Site"] || r["V"] || "").trim();
         return tipeSite === "Site";
     });
+
+    console.log("Jumlah baris Tipe Site='Site':", siteData.length);
+
     const kabMap = {};
+
     siteData.forEach(r => {
-        const kab = (r["Kabupaten"] || "Tidak Diketahui").trim() || "Tidak Diketahui";
-        const statusLabel = (r["Status Label BMN"] || "").trim();
-        if (!kabMap[kab]) kabMap[kab] = { total: 0, terpasang: 0 };
-        kabMap[kab].total += 1;
-        if (statusLabel === "TERPASANG LABEL BMN") kabMap[kab].terpasang += 1;
+        // Kabupaten dari Kolom F
+        const kabupaten = String(r["Kabupaten"] || r["F"] || "Tidak Diketahui").trim() || "Tidak Diketahui";
+
+        if (!kabMap[kabupaten]) {
+            kabMap[kabupaten] = { total: 0, terpasang: 0 };
+        }
+
+        kabMap[kabupaten].total += 1;
+
+        // Status Label BMN dari Kolom AS
+        const statusLabel = String(r["Status Label BMN"] || r["AS"] || "").trim();
+        if (statusLabel === "TERPASANG LABEL BMN") {
+            kabMap[kabupaten].terpasang += 1;
+        }
     });
+
     const sorted = Object.entries(kabMap)
         .map(([kab, val]) => ({
             kabupaten: kab,
@@ -437,25 +463,29 @@ function drawBMNChart(dbData) {
             gap: val.total - val.terpasang
         }))
         .sort((a, b) => b.total - a.total);
+
+    console.log("Data per Kabupaten:", sorted);
+
     const labels = sorted.map(i => i.kabupaten);
     const totalValues = sorted.map(i => i.total);
     const terpasangValues = sorted.map(i => i.terpasang);
     const gapValues = sorted.map(i => i.gap);
+
     if (chartBMN) chartBMN.destroy();
     chartBMN = new Chart(document.getElementById("chartBMN"), {
         type: "bar",
         data: {
             labels: labels,
             datasets: [
-                { label: "Total Lokasi", data: totalValues, backgroundColor: "rgba(0, 212, 255, 0.6)", borderRadius: 4 },
-                { label: "Terpasang Label BMN", data: terpasangValues, backgroundColor: "rgba(0, 208, 132, 0.7)", borderRadius: 4 },
+                { label: "Total Lokasi", data: totalValues, backgroundColor: "rgba(0, 212, 255, 0.65)", borderRadius: 4 },
+                { label: "Terpasang Label BMN", data: terpasangValues, backgroundColor: "rgba(0, 208, 132, 0.75)", borderRadius: 4 },
                 { label: "GAP Belum Terpasang", data: gapValues, backgroundColor: "rgba(255, 82, 82, 0.85)", borderRadius: 4, datalabels: { anchor: 'end', align: 'top', color: '#ff5252', font: { weight: 'bold', size: 11 } } }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 25, bottom: 10 } },
+            layout: { padding: { top: 30, bottom: 10 } },
             plugins: {
                 legend: { display: true, position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } },
                 tooltip: {
@@ -469,7 +499,7 @@ function drawBMNChart(dbData) {
                             const idx = ctx.dataIndex;
                             const item = sorted[idx];
                             if (ctx.datasetIndex === 0) return `Total Lokasi: ${item.total}`;
-                            if (ctx.datasetIndex === 1) return `Terpasang Label: ${item.terpasang}`;
+                            if (ctx.datasetIndex === 1) return `Terpasang Label BMN: ${item.terpasang}`;
                             return `GAP Belum Terpasang: ${item.gap}`;
                         }
                     }
