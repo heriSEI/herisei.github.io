@@ -249,7 +249,7 @@
                 <select id="filterPart"><option value="">Semua Part</option></select>
             </div>
             <div style="display:flex; gap:8px; flex-direction:column;">
-                <button class="btn-refresh" onclick="fetchData()">🔄 Refresh</button>
+                <button class="btn-refresh" onclick="fetchAllData()">🔄 Refresh</button>
                 <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
             </div>
         </div>
@@ -305,31 +305,50 @@
 </div>
 <script>
 // ==============================================
-// ✅ SUMBER DATA SUDAH DIPERBAIKI SESUAI SHEET
+// ✅ 3 SUMBER DATA DARI GOOGLE SHEET PUBLIK
 // ==============================================
-const URL_MAIN_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWBgAcUY6CDlnXcKM4rIwTKRG1i6kb2JVNYD4TBwdcOW6gWozR76RUmixWNNXCuigx7KwmorBU-KCh/pub?output=csv";
-const URL_BMN_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXHBtJ1_uyhsaB_0F1ld1m3XK8y-4-1pUJhvZqU6v0E_RJ6G3Fls8su__suwUSF68LP0xXk4hBz08A/pub?output=csv";
+const SHEET_MAIN_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
+const SHEET_BMN_ID = "1f8ihfSSYAa1KtE3ynhe6JdCdzMNBxlf_SaR7foyd5_8";
+
+const GID_RAW_FILE_UPDATE = "0";           // Raw_File_Update
+const GID_WH_CLUSTER = "174824686";        // WH Cluster
+const GID_SITE_LIST = "158890297";         // Site List (Label BMN)
 
 const REFRESH_MINUTES = 3;
 
+// === FUNGSI BANTU: Ambil Data dari Google Sheet Publik ===
+async function fetchSheet(sheetId, gid) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        let text = await res.text();
+        text = text.replace(/^.*\(/, "").replace(/\);?$/, "");
+        const data = JSON.parse(text);
+        const rows = data.table.rows;
+        if (!rows || rows.length === 0) return [];
+        const headers = rows[0].c.map(cell => cell ? cell.v : "").map(h => String(h || "").trim());
+        return rows.slice(1).map(row => {
+            let obj = {};
+            headers.forEach((h, i) => {
+                const cell = row.c && row.c[i];
+                let val = cell ? (cell.v || "") : "";
+                obj[h] = String(val).trim();
+            });
+            return obj;
+        });
+    } catch (err) {
+        console.error(`Gagal baca sheet ${sheetId} gid=${gid}:`, err);
+        throw err;
+    }
+}
+
 let allData = [];
-let whClusterData = [];
+let bmnData = [];
+let whData = [];
 let chartStockPart, chartFaulty, chartScope, chartFaultyRate, chartBMN;
 let mapWH = null;
 let markers = [];
-
-// === PARSE CSV SEDERHANA ===
-function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (lines.length < 2) return [];
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toUpperCase());
-    return lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-        let obj = {};
-        headers.forEach((h, i) => { obj[h] = values[i] || ""; });
-        return obj;
-    });
-}
 
 const PulseIcon = L.divIcon({
     className: 'pulse-icon',
@@ -339,16 +358,16 @@ const PulseIcon = L.divIcon({
 });
 
 function isUnfulfilled(row) {
-    const usage = (row["USAGE STATUS"] || row["W"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || row["AD"] || "").trim();
+    const usage = (row["USAGE STATUS"] || "").trim();
+    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
     const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
     const statusOk = replStatus === "Open";
     return usageOk && statusOk;
 }
 
 function isFaultyRate(row) {
-    const usage = (row["USAGE STATUS"] || row["W"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || row["AD"] || "").trim();
+    const usage = (row["USAGE STATUS"] || "").trim();
+    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
     const usageOk = usage === "Replacement Faulty" || usage === "Replacement Force Majure";
     const statusOk = replStatus === "Open" || replStatus === "Close";
     return usageOk && statusOk;
@@ -364,44 +383,22 @@ function formatDateID(date) {
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
-// === PROSES WH CLUSTER DARI SHEET TERSEBUT ===
-function processWHCluster(data) {
-    // Cari baris yang berisi data WH Cluster
-    // Kolom: A=WH Name, B=Kabupaten, D=Latt, E=Long
-    const whList = [];
-    data.forEach(row => {
-        const name = row["WH NAME"] || row["A"] || row["ALOCATION NAME"] || "";
-        if (!name || name.trim() === "" || name.trim().toUpperCase() === "WH NAME") return;
-        const lat = parseFloat(row["LATT"] || row["D"] || 0);
-        const lng = parseFloat(row["LONG"] || row["E"] || 0);
-        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-            whList.push({
-                name: name.trim(),
-                kabupaten: row["KABUPATEN"] || row["B"] || "-",
-                lat: lat,
-                lng: lng
-            });
-        }
-    });
-    return whList;
-}
-
 // === GRAFIK LABEL BMN ===
-function drawBMNChart(bmnData) {
-    const labelBMN = { TERPASANG: 0, BELUM_TIDAK_ADA: 0, LAINNYA: 0 };
-    const labelHalo = { TERPASANG: 0, BELUM_TIDAK_ADA: 0, LAINNYA: 0 };
+function drawBMNChart() {
+    const labelBMN = { TERPASANG: 0, BELUM: 0, LAINNYA: 0 };
+    const labelHalo = { TERPASANG: 0, BELUM: 0, LAINNYA: 0 };
 
     bmnData.forEach(row => {
-        const bmnStatus = (row["STATUS LABEL BMN"] || row["P"] || "").trim().toUpperCase();
-        const haloStatus = (row["STATUS HALO BAKTI"] || row["Q"] || "").trim().toUpperCase();
+        const bmnStatus = (row["STATUS LABEL BMN"] || row["Status Label BMN"] || "").trim().toUpperCase();
+        const haloStatus = (row["STATUS HALO BAKTI"] || row["Status Halo Bakti"] || "").trim().toUpperCase();
 
         if (/TERPASANG/.test(bmnStatus)) labelBMN.TERPASANG++;
-        else if (/TIDAK ADA|BELUM/.test(bmnStatus) || bmnStatus === "") labelBMN.BELUM_TIDAK_ADA++;
-        else labelBMN.LAINNYA++;
+        else if (/TIDAK ADA|BELUM/.test(bmnStatus)) labelBMN.BELUM++;
+        else if (bmnStatus) labelBMN.LAINNYA++;
 
         if (/TERPASANG/.test(haloStatus)) labelHalo.TERPASANG++;
-        else if (/TIDAK ADA|BELUM/.test(haloStatus) || haloStatus === "") labelHalo.BELUM_TIDAK_ADA++;
-        else labelHalo.LAINNYA++;
+        else if (/TIDAK ADA|BELUM/.test(haloStatus)) labelHalo.BELUM++;
+        else if (haloStatus) labelHalo.LAINNYA++;
     });
 
     if (chartBMN) chartBMN.destroy();
@@ -412,13 +409,13 @@ function drawBMNChart(bmnData) {
             datasets: [
                 {
                     label: "Label BMN",
-                    data: [labelBMN.TERPASANG, labelBMN.BELUM_TIDAK_ADA, labelBMN.LAINNYA],
+                    data: [labelBMN.TERPASANG, labelBMN.BELUM, labelBMN.LAINNYA],
                     backgroundColor: ["#00d084", "#ff5252", "#8892a6"],
                     borderRadius: 4
                 },
                 {
                     label: "Label Halo BAKTI",
-                    data: [labelHalo.TERPASANG, labelHalo.BELUM_TIDAK_ADA, labelHalo.LAINNYA],
+                    data: [labelHalo.TERPASANG, labelHalo.BELUM, labelHalo.LAINNYA],
                     backgroundColor: ["#00d4ff", "#ff9f29", "#6b7280"],
                     borderRadius: 4
                 }
@@ -444,49 +441,49 @@ function drawBMNChart(bmnData) {
     });
 }
 
-function initOrUpdateMap(whList) {
+function initOrUpdateMap() {
     if (!mapWH) {
-        mapWH = L.map('mapWH').setView([-2.5, 132], 5);
+        mapWH = L.map('mapWH').setView([-2.5, 118], 5);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '' }).addTo(mapWH);
     } else {
         markers.forEach(m => mapWH.removeLayer(m));
         markers = [];
     }
     const validCoords = [];
-    whList.forEach(wh => {
-        if (wh.lat && wh.lng) {
-            validCoords.push([wh.lat, wh.lng]);
-            const marker = L.marker([wh.lat, wh.lng], { icon: PulseIcon }).addTo(mapWH);
-            marker.bindPopup(`<strong>${wh.name}</strong><br>${wh.kabupaten}`);
+    whData.forEach(wh => {
+        const lat = parseFloat(wh["D"] || wh["Latt"] || wh["LATITUDE"] || 0);
+        const lng = parseFloat(wh["E"] || wh["Long"] || wh["LONGITUDE"] || 0);
+        const name = wh["A"] || wh["WH Name"] || wh["NAME"] || "WH";
+        const kab = wh["B"] || wh["Kabupaten"] || "-";
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+            validCoords.push([lat, lng]);
+            const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
+            marker.bindPopup(`<strong>${name}</strong><br>${kab}`);
             markers.push(marker);
         }
     });
     if (validCoords.length > 0) mapWH.fitBounds(validCoords, { padding: [15, 15] });
 }
 
-async function fetchData() {
+async function fetchAllData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
 
-        // Ambil data Sparepart dari Raw_File_Update
-        const resMain = await fetch(URL_MAIN_CSV);
-        if (!resMain.ok) throw new Error(`Gagal ambil data utama: ${resMain.status}`);
-        const csvMain = await resMain.text();
-        allData = parseCSV(csvMain);
-        if (allData.length === 0) throw new Error("Data utama kosong");
+        // Ambil 3 sumber data sekaligus
+        [allData, bmnData, whData] = await Promise.all([
+            fetchSheet(SHEET_MAIN_ID, GID_RAW_FILE_UPDATE),
+            fetchSheet(SHEET_BMN_ID, GID_SITE_LIST),
+            fetchSheet(SHEET_MAIN_ID, GID_WH_CLUSTER)
+        ]);
 
-        // Proses WH Cluster dari sheet utama
-        whClusterData = processWHCluster(allData);
-        document.getElementById("whCluster").textContent = whClusterData.length;
-        initOrUpdateMap(whClusterData);
+        // Tampilkan jumlah WH Cluster
+        document.getElementById("whCluster").textContent = whData.length;
+        initOrUpdateMap();
 
-        // Ambil data Label BMN dari Site List
-        const resBMN = await fetch(URL_BMN_CSV);
-        if (!resBMN.ok) throw new Error(`Gagal ambil data BMN: ${resBMN.status}`);
-        const csvBMN = await resBMN.text();
-        const bmnData = parseCSV(csvBMN);
-        drawBMNChart(bmnData);
+        // Gambar grafik BMN
+        drawBMNChart();
 
+        // Update semua grafik & kartu
         updateDashboard(allData);
 
         const now = new Date();
@@ -495,7 +492,7 @@ async function fetchData() {
     } catch (err) {
         console.error(err);
         document.getElementById("refreshInfo").innerHTML = 
-            `<span style="color:#ff5252">❌ Gagal ambil data!</span><br>Error: ${err.message}<br>Pastikan link CSV publik masih aktif!`;
+            `<span style="color:#ff5252">❌ Gagal ambil data!</span><br>Error: ${err.message}<br>Pastikan Sheet dipublikasikan ke Web!`;
     }
 }
 
@@ -505,14 +502,10 @@ function getFilteredData() {
     const fBrand = document.getElementById("filterBrand").value;
     const fPart = document.getElementById("filterPart").value;
     return allData.filter(r => {
-        const scope = (r["SCOPE"] || r["E"] || "").trim();
-        const material = (r["MATERIAL TYPE"] || r["F"] || "").trim();
-        const brand = (r["BRAND"] || r["G"] || "").trim();
-        const part = (r["PART"] || r["H"] || "").trim();
-        return (!fScope || scope === fScope) &&
-               (!fMaterial || material === fMaterial) &&
-               (!fBrand || brand === fBrand) &&
-               (!fPart || part === fPart);
+        return (!fScope || (r["SCOPE"] || "").trim() === fScope) &&
+               (!fMaterial || (r["MATERIAL TYPE"] || "").trim() === fMaterial) &&
+               (!fBrand || (r["BRAND"] || "").trim() === fBrand) &&
+               (!fPart || (r["PART"] || "").trim() === fPart);
     });
 }
 
@@ -525,12 +518,12 @@ function fillSelect(id, arr) {
 
 function updateDashboard(data) {
     const total = data.length;
-    const stockRows = data.filter(r => (r["USAGE STATUS"] || r["W"] || "").toString().trim().toLowerCase() === "stock");
+    const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
     const inStock = stockRows.length;
-    const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || Number(r["M"]) || 0), 0);
+    const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
     const unfulfilledData = data.filter(r => isUnfulfilled(r));
     const needReplaceCount = unfulfilledData.length;
-    const unikPart = new Set(data.map(r => (r["PART"] || r["H"] || "").trim()).filter(v => v)).size;
+    const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
     
     document.getElementById("totalUnit").textContent = total;
     document.getElementById("inStock").textContent = inStock;
@@ -538,7 +531,7 @@ function updateDashboard(data) {
     document.getElementById("needReplace").textContent = needReplaceCount;
     document.getElementById("typePart").textContent = unikPart;
     
-    fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || r["E"] || "").trim()).filter(v => v))].sort());
+    fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
     syncFilterMaterialType();
     syncFilterBrand();
     syncFilterPart();
@@ -554,44 +547,44 @@ function updateDashboard(data) {
 function syncFilterMaterialType() {
     const fScope = document.getElementById("filterScope").value;
     let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || r["E"] || "").trim() === fScope);
-    fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || r["F"] || "").trim()).filter(v => v))].sort());
+    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
+    fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
 }
 function syncFilterBrand() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
     let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || r["E"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || r["F"] || "").trim() === fMaterial);
-    fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || r["G"] || "").trim()).filter(v => v))].sort());
+    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
+    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
+    fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
 }
 function syncFilterPart() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
     const fBrand = document.getElementById("filterBrand").value;
     let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || r["E"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || r["F"] || "").trim() === fMaterial);
-    if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || r["G"] || "").trim() === fBrand);
-    fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || r["H"] || "").trim()).filter(v => v))].sort());
+    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
+    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
+    if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
+    fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
 }
 
 function updatePartDetail() {
     const fPart = document.getElementById("filterPart").value;
     const detailBox = document.getElementById("partDetail");
     if (!fPart) { detailBox.classList.remove("show"); return; }
-    const partData = allData.filter(r => (r["PART"] || r["H"] || "").trim() === fPart);
+    const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
     if (partData.length === 0) { detailBox.classList.remove("show"); return; }
     const info = partData[0];
-    const desc = (info["DESCRIPTION"] || info["J"] || "-").trim();
-    const brand = (info["BRAND"] || info["G"] || "-").trim();
-    const partNo = (info["PART NUMBER"] || info["K"] || "-").trim();
-    const stockData = partData.filter(r => (r["USAGE STATUS"] || r["W"] || "").trim().toLowerCase() === "stock");
-    const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || Number(r["M"]) || 0), 0);
+    const desc = (info["DESCRIPTION"] || "-").trim();
+    const brand = (info["BRAND"] || "-").trim();
+    const partNo = (info["PART NUMBER"] || "-").trim();
+    const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
+    const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
     const whMap = {};
     stockData.forEach(r => {
-        const loc = (r["CURRENT SITE NAME"] || r["Y"] || r["ALOCATION NAME"] || r["C"] || "Tidak Diketahui").trim();
-        whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || Number(r["M"]) || 0);
+        const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
+        whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || 0);
     });
     const whListHtml = Object.entries(whMap)
         .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
@@ -606,11 +599,11 @@ function updatePartDetail() {
 }
 
 function drawStockPartChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || r["W"] || "").trim().toLowerCase() === "stock");
+    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
     stockData.forEach(r => {
-        const partName = (r["PART"] || r["H"] || "UNKNOWN").trim() || "UNKNOWN";
-        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || Number(r["M"]) || 0);
+        const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
+        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
     });
     const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
     const labels = sorted.map(i => i[0]);
@@ -641,11 +634,11 @@ function drawUnfulfilledChart(data) {
     const unfulfilledData = data.filter(r => isUnfulfilled(r));
     const grouped = {};
     unfulfilledData.forEach(r => {
-        const scope = (r["SCOPE"] || r["E"] || "").trim();
-        const matType = (r["MATERIAL TYPE"] || r["F"] || "").trim();
-        const brand = (r["BRAND"] || r["G"] || "").trim();
-        const part = (r["PART"] || r["H"] || "UNKNOWN").trim() || "UNKNOWN";
-        const qty = Number(r["QTY"]) || Number(r["M"]) || 0;
+        const scope = (r["SCOPE"] || "").trim();
+        const matType = (r["MATERIAL TYPE"] || "").trim();
+        const brand = (r["BRAND"] || "").trim();
+        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
+        const qty = Number(r["QTY"]) || 0;
         const key = `${scope}||${matType}||${brand}||${part}`;
         if (!grouped[key]) grouped[key] = { scope, matType, brand, part, totalQty: 0 };
         grouped[key].totalQty += qty;
@@ -687,10 +680,10 @@ function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
     faultyData.forEach(r => {
-        const part = (r["PART"] || r["H"] || "UNKNOWN").trim() || "UNKNOWN";
-        const usage = (r["USAGE STATUS"] || r["W"] || "").trim();
-        const status = (r["STATUS REPLACEMENT"] || r["AD"] || "").trim();
-        const qty = Number(r["QTY"]) || Number(r["M"]) || 0;
+        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
+        const usage = (r["USAGE STATUS"] || "").trim();
+        const status = (r["STATUS REPLACEMENT"] || "").trim();
+        const qty = Number(r["QTY"]) || 0;
         if (!grouped[part]) grouped[part] = { part, totalQty: 0, faultyQty: 0, forceMajureQty: 0, openQty: 0, closeQty: 0 };
         grouped[part].totalQty += qty;
         if (usage === "Replacement Faulty") grouped[part].faultyQty += qty;
@@ -735,11 +728,11 @@ function drawFaultyRateChart(data) {
 }
 
 function drawStockPerScopeChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || r["W"] || "").trim().toLowerCase() === "stock");
+    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const scopeQty = {};
     stockData.forEach(r => {
-        const s = (r["SCOPE"] || r["E"] || "Others").trim() || "Others";
-        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || Number(r["M"]) || 0);
+        const s = (r["SCOPE"] || "Others").trim() || "Others";
+        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
     });
     if (chartScope) chartScope.destroy();
     chartScope = new Chart(document.getElementById("chartScope"), {
@@ -771,8 +764,11 @@ function updateView() {
     updateDashboard(filtered);
 }
 
-fetchData();
-setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
+// Ambil data pertama kali
+fetchAllData();
+
+// Auto-refresh tiap 3 menit
+setInterval(fetchAllData, REFRESH_MINUTES * 60 * 1000);
 </script>
 </body>
 </html>
