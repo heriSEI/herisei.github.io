@@ -154,9 +154,13 @@
         @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
         .chart-row canvas { max-height: 240px !important; }
         
-        /* === GRAFIK FAULTY RATE — TINGGI SEDANG === */
+        /* === GRAFIK TINGGI SEDANG === */
         .chart-row-full { margin-bottom: 24px; }
         .chart-row-full canvas { max-height: 280px !important; }
+
+        /* === GRAFIK BMN === */
+        .chart-row-bmn { margin-bottom: 24px; }
+        .chart-row-bmn canvas { max-height: 300px !important; }
         
         /* === PETA WH CLUSTER === */
         .map-box {
@@ -178,7 +182,6 @@
         }
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
-
         /* === PERKECIL TEKS HAK CIPTA PETA === */
         .leaflet-control-attribution {
             font-size: 8px !important;
@@ -190,7 +193,6 @@
         .leaflet-control-attribution a {
             color: #888 !important;
         }
-
         /* === ANIMASI TITIK BERDENYUT === */
         .pulse-marker {
             width: 14px;
@@ -225,7 +227,7 @@
 <div class="container">
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
-        <p class="sub">Sparepart Operation · Transaction Data · Request Analysis</p>
+        <p class="sub">Sparepart Operation · Transaction Data · Asset Label BMN</p>
         <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
@@ -275,7 +277,6 @@
             <div id="dWHList"></div>
         </div>
     </div>
-
     <!-- === GRAFIK STOK + PETA === -->
     <div class="chart-map-row">
         <div class="chart-box">
@@ -287,7 +288,6 @@
             <div id="mapWH"></div>
         </div>
     </div>
-
     <!-- === BARIS 1: UNFULFILLED + STOK PER SCOPE === -->
     <div class="chart-row">
         <div class="chart-box">
@@ -299,12 +299,18 @@
             <canvas id="chartScope"></canvas>
         </div>
     </div>
-
-    <!-- === GRAFIK BARU: FAULTY RATE === -->
+    <!-- === GRAFIK FAULTY RATE === -->
     <div class="chart-row-full">
         <div class="chart-box">
             <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
             <canvas id="chartFaultyRate"></canvas>
+        </div>
+    </div>
+    <!-- === GRAFIK BARU: LABEL BMN PER KABUPATEN === -->
+    <div class="chart-row-bmn">
+        <div class="chart-box">
+            <h4>🏷️ PROGRES LABEL BMN PER KABUPATEN <span>(Tipe Site=Site | Terpasang vs GAP)</span></h4>
+            <canvas id="chartBMN"></canvas>
         </div>
     </div>
 </div>
@@ -312,12 +318,16 @@
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
 const WH_CLUSTER_SHEET = "WH Cluster";
+const DATABASE_SHEET = "Database";
 const REFRESH_MINUTES = 3;
+
 const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
+const URL_DATABASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATABASE_SHEET)}`;
 
 let allData = [];
-let chartStockPart, chartFaulty, chartScope, chartFaultyRate;
+let databaseData = [];
+let chartStockPart, chartFaulty, chartScope, chartFaultyRate, chartBMN;
 let mapWH = null;
 let markers = [];
 
@@ -357,6 +367,7 @@ function formatDateID(date) {
     return `${d}/${m}/${y}, ${h}.${min}.${s}`;
 }
 
+// === AMBIL DATA WH CLUSTER ===
 async function fetchWHClusterData() {
     try {
         const res = await fetch(URL_WH_CLUSTER);
@@ -378,6 +389,28 @@ async function fetchWHClusterData() {
     }
 }
 
+// === AMBIL DATA DATABASE (untuk Grafik BMN) ===
+async function fetchDatabaseData() {
+    try {
+        const res = await fetch(URL_DATABASE);
+        const txt = await res.text();
+        const json = JSON.parse(txt.substr(47).slice(0, -2));
+        const cols = json.table.cols.map(c => (c.label || "").trim());
+        const data = json.table.rows.map(r => {
+            let obj = {};
+            r.c.forEach((cell, i) => {
+                const val = cell?.v ?? "";
+                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
+            });
+            return obj;
+        });
+        return data;
+    } catch (err) {
+        console.warn("Gagal ambil Database:", err);
+        return [];
+    }
+}
+
 function initOrUpdateMap(whList) {
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
@@ -388,7 +421,6 @@ function initOrUpdateMap(whList) {
         markers.forEach(m => mapWH.removeLayer(m));
         markers = [];
     }
-
     const validCoords = [];
     whList.forEach(wh => {
         const lat = parseFloat(wh["Latt"]);
@@ -398,7 +430,6 @@ function initOrUpdateMap(whList) {
         const addr = wh["Alamat"] || "-";
         const pic = wh["PIC"] || "-";
         const hp = wh["Kontak"] || "-";
-
         if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
             validCoords.push([lat, lng]);
             const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
@@ -413,7 +444,6 @@ function initOrUpdateMap(whList) {
             markers.push(marker);
         }
     });
-
     if (validCoords.length > 0) {
         mapWH.fitBounds(validCoords, { padding: [15, 15] });
     }
@@ -423,10 +453,15 @@ async function fetchData() {
     try {
         document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
         
+        // Ambil WH Cluster
         const whData = await fetchWHClusterData();
         document.getElementById("whCluster").textContent = whData.length;
         initOrUpdateMap(whData);
 
+        // Ambil Database untuk Grafik BMN
+        databaseData = await fetchDatabaseData();
+
+        // Ambil Data Utama Sparepart
         const resMain = await fetch(URL_MAIN);
         const txtMain = await resMain.text();
         const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
@@ -447,6 +482,8 @@ async function fetchData() {
         });
 
         updateDashboard(allData);
+        drawBMNChart(); // === GRAFIK BMN ===
+
         const now = new Date();
         document.getElementById("refreshInfo").textContent = 
             `Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
@@ -455,6 +492,108 @@ async function fetchData() {
         document.getElementById("refreshInfo").innerHTML = 
             `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
     }
+}
+
+// === ✅ GRAFIK BMN: Tipe Site=Site, Kelompok per Kabupaten, Hitung Total vs Terpasang vs GAP ===
+function drawBMNChart() {
+    if (!databaseData || databaseData.length === 0) return;
+
+    // Filter: Tipe Site = "Site"
+    const siteData = databaseData.filter(r => {
+        const tipeSite = (r["Tipe Site"] || r["TIPE SITE"] || r["V"] || "").trim();
+        return tipeSite.toUpperCase() === "SITE";
+    });
+
+    // Kelompokkan per Kabupaten
+    const kabMap = {};
+    siteData.forEach(r => {
+        const kab = (r["Kabupaten"] || r["KABUPATEN"] || r["F"] || "TIDAK DIKETAHUI").trim() || "TIDAK DIKETAHUI";
+        const statusLabel = (r["Status Label BMN"] || r["STATUS LABEL BMN"] || r["AS"] || "").trim();
+        const terpasang = statusLabel.toUpperCase() === "TERPASANG LABEL BMN";
+
+        if (!kabMap[kab]) {
+            kabMap[kab] = { total: 0, terpasang: 0 };
+        }
+        kabMap[kab].total += 1;
+        if (terpasang) kabMap[kab].terpasang += 1;
+    });
+
+    // Urutkan dari yang terbanyak
+    const sorted = Object.entries(kabMap)
+        .map(([kab, val]) => ({ kab, ...val, gap: val.total - val.terpasang }))
+        .sort((a, b) => b.total - a.total);
+
+    const labels = sorted.map(item => item.kab);
+    const totalValues = sorted.map(item => item.total);
+    const terpasangValues = sorted.map(item => item.terpasang);
+    const gapValues = sorted.map(item => item.gap);
+
+    if (chartBMN) chartBMN.destroy();
+    chartBMN = new Chart(document.getElementById("chartBMN"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Total Lokasi",
+                    data: totalValues,
+                    backgroundColor: "rgba(0, 212, 255, 0.55)",
+                    borderRadius: 4
+                },
+                {
+                    label: "Terpasang Label BMN",
+                    data: terpasangValues,
+                    backgroundColor: "rgba(0, 208, 132, 0.75)",
+                    borderRadius: 4
+                },
+                {
+                    label: "GAP / Belum Terpasang",
+                    data: gapValues,
+                    backgroundColor: "rgba(255, 82, 82, 0.85)",
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 25, bottom: 10 } },
+            plugins: {
+                legend: { 
+                    display: true,
+                    position: "top",
+                    labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 }
+                },
+                tooltip: {
+                    backgroundColor: "rgba(26, 31, 46, 0.95)",
+                    titleColor: "#00d4ff",
+                    bodyColor: "#fff",
+                    borderColor: "#00d4ff",
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(ctx) {
+                            const idx = ctx.dataIndex;
+                            const item = sorted[idx];
+                            if (ctx.datasetIndex === 0) return `Total Lokasi: ${item.total}`;
+                            if (ctx.datasetIndex === 1) return `Terpasang: ${item.terpasang}`;
+                            return `Belum Terpasang: ${item.gap}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: "#8892a6", maxRotation: 60, minRotation: 45, font: { size: 9 } },
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: "#8892a6", font: { size: 11 } },
+                    grid: { color: "rgba(44, 52, 75, 0.3)" }
+                }
+            }
+        }
+    });
 }
 
 function getFilteredData() {
@@ -519,7 +658,6 @@ function syncFilterMaterialType() {
     if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
     fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
 }
-
 function syncFilterBrand() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -528,7 +666,6 @@ function syncFilterBrand() {
     if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
     fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
 }
-
 function syncFilterPart() {
     const fScope = document.getElementById("filterScope").value;
     const fMaterial = document.getElementById("filterMaterialType").value;
@@ -576,20 +713,15 @@ function drawStockPartChart(data) {
         const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
     });
-
     const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
     const labels = sorted.map(i => i[0]);
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
-
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
-
     const greenColors = values.map(v => {
         return `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`;
     });
-
     if (chartStockPart) chartStockPart.destroy();
-
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
         data: {
@@ -721,7 +853,7 @@ function drawUnfulfilledChart(data) {
     });
 }
 
-// === ✅ GRAFIK FAULTY RATE — HANYA 1 ANGKA TOTAL DI ATAS ===
+// === GRAFIK FAULTY RATE ===
 function drawFaultyRateChart(data) {
     const faultyData = data.filter(r => isFaultyRate(r));
     const grouped = {};
@@ -746,15 +878,12 @@ function drawFaultyRateChart(data) {
         if (status === "Open") grouped[part].openQty += qty;
         if (status === "Close") grouped[part].closeQty += qty;
     });
-
     const sorted = Object.values(grouped).sort((a, b) => b.totalQty - a.totalQty);
     const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
     const faultyValues = sorted.length ? sorted.map(item => item.faultyQty) : [0];
     const forceValues = sorted.length ? sorted.map(item => item.forceMajureQty) : [0];
     const totalValues = sorted.length ? sorted.map(item => item.totalQty) : [0];
-
     if (chartFaultyRate) chartFaultyRate.destroy();
-
     chartFaultyRate = new Chart(document.getElementById("chartFaultyRate"), {
         type: "bar",
         data: {
@@ -767,7 +896,6 @@ function drawFaultyRateChart(data) {
                     borderRadius: 3,
                     borderWidth: 1,
                     borderColor: "#ff7b7b",
-                    // ❌ JANGAN TAMPILKAN LABEL DI SINI
                     datalabels: { display: false }
                 },
                 {
@@ -777,7 +905,6 @@ function drawFaultyRateChart(data) {
                     borderRadius: 3,
                     borderWidth: 1,
                     borderColor: "#ffc070",
-                    // ✅ HANYA TAMPILKAN ANGKA TOTAL DI SINI (dataset paling atas)
                     datalabels: {
                         anchor: 'end',
                         align: 'top',
@@ -828,76 +955,4 @@ function drawFaultyRateChart(data) {
                         color: "#8892a6", 
                         font: { size: 11 }
                     },
-                    grid: { color: "rgba(44, 52, 75, 0.4)" },
-                    stacked: true
-                },
-                x: {
-                    ticks: { color: "#8892a6", maxRotation: 60, font: { size: 10 } },
-                    grid: { display: false },
-                    stacked: true
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
-}
-
-function drawStockPerScopeChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const scopeQty = {};
-    stockData.forEach(r => {
-        const s = (r["SCOPE"] || "Others").trim() || "Others";
-        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
-    });
-    if (chartScope) chartScope.destroy();
-    chartScope = new Chart(document.getElementById("chartScope"), {
-        type: "doughnut",
-        data: {
-            labels: Object.keys(scopeQty),
-            datasets: [{
-                data: Object.values(scopeQty),
-                backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { 
-                    position: "bottom", 
-                    labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 12 } 
-                } 
-            }
-        }
-    });
-}
-
-function resetFilters() {
-    document.getElementById("filterScope").value = "";
-    document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
-    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
-    document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
-    document.getElementById("partDetail").classList.remove("show");
-    updateDashboard(allData);
-}
-
-document.getElementById("filterScope").addEventListener("change", updateView);
-document.getElementById("filterMaterialType").addEventListener("change", updateView);
-document.getElementById("filterBrand").addEventListener("change", updateView);
-document.getElementById("filterPart").addEventListener("change", updateView);
-
-function updateView() {
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-    const filtered = getFilteredData();
-    updateDashboard(filtered);
-}
-
-fetchData();
-setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
-</script>
-</body>
-</html>
+                    grid: { color: "
