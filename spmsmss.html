@@ -38,7 +38,7 @@
         }
         .container { max-width: 1400px; margin: 0 auto; position: relative; }
 
-        /* === MENU NAVIGASI — PERBAIKAN TATA LETAK === */
+        /* === MENU NAVIGASI === */
         .menu-container {
             position: absolute;
             top: 0;
@@ -87,16 +87,19 @@
         .menu-dropdown a:last-child { border-bottom: none; }
         .menu-dropdown a:hover { background: var(--bg-card-2); color: var(--accent); }
 
+        /* === HEADER — JUDUL & SUBJUDUL DI TENGAH === */
         header { 
             margin-bottom: 24px; 
-            padding: 0 0 16px 80px;
+            padding: 16px 20px;
+            text-align: center;
             border-bottom: 1px solid var(--border);
             backdrop-filter: blur(8px);
         }
         h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
-        .sub { color: var(--muted); font-size: 13px; }
+        .sub { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
         .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
+
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
@@ -116,6 +119,7 @@
         .card:nth-child(4) .num { color: var(--yellow); }
         .card:nth-child(5) .num { color: var(--purple); }
         .card:nth-child(6) .num { color: var(--accent); }
+
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -153,6 +157,7 @@
         .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25); }
         .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 82, 82, 0.25); }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
+
         .part-detail {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -175,6 +180,7 @@
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
+
         .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
         .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
@@ -199,6 +205,7 @@
         }
         .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
         canvas { max-height: 280px !important; }
+
         .map-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -227,6 +234,7 @@
             color: #666 !important;
         }
         .leaflet-control-attribution a { color: #888 !important; }
+
         .pulse-marker {
             width: 14px;
             height: 14px;
@@ -259,7 +267,7 @@
 <body>
 <div class="container">
 
-    <!-- === MENU NAVIGASI — Tautan LABEL BMN SUDAH DIPERBARUI === -->
+    <!-- === MENU NAVIGASI === -->
     <div class="menu-container">
         <div class="menu-toggle" id="menuToggle"><span>☰</span> <span>MENU</span></div>
         <div class="menu-dropdown" id="menuDropdown">
@@ -269,6 +277,7 @@
         </div>
     </div>
 
+    <!-- === HEADER — JUDUL DI TENGAH === -->
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
         <p class="sub">Sparepart Operation · Transaction Data · Asset Label Monitoring</p>
@@ -361,8 +370,10 @@
 </div>
 
 <script>
-// === MENU TOGGLE ===
-document.getElementById('menuToggle').onclick = e => { e.stopPropagation(); document.getElementById('menuDropdown').classList.toggle('show'); };
+document.getElementById('menuToggle').onclick = e => {
+    e.stopPropagation();
+    document.getElementById('menuDropdown').classList.toggle('show');
+};
 document.onclick = () => document.getElementById('menuDropdown').classList.remove('show');
 
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
@@ -818,13 +829,12 @@ function updateView() {
     const filtered = getFilteredData();
     drawStockPartChart(filtered);
     drawUnfulfilledChart(filtered);
-    drawStockPerScopeChart(filtered);
     drawFaultyRateChart(filtered);
+    drawStockPerScopeChart(filtered);
 }
 
 fetchData();
 setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
 </script>
-
 </body>
 </html>
