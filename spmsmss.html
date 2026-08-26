@@ -806,12 +806,18 @@ function drawFaultyRateChart(data) {
                         }
                     }
                 },
-                datalabels: {
+                    datalabels: {
                     anchor: "end",
                     align: "top",
                     color: "#ffffff",
                     font: { size: 10, weight: "bold" },
-                    formatter: (value, ctx) => totalValues[ctx.dataIndex] > 0 ? totalValues[ctx.dataIndex] : ""
+                    formatter: function(value, ctx) {
+                        // Hanya tampilkan angka TOTAL di dataset terakhir (batang oranye)
+                        if (ctx.datasetIndex === 1 && totalValues[ctx.dataIndex] > 0) {
+                            return totalValues[ctx.dataIndex];
+                        }
+                        return ""; // Dataset pertama (merah) kosong
+                    }
                 }
             },
             scales: { 
