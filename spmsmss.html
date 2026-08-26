@@ -28,70 +28,40 @@
             color: var(--text); 
             padding: 20px; 
             min-height: 100vh; 
-            background:
-                linear-gradient(rgba(15, 20, 25, 0.45), rgba(15, 20, 25, 0.55)),
-                url("https://herisei.github.io/Fix%20PLTS%20BTS.png");
+            background: linear-gradient(rgba(15, 20, 25, 0.45), rgba(15, 20, 25, 0.55)),
+                        url("https://herisei.github.io/Fix%20PLTS%20BTS.png");
             background-size: cover;
             background-position: center center;
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
         .container { max-width: 1400px; margin: 0 auto; position: relative; }
-        /* === MENU NAVIGASI === */
-        .menu-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 100;
-        }
+        .menu-container { position: absolute; top: 0; left: 0; z-index: 100; }
         .menu-toggle {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 14px;
-            cursor: pointer;
-            color: var(--accent);
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            display: flex; align-items: center; gap: 6px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 8px; padding: 8px 14px; cursor: pointer;
+            color: var(--accent); font-size: 14px; font-weight: 600;
+            backdrop-filter: blur(12px); box-shadow: 0 4px 15px rgba(0,0,0,0.25);
         }
-        .menu-toggle:hover { background: var(--bg-card-2); }
         .menu-dropdown {
-            display: none;
-            position: absolute;
-            top: 48px;
-            left: 0;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            min-width: 280px;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+            display: none; position: absolute; top: 48px; left: 0;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; min-width: 280px;
+            backdrop-filter: blur(16px); box-shadow: 0 8px 25px rgba(0,0,0,0.35);
         }
         .menu-dropdown.show { display: block; }
         .menu-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            color: var(--text);
-            text-decoration: none;
-            font-size: 14px;
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; color: var(--text);
+            text-decoration: none; font-size: 14px;
             border-bottom: 1px solid var(--border);
         }
         .menu-dropdown a:last-child { border-bottom: none; }
         .menu-dropdown a:hover { background: var(--bg-card-2); color: var(--accent); }
-        /* === HEADER — JUDUL & SUBJUDUL DI TENGAH === */
         header { 
-            margin-bottom: 24px; 
-            padding: 16px 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(8px);
+            margin-bottom: 24px; padding: 16px 20px; text-align: center;
+            border-bottom: 1px solid var(--border); backdrop-filter: blur(8px);
         }
         h1 { font-size: 22px; color: var(--accent); margin-bottom: 4px; }
         .sub { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
@@ -101,12 +71,9 @@
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
         .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px;
+            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .card h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
         .card .num { font-size: 28px; font-weight: 700; }
@@ -117,133 +84,64 @@
         .card:nth-child(5) .num { color: var(--purple); }
         .card:nth-child(6) .num { color: var(--accent); }
         .filter-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;
+            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .filter-header {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr) auto;
-            gap: 12px;
-            align-items: flex-end;
-        }
+        .filter-header { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 12px; align-items: flex-end; }
         @media (max-width: 1000px) { .filter-header { grid-template-columns: repeat(2, 1fr) auto; } }
         @media (max-width: 600px) { .filter-header { grid-template-columns: 1fr; } }
-        .filter-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
+        .filter-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
         select, button {
-            width: 100%;
-            background: var(--bg-card-2);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 12px;
-            border-radius: 6px;
-            outline: none;
-            font-size: 13px;
-            backdrop-filter: blur(6px);
+            width: 100%; background: var(--bg-card-2); border: 1px solid var(--border);
+            color: var(--text); padding: 10px 12px; border-radius: 6px;
+            outline: none; font-size: 13px; backdrop-filter: blur(6px);
         }
-        .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25); }
-        .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 82, 82, 0.25); }
+        .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; }
+        .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
         .part-detail {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 20px; margin-bottom: 20px;
+            display: none; backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .part-detail.show { display: block; }
         .part-detail h4 { color: var(--accent); margin-bottom: 12px; font-size: 15px; }
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-        }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
         .detail-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
         .detail-item span:first-child { color: var(--muted); font-size: 13px; }
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
-        .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-        .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
-        @media (max-width: 900px) {
-            .row-1, .row-2, .row-3 { grid-template-columns: 1fr; }
-        }
+        .row-1, .row-2, .row-3 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
+        .row-2, .row-3 { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 900px) { .row-1, .row-2, .row-3 { grid-template-columns: 1fr; } }
         .chart-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px;
+            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .chart-box h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .chart-box h4 { font-size: 14px; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
         .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
         canvas { max-height: 280px !important; }
         .map-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            height: 100%;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px; height: 100%;
+            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .map-box h4 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: var(--green);
-        }
-        #mapWH {
-            height: 280px;
-            border-radius: 8px;
-        }
+        .map-box h4 { font-size: 14px; margin-bottom: 10px; color: var(--green); }
+        #mapWH { height: 280px; border-radius: 8px; }
         .leaflet-popup-content strong { color: #00d084; }
         .leaflet-popup-content small { color: #666; display: block; margin-top: 4px; }
-        .leaflet-control-attribution {
-            font-size: 8px !important;
-            opacity: 0.45 !important;
-            padding: 0 4px !important;
-            background: transparent !important;
-            color: #666 !important;
-        }
+        .leaflet-control-attribution { font-size: 8px !important; opacity: 0.45 !important; padding: 0 4px !important; background: transparent !important; color: #666 !important; }
         .leaflet-control-attribution a { color: #888 !important; }
         .pulse-marker {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #00d084;
-            position: relative;
-            box-shadow: 0 0 0 rgba(0, 208, 132, 0.7);
-            animation: pulse 2s infinite;
+            width: 14px; height: 14px; border-radius: 50%; background: #00d084;
+            position: relative; box-shadow: 0 0 0 rgba(0, 208, 132, 0.7); animation: pulse 2s infinite;
         }
         .pulse-marker::after {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: rgba(0, 208, 132, 0.4);
-            animation: pulse-ring 2s infinite;
+            content: ''; position: absolute; width: 14px; height: 14px;
+            border-radius: 50%; background: rgba(0, 208, 132, 0.4); animation: pulse-ring 2s infinite;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 208, 132, 0.6); }
@@ -258,7 +156,6 @@
 </head>
 <body>
 <div class="container">
-    <!-- === MENU NAVIGASI === -->
     <div class="menu-container">
         <div class="menu-toggle" id="menuToggle"><span>☰</span> <span>MENU</span></div>
         <div class="menu-dropdown" id="menuDropdown">
@@ -267,7 +164,6 @@
             <a href="https://docs.google.com/spreadsheets/d/1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ/edit#gid=409788786" target="_blank">📍 WAREHOUSE CLUSTER</a>
         </div>
     </div>
-    <!-- === HEADER — JUDUL DI TENGAH === -->
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
         <p class="sub">Sparepart Operation · Transaction Data · Asset Label Monitoring</p>
@@ -282,32 +178,18 @@
         <div class="card"><h3>JENIS PART</h3><div class="num" id="typePart">—</div></div>
         <div class="card"><h3>UNIT DI STOCK</h3><div class="num" id="inStock">—</div></div>
     </div>
-
     <div class="filter-section">
         <div class="filter-header">
-            <div class="filter-group">
-                <label>SCOPE</label>
-                <select id="filterScope"><option value="">Semua Scope</option></select>
-            </div>
-            <div class="filter-group">
-                <label>MATERIAL TYPE</label>
-                <select id="filterMaterialType"><option value="">Semua Type</option></select>
-            </div>
-            <div class="filter-group">
-                <label>BRAND</label>
-                <select id="filterBrand"><option value="">Semua Brand</option></select>
-            </div>
-            <div class="filter-group">
-                <label>PART</label>
-                <select id="filterPart"><option value="">Semua Part</option></select>
-            </div>
+            <div class="filter-group"><label>SCOPE</label><select id="filterScope"><option value="">Semua Scope</option></select></div>
+            <div class="filter-group"><label>MATERIAL TYPE</label><select id="filterMaterialType"><option value="">Semua Type</option></select></div>
+            <div class="filter-group"><label>BRAND</label><select id="filterBrand"><option value="">Semua Brand</option></select></div>
+            <div class="filter-group"><label>PART</label><select id="filterPart"><option value="">Semua Part</option></select></div>
             <div style="display:flex; gap:8px; flex-direction:column;">
                 <button class="btn-refresh" onclick="fetchData()">🔄 Refresh</button>
                 <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
             </div>
         </div>
     </div>
-
     <div class="part-detail" id="partDetail">
         <h4>📋 Detail Part Terpilih</h4>
         <div class="detail-grid">
@@ -322,518 +204,71 @@
             <div id="dWHList"></div>
         </div>
     </div>
-
     <div class="row-1">
-        <div class="chart-box">
-            <h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4>
-            <canvas id="chartStockPart"></canvas>
-        </div>
-        <div class="map-box">
-            <h4>🗺️ LOKASI WH CLUSTER</h4>
-            <div id="mapWH"></div>
-        </div>
+        <div class="chart-box"><h4>📦 SPAREPART STOCK AVAILABILITY <span>(Hanya Usage Status = Stock)</span></h4><canvas id="chartStockPart"></canvas></div>
+        <div class="map-box"><h4>🗺️ LOKASI WH CLUSTER</h4><div id="mapWH"></div></div>
     </div>
-
     <div class="row-2">
-        <div class="chart-box">
-            <h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4>
-            <canvas id="chartFaulty"></canvas>
-        </div>
-        <div class="chart-box">
-            <h4>📊 STOK PER SCOPE</h4>
-            <canvas id="chartScope"></canvas>
-        </div>
+        <div class="chart-box"><h4>🔧 UNFULFILLED SPAREPART REQUESTS <span>(Usage=Replacement + Status=Open)</span></h4><canvas id="chartFaulty"></canvas></div>
+        <div class="chart-box"><h4>📊 STOK PER SCOPE</h4><canvas id="chartScope"></canvas></div>
     </div>
-
     <div class="row-3">
-        <div class="chart-box">
-            <h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4>
-            <canvas id="chartFaultyRate"></canvas>
-        </div>
-        <div class="chart-box">
-            <h4>🏷️ STATUS LABEL BMN PER KABUPATEN <span>(Total vs Terpasang vs Belum Terpasang)</span></h4>
-            <canvas id="chartBMN"></canvas>
-        </div>
+        <div class="chart-box"><h4>⚠️ FAULTY RATE SPAREPART <span>(Usage=Replacement Faulty/Force Majure + Status=Open/Close)</span></h4><canvas id="chartFaultyRate"></canvas></div>
+        <div class="chart-box"><h4>🏷️ STATUS LABEL BMN PER KABUPATEN <span>(Total vs Terpasang vs Belum Terpasang)</span></h4><canvas id="chartBMN"></canvas></div>
     </div>
-
 </div>
-
 <script>
-document.getElementById('menuToggle').onclick = e => {
-    e.stopPropagation();
-    document.getElementById('menuDropdown').classList.toggle('show');
-};
+document.getElementById('menuToggle').onclick = e => { e.stopPropagation(); document.getElementById('menuDropdown').classList.toggle('show'); };
 document.onclick = () => document.getElementById('menuDropdown').classList.remove('show');
-
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
 const WH_CLUSTER_SHEET = "WH Cluster";
 const BMN_SHEET = "Site List Label BMN";
 const REFRESH_MINUTES = 3;
-
 const URL_MAIN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const URL_WH_CLUSTER = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(WH_CLUSTER_SHEET)}`;
 const URL_BMN = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(BMN_SHEET)}`;
-
 let allData = [];
 let chartStockPart, chartFaulty, chartScope, chartFaultyRate, chartBMN;
 let mapWH = null;
 let markers = [];
-
 Chart.register(ChartDataLabels);
-
-const PulseIcon = L.divIcon({
-    className: 'pulse-icon',
-    html: '<div class="pulse-marker"></div>',
-    iconSize: [14, 14],
-    iconAnchor: [7, 7]
-});
-
-function isUnfulfilled(row) {
-    const usage = (row["USAGE STATUS"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
-    return (usage === "Replacement Faulty" || usage === "Replacement Force Majure") && replStatus === "Open";
+const PulseIcon = L.divIcon({ className: 'pulse-icon', html: '<div class="pulse-marker"></div>', iconSize: [14,14], iconAnchor: [7,7] });
+function isUnfulfilled(r) {
+    const u = (r["USAGE STATUS"]||"").trim(), s = (r["STATUS REPLACEMENT"]||"").trim();
+    return (u==="Replacement Faulty"||u==="Replacement Force Majure") && s==="Open";
 }
-
-function isFaultyRate(row) {
-    const usage = (row["USAGE STATUS"] || "").trim();
-    const replStatus = (row["STATUS REPLACEMENT"] || "").trim();
-    return (usage === "Replacement Faulty" || usage === "Replacement Force Majure") && (replStatus === "Open" || replStatus === "Close");
+function isFaultyRate(r) {
+    const u = (r["USAGE STATUS"]||"").trim(), s = (r["STATUS REPLACEMENT"]||"").trim();
+    return (u==="Replacement Faulty"||u==="Replacement Force Majure") && (s==="Open"||s==="Close");
 }
-
-function formatDateID(date) {
-    const d = date.getDate();
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    const h = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const s = String(date.getSeconds()).padStart(2, '0');
-    return `${d}/${m}/${y}, ${h}.${min}.${s}`;
+function formatDateID(d){
+    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}, ${String(d.getHours()).padStart(2,'0')}.${String(d.getMinutes()).padStart(2,'0')}.${String(d.getSeconds()).padStart(2,'0')}`;
 }
-
-async function fetchWHClusterData() {
-    try {
-        const res = await fetch(URL_WH_CLUSTER);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => (c.label || "").trim());
-        return json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => {
-                const val = cell?.v ?? "";
-                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
-            });
-            return obj;
-        }).filter(row => row["WH Name"]);
-    } catch (err) {
-        console.warn("Gagal ambil WH Cluster:", err);
-        return [];
-    }
-}
-
-async function fetchBMNData() {
-    try {
-        const res = await fetch(URL_BMN);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substr(47).slice(0, -2));
-        const cols = json.table.cols.map(c => (c.label || "").trim());
-        return json.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => {
-                const val = cell?.v ?? "";
-                obj[cols[i]] = typeof val === 'string' ? val.trim() : val;
-            });
-            return obj;
-        }).filter(row => row["KABUPATEN"] && row["KABUPATEN"] !== "Kab/Kota");
-    } catch (err) {
-        console.warn("Gagal ambil BMN:", err);
-        return [];
-    }
-}
-
-function drawBMNChart(bmnData) {
-    if (!bmnData || bmnData.length === 0) {
-        console.warn("⚠️ Data BMN kosong atau belum tersedia");
-        return;
-    }
-    const labels = bmnData.map(r => r["KABUPATEN"] || "-");
-    const totalValues = bmnData.map(r => Number(r["TOTAL LOKASI"]) || 0);
-    const terpasangValues = bmnData.map(r => Number(r["STATUS LABEL BMN"]) || 0);
-    const belumValues = bmnData.map(r => Number(r["REMAINING"]) || 0);
-
-    if (chartBMN) chartBMN.destroy();
-    chartBMN = new Chart(document.getElementById("chartBMN"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-                { label: "Total Lokasi", data: totalValues, backgroundColor: "rgba(0, 212, 255, 0.65)", borderRadius: 4 },
-                { label: "Terpasang Label BMN", data: terpasangValues, backgroundColor: "rgba(0, 208, 132, 0.75)", borderRadius: 4 },
-                { label: "Belum Terpasang", data: belumValues, backgroundColor: "rgba(255, 82, 82, 0.85)", borderRadius: 4 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 10, bottom: 10 } },
-            plugins: {
-                legend: { display: true, position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#00d4ff",
-                    bodyColor: "#fff",
-                    borderColor: "#00d084",
-                    borderWidth: 1,
-                    callbacks: {
-                        label: ctx => {
-                            const idx = ctx.dataIndex;
-                            return [
-                                `Total: ${totalValues[idx]}`,
-                                `Terpasang: ${terpasangValues[idx]}`,
-                                `Belum: ${belumValues[idx]}`
-                            ];
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { color: "#8892a6", font: { size: 11 } }, grid: { color: "rgba(44, 52, 75, 0.4)" } },
-                x: { ticks: { color: "#8892a6", maxRotation: 60, font: { size: 10 } }, grid: { display: false } }
-            }
-        }
-    });
-}
-
-function initOrUpdateMap(whList) {
-    if (!mapWH) {
-        mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '' }).addTo(mapWH);
-    } else {
-        markers.forEach(m => mapWH.removeLayer(m));
-        markers = [];
-    }
-    const validCoords = [];
-    whList.forEach(wh => {
-        const lat = parseFloat(wh["Latt"]);
-        const lng = parseFloat(wh["Long"]);
-        const name = wh["WH Name"] || "WH";
-        const kab = wh["Kabupaten"] || "-";
-        const addr = wh["Alamat"] || "-";
-        const pic = wh["PIC"] || "-";
-        const hp = wh["Kontak"] || "-";
-        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-            validCoords.push([lat, lng]);
-            const marker = L.marker([lat, lng], { icon: PulseIcon }).addTo(mapWH);
-            marker.bindPopup(`<strong>${name}</strong><br>${kab}<br><small>${addr}</small><hr style="margin:4px 0; border:none; border-top:1px solid #eee;">PIC: ${pic}<br>Kontak: ${hp}`);
-            markers.push(marker);
-        }
-    });
-    if (validCoords.length > 0) mapWH.fitBounds(validCoords, { padding: [15, 15] });
-}
-
-async function fetchData() {
-    try {
-        document.getElementById("refreshInfo").textContent = `⏳ Mengambil data...`;
-        const whData = await fetchWHClusterData();
-        document.getElementById("whCluster").textContent = whData.length;
-        initOrUpdateMap(whData);
-        const bmnData = await fetchBMNData();
-        drawBMNChart(bmnData);
-
-        const resMain = await fetch(URL_MAIN);
-        const txtMain = await resMain.text();
-        const jsonMain = JSON.parse(txtMain.substr(47).slice(0, -2));
-        const cols = [
-            "REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE",
-            "MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION",
-            "PART NUMBER","SN","QTY","UOM","REQUEST STATUS",
-            "ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME",
-            "INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME",
-            "TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT",
-            "COVERAGE TYPE","CLAIM STATUS","CLAIM REPORT DATE","DISPOSITION METHODE","DISPOSITION DATE",
-            "DEFECTIVE POSITION ID","DEFECTIVE POSITION NAME","HISTORY TRACKING REMARK"
-        ];
-        allData = jsonMain.table.rows.map(r => {
-            let obj = {};
-            r.c.forEach((cell, i) => { obj[cols[i]] = cell?.v ?? ""; });
-            return obj;
-        });
-        updateDashboard(allData);
-        const now = new Date();
-        document.getElementById("refreshInfo").textContent = 
-            `✅ Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`;
-    } catch (err) {
-        console.error(err);
-        document.getElementById("refreshInfo").innerHTML = 
-            `❌ Gagal ambil data. Pastikan Sheet sudah di-set publik & nama Sheet benar!<br>Error: ${err.message}`;
-    }
-}
-
-function getFilteredData() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    const fPart = document.getElementById("filterPart").value;
-    return allData.filter(r => {
-        return (!fScope || (r["SCOPE"] || "").trim() === fScope) &&
-               (!fMaterial || (r["MATERIAL TYPE"] || "").trim() === fMaterial) &&
-               (!fBrand || (r["BRAND"] || "").trim() === fBrand) &&
-               (!fPart || (r["PART"] || "").trim() === fPart);
-    });
-}
-
-function fillSelect(id, arr) {
-    const sel = document.getElementById(id);
-    const keep = sel.value;
-    const exclude = {
-        "filterScope": ["SCOPE"], "filterMaterialType": ["MATERIAL TYPE"],
-        "filterBrand": ["BRAND"], "filterPart": ["PART"]
-    };
-    const filteredArr = arr.filter(v => !exclude[id]?.includes(v));
-    sel.innerHTML = `<option value="">Semua</option>` + filteredArr.map(v => `<option value="${v}">${v}</option>`).join("");
-    sel.value = keep;
-}
-
-function updateDashboard(data) {
-    const total = data.length;
-    const stockRows = data.filter(r => (r["USAGE STATUS"] || "").toString().trim().toLowerCase() === "stock");
-    const inStock = stockRows.length;
-    const totalStock = stockRows.reduce((sum, r) => sum + (Number(r["QTY"]) || 0), 0);
-    const unfulfilledData = data.filter(r => isUnfulfilled(r));
-    const needReplaceCount = unfulfilledData.length;
-    const unikPart = new Set(data.map(r => (r["PART"] || "").trim()).filter(v => v)).size;
-
-    document.getElementById("totalUnit").textContent = total;
-    document.getElementById("inStock").textContent = inStock;
-    document.getElementById("totalStock").textContent = totalStock;
-    document.getElementById("needReplace").textContent = needReplaceCount;
-    document.getElementById("typePart").textContent = unikPart;
-
-    fillSelect("filterScope", [...new Set(data.map(r => (r["SCOPE"] || "").trim()).filter(v => v))].sort());
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered);
-    drawUnfulfilledChart(filtered);
-    drawStockPerScopeChart(filtered);
-    drawFaultyRateChart(filtered);
-}
-
-function syncFilterMaterialType() {
-    const fScope = document.getElementById("filterScope").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    fillSelect("filterMaterialType", [...new Set(filtered.map(r => (r["MATERIAL TYPE"] || "").trim()).filter(v => v))].sort());
-}
-
-function syncFilterBrand() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
-    fillSelect("filterBrand", [...new Set(filtered.map(r => (r["BRAND"] || "").trim()).filter(v => v))].sort());
-}
-
-function syncFilterPart() {
-    const fScope = document.getElementById("filterScope").value;
-    const fMaterial = document.getElementById("filterMaterialType").value;
-    const fBrand = document.getElementById("filterBrand").value;
-    let filtered = allData;
-    if (fScope) filtered = filtered.filter(r => (r["SCOPE"] || "").trim() === fScope);
-    if (fMaterial) filtered = filtered.filter(r => (r["MATERIAL TYPE"] || "").trim() === fMaterial);
-    if (fBrand) filtered = filtered.filter(r => (r["BRAND"] || "").trim() === fBrand);
-    fillSelect("filterPart", [...new Set(filtered.map(r => (r["PART"] || "").trim()).filter(v => v))].sort());
-}
-
-function updatePartDetail() {
-    const fPart = document.getElementById("filterPart").value;
-    const detailBox = document.getElementById("partDetail");
-    if (!fPart) { detailBox.classList.remove("show"); return; }
-    const partData = allData.filter(r => (r["PART"] || "").trim() === fPart);
-    if (partData.length === 0) { detailBox.classList.remove("show"); return; }
-    const info = partData[0];
-    const desc = (info["DESCRIPTION"] || "-").trim();
-    const brand = (info["BRAND"] || "-").trim();
-    const partNo = (info["PART NUMBER"] || "-").trim();
-    const stockData = partData.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const totalQty = stockData.reduce((s, r) => s + (Number(r["QTY"]) || 0), 0);
-    const whMap = {};
-    stockData.forEach(r => {
-        const loc = (r["CURRENT SITE NAME"] || r["ALOCATION NAME"] || "Tidak Diketahui").trim();
-        whMap[loc] = (whMap[loc] || 0) + (Number(r["QTY"]) || 0);
-    });
-    const whListHtml = Object.entries(whMap)
-        .map(([loc, qty]) => `<div class="wh-item">📍 ${loc} : <strong>${qty}</strong> unit</div>`)
-        .join("");
-    document.getElementById("dPart").textContent = fPart;
-    document.getElementById("dDesc").textContent = desc;
-    document.getElementById("dBrand").textContent = brand;
-    document.getElementById("dPartNo").textContent = partNo;
-    document.getElementById("dStock").textContent = totalQty + " unit";
-    document.getElementById("dWHList").innerHTML = whListHtml || "<div class='wh-item'>— Tidak ada stok</div>";
-    detailBox.classList.add("show");
-}
-
-function drawStockPartChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const partQty = {};
-    stockData.forEach(r => {
-        const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
-    });
-    const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
-    const labels = sorted.map(i => i[0]);
-    const values = sorted.map(i => i[1]);
-    const maxValue = Math.max(...values) || 1;
-    const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
-    const greenColors = values.map(v => `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`);
-
-    if (chartStockPart) chartStockPart.destroy();
-    chartStockPart = new Chart(document.getElementById("chartStockPart"), {
-        type: "bar",
-        data: { labels: labels, datasets: [{ label: "Stock QTY", data: scaledValues, backgroundColor: greenColors, borderRadius: 4 }] },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 5, bottom: 45 } },
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: "rgba(26, 31, 46, 0.95)", titleColor: "#00d4ff", bodyColor: "#ffffff", borderColor: "#00d084", borderWidth: 1, padding: 10, displayColors: false, callbacks: { label: ctx => `Stock QTY: ${values[ctx.dataIndex]}` } } },
-            scales: { y: { display: false, beginAtZero: true, max: 280 }, x: { ticks: { color: "#8892a6", maxRotation: 60, minRotation: 45, font: { size: 8 } }, grid: { display: false } } }
-        }
-    });
-}
-
-function drawUnfulfilledChart(data) {
-    const unfulfilledData = data.filter(r => isUnfulfilled(r));
-    const grouped = {};
-    unfulfilledData.forEach(r => {
-        const scope = (r["SCOPE"] || "").trim();
-        const matType = (r["MATERIAL TYPE"] || "").trim();
-        const brand = (r["BRAND"] || "").trim();
-        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        const qty = Number(r["QTY"]) || 0;
-        const key = `${scope}||${matType}||${brand}||${part}`;
-        if (!grouped[key]) grouped[key] = { scope, matType, brand, part, totalQty: 0 };
-        grouped[key].totalQty += qty;
-    });
-    const sorted = Object.values(grouped).sort((a, b) => {
-        if (a.scope !== b.scope) return a.scope.localeCompare(b.scope);
-        if (a.matType !== b.matType) return a.matType.localeCompare(b.matType);
-        if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
-        return a.part.localeCompare(b.part);
-    });
-    const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
-    const values = sorted.length ? sorted.map(item => item.totalQty) : [0];
-    const colors = ["#ffc107", "#ff5252", "#ff9800", "#ff7043", "#8d6e63", "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50"];
-    const barColors = labels.map((_, i) => colors[i % colors.length]);
-
-    if (chartFaulty) chartFaulty.destroy();
-    chartFaulty = new Chart(document.getElementById("chartFaulty"), {
-        type: "bar",
-        data: { labels: labels, datasets: [{ label: "Unfulfilled QTY", data: values, backgroundColor: barColors, borderRadius: 4 }] },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: "rgba(26, 31, 46, 0.95)", titleColor: "#fff", bodyColor: "#fff", borderColor: "#ffc107", borderWidth: 1, callbacks: { label: ctx => { const idx = ctx.dataIndex; const item = sorted[idx]; if (!item) return `QTY: ${ctx.raw}`; return [`QTY: ${ctx.raw}`, `Scope: ${item.scope || "-"}`, `Material: ${item.matType || "-"}`, `Brand: ${item.brand || "-"}`]; } } } },
-            scales: { y: { beginAtZero: true, ticks: { color: "#8892a6", font: { size: 10 } }, grid: { color: "rgba(44, 52, 75, 0.3)" } }, x: { ticks: { color: "#8892a6", maxRotation: 60, font: { size: 9 } }, grid: { display: false } } }
-        }
-    });
-}
-
-function drawFaultyRateChart(data) {
-    const faultyData = data.filter(r => isFaultyRate(r));
-    const grouped = {};
-    faultyData.forEach(r => {
-        const part = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
-        const usage = (r["USAGE STATUS"] || "").trim();
-        const qty = Number(r["QTY"]) || 0;
-        if (!grouped[part]) grouped[part] = { part, totalQty: 0, faultyQty: 0, forceMajureQty: 0 };
-        grouped[part].totalQty += qty;
-        if (usage === "Replacement Faulty") grouped[part].faultyQty += qty;
-        if (usage === "Replacement Force Majure") grouped[part].forceMajureQty += qty;
-    });
-    const sorted = Object.values(grouped).sort((a, b) => b.totalQty - a.totalQty);
-    const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
-    const faultyValues = sorted.length ? sorted.map(item => item.faultyQty) : [0];
-    const forceValues = sorted.length ? sorted.map(item => item.forceMajureQty) : [0];
-    const totalValues = sorted.length ? sorted.map(item => item.totalQty) : [0];
-
-    if (chartFaultyRate) chartFaultyRate.destroy();
-    chartFaultyRate = new Chart(document.getElementById("chartFaultyRate"), {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-                { label: "Replacement Faulty", data: faultyValues, backgroundColor: "#ff5252", borderRadius: 3 },
-                { label: "Replacement Force Majure", data: forceValues, backgroundColor: "#ff9f29", borderRadius: 3 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { top: 30, bottom: 10 } },
-            plugins: {
-                legend: { display: true, position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } },
-                tooltip: {
-                    backgroundColor: "rgba(26, 31, 46, 0.95)",
-                    titleColor: "#00d4ff",
-                    bodyColor: "#fff",
-                    borderColor: "#ff5252",
-                    borderWidth: 1,
-                    callbacks: {
-                        label: ctx => {
-                            const idx = ctx.dataIndex;
-                            return [
-                                `Total: ${totalValues[idx]}`,
-                                `Replacement Faulty: ${faultyValues[idx]}`,
-                                `Replacement Force Majure: ${forceValues[idx]}`
-                            ];
-                        }
-                    }
-                },
-                datalabels: {
-                    anchor: "end",
-                    align: "top",
-                    color: "#ffffff",
-                    font: { size: 11, weight: "bold" },
-                    formatter: (value, ctx) => totalValues[ctx.dataIndex] || ""
-                }
-            },
-            scales: { 
-                y: { beginAtZero: true, ticks: { color: "#8892a6", font: { size: 11 } }, grid: { color: "rgba(44, 52, 75, 0.4)" }, stacked: true }, 
-                x: { ticks: { color: "#8892a6", maxRotation: 65, font: { size: 7 } }, grid: { display: false }, stacked: true } 
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
-}
-
-function drawStockPerScopeChart(data) {
-    const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
-    const scopeQty = {};
-    stockData.forEach(r => {
-        const s = (r["SCOPE"] || "Others").trim() || "Others";
-        scopeQty[s] = (scopeQty[s] || 0) + (Number(r["QTY"]) || 0);
-    });
-    if (chartScope) chartScope.destroy();
-    chartScope = new Chart(document.getElementById("chartScope"), {
-        type: "doughnut",
-        data: { labels: Object.keys(scopeQty), datasets: [{ data: Object.values(scopeQty), backgroundColor: ["#00d4ff", "#00d084", "#ffc107", "#ff5252", "#a855f7", "#8892a6"], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 12 } } } }
-    });
-}
-
-function resetFilters() {
-    document.getElementById("filterScope").value = "";
-    document.getElementById("filterMaterialType").innerHTML = `<option value="">Semua Type</option>`;
-    document.getElementById("filterBrand").innerHTML = `<option value="">Semua Brand</option>`;
-    document.getElementById("filterPart").innerHTML = `<option value="">Semua Part</option>`;
-    document.getElementById("partDetail").classList.remove("show");
-    updateDashboard(allData);
-}
-
-document.getElementById("filterScope").addEventListener("change", updateView);
-document.getElementById("filterMaterialType").add
+async function fetchWHClusterData(){try{const r=await fetch(URL_WH_CLUSTER),t=await r.text(),j=JSON.parse(t.substr(47).slice(0,-2)),c=j.table.cols.map(x=>(x.label||"").trim());return j.table.rows.map(x=>{let o={};x.c.forEach((y,i)=>{o[c[i]]=typeof y?.v=="string"?y.v.trim():y?.v??""});return o}).filter(x=>x["WH Name"])}catch(e){console.warn("WH Cluster err",e);return[]}}
+async function fetchBMNData(){try{const r=await fetch(URL_BMN),t=await r.text(),j=JSON.parse(t.substr(47).slice(0,-2)),c=j.table.cols.map(x=>(x.label||"").trim());return j.table.rows.map(x=>{let o={};x.c.forEach((y,i)=>{o[c[i]]=typeof y?.v=="string"?y.v.trim():y?.v??""});return o}).filter(x=>x["KABUPATEN"]&&x["KABUPATEN"]!=="Kab/Kota")}catch(e){console.warn("BMN err",e);return[]}}
+function drawBMNChart(d){if(!d||!d.length)return;const l=d.map(x=>x["KABUPATEN"]||"-"),t=d.map(x=>Number(x["TOTAL LOKASI"])||0),p=d.map(x=>Number(x["STATUS LABEL BMN"])||0),b=d.map(x=>Number(x["REMAINING"])||0);if(chartBMN)chartBMN.destroy();chartBMN=new Chart(document.getElementById("chartBMN"),{type:"bar",data:{labels:l,datasets:[{label:"Total Lokasi",data:t,backgroundColor:"rgba(0,212,255,0.65)",borderRadius:4},{label:"Terpasang Label BMN",data:p,backgroundColor:"rgba(0,208,132,0.75)",borderRadius:4},{label:"Belum Terpasang",data:b,backgroundColor:"rgba(255,82,82,0.85)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#e6e6e6",font:{size:11}}},tooltip:{callbacks:{label:ctx=>[`Total: ${t[ctx.dataIndex]}`,`Terpasang: ${p[ctx.dataIndex]}`,`Belum: ${b[ctx.dataIndex]}`]}}},scales:{y:{ticks:{color:"#8892a6"},grid:{color:"rgba(44,52,75,0.4)"}},x:{ticks:{color:"#8892a6",font:{size:10}},grid:{display:false}}}}})}
+function initOrUpdateMap(w){if(!mapWH){mapWH=L.map('mapWH').setView([-2.5,118],5);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:''}).addTo(mapWH)}else{markers.forEach(m=>mapWH.removeLayer(m));markers=[]}w.forEach(x=>{const la=parseFloat(x["Latt"]),ln=parseFloat(x["Long"]);if(!isNaN(la)&&!isNaN(ln)){const m=L.marker([la,ln],{icon:PulseIcon}).addTo(mapWH);m.bindPopup(`<strong>${x["WH Name"]||"WH"}</strong><br>${x["Kabupaten"]||"-"}<br><small>${x["Alamat"]||"-"}</small>`);markers.push(m)}})}
+async function fetchData(){try{document.getElementById("refreshInfo").textContent="⏳ Mengambil data...";const wd=await fetchWHClusterData();document.getElementById("whCluster").textContent=wd.length;initOrUpdateMap(wd);const bd=await fetchBMNData();drawBMNChart(bd);const r=await fetch(URL_MAIN),t=await r.text(),j=JSON.parse(t.substr(47).slice(0,-2)),cols=["REQUEST DATE","ALOCATION ID","ALOCATION NAME","KABUPATEN","SCOPE","MATERIAL TYPE","BRAND","PART","RMA No. / PR No.","DESCRIPTION","PART NUMBER","SN","QTY","UOM","REQUEST STATUS","ASSET CONDITION","ORIGIN ID","ORIGIN NAME","DESTINATION ID","DESTINATION NAME","INBOUND DATE","INBOUND STATUS","USAGE STATUS","CURRENT SITE ID","CURRENT SITE NAME","TT BAKTI OSS","DEFECTIVE PART NUMBER","DEFECTIVE SN","INSTALLATION DATE","STATUS REPLACEMENT"];allData=j.table.rows.map(x=>{let o={};x.c.forEach((y,i)=>{o[cols[i]]=y?.v??""});return o});updateDashboard(allData);const now=new Date();document.getElementById("refreshInfo").textContent=`✅ Data diperbarui: ${formatDateID(now)} · Auto-refresh tiap ${REFRESH_MINUTES} menit`}catch(e){document.getElementById("refreshInfo").innerHTML=`❌ Gagal ambil data: ${e.message}`;console.error(e)}}
+function getFilteredData(){const s=document.getElementById("filterScope").value,m=document.getElementById("filterMaterialType").value,b=document.getElementById("filterBrand").value,p=document.getElementById("filterPart").value;return allData.filter(x=>(!s||(x["SCOPE"]||"").trim()===s)&&(!m||(x["MATERIAL TYPE"]||"").trim()===m)&&(!b||(x["BRAND"]||"").trim()===b)&&(!p||(x["PART"]||"").trim()===p))}
+function fillSelect(id,arr){const s=document.getElementById(id),k=s.value;s.innerHTML=`<option value="">Semua</option>`+arr.map(v=>`<option value="${v}">${v}</option>`).join("");s.value=k}
+function updateDashboard(d){const t=d.length,st=d.filter(x=>(x["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),is=st.length,ts=st.reduce((s,x)=>s+(Number(x["QTY"])||0),0),uf=d.filter(x=>isUnfulfilled(x)).length,up=new Set(d.map(x=>(x["PART"]||"").trim()).filter(v=>v)).size;document.getElementById("totalUnit").textContent=t;document.getElementById("inStock").textContent=is;document.getElementById("totalStock").textContent=ts;document.getElementById("needReplace").textContent=uf;document.getElementById("typePart").textContent=up;fillSelect("filterScope",[...new Set(d.map(x=>(x["SCOPE"]||"").trim()).filter(v=>v))].sort());syncFilterMaterialType();syncFilterBrand();syncFilterPart();updatePartDetail();const fd=getFilteredData();drawStockPartChart(fd);drawUnfulfilledChart(fd);drawStockPerScopeChart(fd);drawFaultyRateChart(fd)}
+function syncFilterMaterialType(){const s=document.getElementById("filterScope").value;let d=allData;if(s)d=d.filter(x=>(x["SCOPE"]||"").trim()===s);fillSelect("filterMaterialType",[...new Set(d.map(x=>(x["MATERIAL TYPE"]||"").trim()).filter(v=>v))].sort())}
+function syncFilterBrand(){const s=document.getElementById("filterScope").value,m=document.getElementById("filterMaterialType").value;let d=allData;if(s)d=d.filter(x=>(x["SCOPE"]||"").trim()===s);if(m)d=d.filter(x=>(x["MATERIAL TYPE"]||"").trim()===m);fillSelect("filterBrand",[...new Set(d.map(x=>(x["BRAND"]||"").trim()).filter(v=>v))].sort())}
+function syncFilterPart(){const s=document.getElementById("filterScope").value,m=document.getElementById("filterMaterialType").value,b=document.getElementById("filterBrand").value;let d=allData;if(s)d=d.filter(x=>(x["SCOPE"]||"").trim()===s);if(m)d=d.filter(x=>(x["MATERIAL TYPE"]||"").trim()===m);if(b)d=d.filter(x=>(x["BRAND"]||"").trim()===b);fillSelect("filterPart",[...new Set(d.map(x=>(x["PART"]||"").trim()).filter(v=>v))].sort())}
+function updatePartDetail(){const p=document.getElementById("filterPart").value,d=document.getElementById("partDetail");if(!p){d.classList.remove("show");return}const pd=allData.filter(x=>(x["PART"]||"").trim()===p);if(!pd.length){d.classList.remove("show");return}const i=pd[0],desc=(i["DESCRIPTION"]||"-").trim(),br=(i["BRAND"]||"-").trim(),pn=(i["PART NUMBER"]||"-").trim(),sd=pd.filter(x=>(x["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),tq=sd.reduce((s,x)=>s+(Number(x["QTY"])||0),0),wm={};sd.forEach(x=>{const l=(x["CURRENT SITE NAME"]||x["ALOCATION NAME"]||"Tidak Diketahui").trim();wm[l]=(wm[l]||0)+(Number(x["QTY"])||0)});const whl=Object.entries(wm).map(([l,q])=>`<div class="wh-item">📍 ${l} : <strong>${q}</strong> unit</div>`).join("")||"<div class='wh-item'>— Tidak ada stok</div>";document.getElementById("dPart").textContent=p;document.getElementById("dDesc").textContent=desc;document.getElementById("dBrand").textContent=br;document.getElementById("dPartNo").textContent=pn;document.getElementById("dStock").textContent=tq+" unit";document.getElementById("dWHList").innerHTML=whl;d.classList.add("show")}
+function drawStockPartChart(d){const sd=d.filter(x=>(x["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),pq={};sd.forEach(x=>{const p=(x["PART"]||"UNKNOWN").trim()||"UNKNOWN";pq[p]=(pq[p]||0)+(Number(x["QTY"])||0)});const srt=Object.entries(pq).sort((a,b)=>b[1]-a[1]),l=srt.map(x=>x[0]),v=srt.map(x=>x[1]),mx=Math.max(...v)||1,sv=v.map(x=>Math.max(1,(x/mx)*280)),bg=v.map(x=>`rgba(0,208,132,${0.45+((x/mx)*0.55)})`);if(chartStockPart)chartStockPart.destroy();chartStockPart=new Chart(document.getElementById("chartStockPart"),{type:"bar",data:{labels:l,datasets:[{label:"Stock QTY",data:sv,backgroundColor:bg,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Stock QTY: ${v[ctx.dataIndex]}`}}},scales:{y:{display:false,beginAtZero:true,max:280},x:{ticks:{color:"#8892a6",maxRotation:60,font:{size:8}},grid:{display:false}}}}})}
+function drawUnfulfilledChart(d){const uf=d.filter(x=>isUnfulfilled(x)),g={};uf.forEach(x=>{const sc=(x["SCOPE"]||"").trim(),mt=(x["MATERIAL TYPE"]||"").trim(),br=(x["BRAND"]||"").trim(),p=(x["PART"]||"UNKNOWN").trim()||"UNKNOWN",q=Number(x["QTY"])||0,k=`${sc}||${mt}||${br}||${p}`;if(!g[k])g[k]={sc,mt,br,part:p,qty:0};g[k].qty+=q});const srt=Object.values(g).sort((a,b)=>a.sc.localeCompare(b.sc)||a.mt.localeCompare(b.mt)||a.br.localeCompare(b.br)||a.part.localeCompare(b.part)),l=srt.length?srt.map(x=>x.part):["No Data"],v=srt.length?srt.map(x=>x.qty):[0],clrs=["#ffc107","#ff5252","#ff9800","#ff7043","#8d6e63","#f44336","#e91e63","#9c27b0","#673ab7","#3f51b5","#2196f3","#03a9f4","#00bcd4","#009688","#4caf50"],bg=l.map((_,i)=>clrs[i%clrs.length]);if(chartFaulty)chartFaulty.destroy();chartFaulty=new Chart(document.getElementById("chartFaulty"),{type:"bar",data:{labels:l,datasets:[{label:"Unfulfilled QTY",data:v,backgroundColor:bg,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex,itm=srt[i];return itm?[`QTY: ${ctx.raw}`,`Scope: ${itm.sc||"-"}`,`Material: ${itm.mt||"-"}`,`Brand: ${itm.br||"-"}`]:`QTY: ${ctx.raw}`}}}},scales:{y:{beginAtZero:true,ticks:{color:"#8892a6",font:{size:10}},grid:{color:"rgba(44,52,75,0.3)"}},x:{ticks:{color:"#8892a6",maxRotation:60,font:{size:9}},grid:{display:false}}}}})}
+function drawFaultyRateChart(d){const fd=d.filter(x=>isFaultyRate(x)),g={};fd.forEach(x=>{const p=(x["PART"]||"UNKNOWN").trim()||"UNKNOWN",u=(x["USAGE STATUS"]||"").trim(),q=Number(x["QTY"])||0;if(!g[p])g[p]={part:p,total:0,flt:0,fmj:0};g[p].total+=q;if(u==="Replacement Faulty")g[p].flt+=q;if(u==="Replacement Force Majure")g[p].fmj+=q});const srt=Object.values(g).sort((a,b)=>b.total-a.total),l=srt.length?srt.map(x=>x.part):["No Data"],fv=srt.length?srt.map(x=>x.flt):[0],fj=srt.length?srt.map(x=>x.fmj):[0],tt=srt.length?srt.map(x=>x.total):[0];if(chartFaultyRate)chartFaultyRate.destroy();chartFaultyRate=new Chart(document.getElementById("chartFaultyRate"),{type:"bar",data:{labels:l,datasets:[{label:"Replacement Faulty",data:fv,backgroundColor:"#ff5252",borderRadius:3},{label:"Replacement Force Majure",data:fj,backgroundColor:"#ff9f29",borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30}},plugins:{legend:{position:"top",labels:{color:"#e6e6e6",font:{size:11}}},tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex;return[`Total: ${tt[i]}`,`Replacement Faulty: ${fv[i]}`,`Replacement Force Majure: ${fj[i]}`]}}}},datalabels:{anchor:"end",align:"top",color:"#fff",font:{size:11,weight:"bold"},formatter:(v,ctx)=>tt[ctx.dataIndex]||""}},scales:{y:{stacked:true,beginAtZero:true,ticks:{color:"#8892a6"},grid:{color:"rgba(44,52,75,0.4)"}},x:{stacked:true,ticks:{color:"#8892a6",maxRotation:65,font:{size:7}},grid:{display:false}}}},plugins:[ChartDataLabels]})}
+function drawStockPerScopeChart(d){const sd=d.filter(x=>(x["USAGE STATUS"]||"").trim().toLowerCase()==="stock"),sq={};sd.forEach(x=>{const s=(x["SCOPE"]||"Others").trim()||"Others";sq[s]=(sq[s]||0)+(Number(x["QTY"])||0)});if(chartScope)chartScope.destroy();chartScope=new Chart(document.getElementById("chartScope"),{type:"doughnut",data:{labels:Object.keys(sq),datasets:[{data:Object.values(sq),backgroundColor:["#00d4ff","#00d084","#ffc107","#ff5252","#a855f7","#8892a6"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{color:"#e6e6e6",font:{size:11}}}}}})}
+function resetFilters(){document.getElementById("filterScope").value="";document.getElementById("filterMaterialType").innerHTML=`<option value="">Semua Type</option>`;document.getElementById("filterBrand").innerHTML=`<option value="">Semua Brand</option>`;document.getElementById("filterPart").innerHTML=`<option value="">Semua Part</option>`;document.getElementById("partDetail").classList.remove("show");updateDashboard(allData)}
+function updateView(){syncFilterMaterialType();syncFilterBrand();syncFilterPart();updatePartDetail();const fd=getFilteredData();drawStockPartChart(fd);drawUnfulfilledChart(fd);drawStockPerScopeChart(fd);drawFaultyRateChart(fd)}
+document.getElementById("filterScope").addEventListener("change",updateView);
+document.getElementById("filterMaterialType").addEventListener("change",syncFilterBrand);
+document.getElementById("filterBrand").addEventListener("change",syncFilterPart);
+document.getElementById("filterPart").addEventListener("change",updatePartDetail);
+fetchData();
+setInterval(fetchData,REFRESH_MINUTES*60*1000);
+</script>
+</body>
+</html>
