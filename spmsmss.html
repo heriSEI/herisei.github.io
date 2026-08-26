@@ -37,7 +37,6 @@
             background-repeat: no-repeat;
         }
         .container { max-width: 1400px; margin: 0 auto; position: relative; }
-
         /* === MENU NAVIGASI === */
         .menu-container {
             position: absolute;
@@ -86,7 +85,6 @@
         }
         .menu-dropdown a:last-child { border-bottom: none; }
         .menu-dropdown a:hover { background: var(--bg-card-2); color: var(--accent); }
-
         /* === HEADER — JUDUL & SUBJUDUL DI TENGAH === */
         header { 
             margin-bottom: 24px; 
@@ -99,7 +97,6 @@
         .sub { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
         .refresh-info { font-size: 12px; color: var(--muted); margin-top: 6px; }
         .credit { color: #6b7280; font-size: 12px; margin-top: 4px; font-style: italic; }
-
         .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         @media (max-width: 1200px) { .cards { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
@@ -119,7 +116,6 @@
         .card:nth-child(4) .num { color: var(--yellow); }
         .card:nth-child(5) .num { color: var(--purple); }
         .card:nth-child(6) .num { color: var(--accent); }
-
         .filter-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -157,7 +153,6 @@
         .btn-refresh { background: var(--accent); color: #000; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 212, 255, 0.25); }
         .btn-reset { background: var(--red); color: #fff; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 82, 82, 0.25); }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
-
         .part-detail {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -180,7 +175,6 @@
         .detail-item span:last-child { color: var(--text); font-weight: 500; margin-left: 8px; }
         .wh-list { margin-top: 10px; }
         .wh-item { padding: 6px 10px; background: var(--bg-card-2); border-radius: 4px; margin: 4px 0; font-size: 13px; }
-
         .row-1 { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; margin-bottom: 18px; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
         .row-3 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
@@ -205,7 +199,6 @@
         }
         .chart-box h4 span { font-size: 11px; color: var(--muted); font-weight: normal; }
         canvas { max-height: 280px !important; }
-
         .map-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -234,7 +227,6 @@
             color: #666 !important;
         }
         .leaflet-control-attribution a { color: #888 !important; }
-
         .pulse-marker {
             width: 14px;
             height: 14px;
@@ -266,7 +258,6 @@
 </head>
 <body>
 <div class="container">
-
     <!-- === MENU NAVIGASI === -->
     <div class="menu-container">
         <div class="menu-toggle" id="menuToggle"><span>☰</span> <span>MENU</span></div>
@@ -276,7 +267,6 @@
             <a href="https://docs.google.com/spreadsheets/d/1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ/edit#gid=409788786" target="_blank">📍 WAREHOUSE CLUSTER</a>
         </div>
     </div>
-
     <!-- === HEADER — JUDUL DI TENGAH === -->
     <header>
         <h1>📊 DASHBOARD SPAREPARTS - BAKTI MSS 2026</h1>
@@ -284,7 +274,6 @@
         <p class="refresh-info" id="refreshInfo">Data diperbarui: — · Auto-refresh tiap 3 menit</p>
         <p class="credit">Designed & Developed with Precision by — Elmaz</p>
     </header>
-
     <div class="cards">
         <div class="card"><h3>TOTAL ITEM</h3><div class="num" id="totalUnit">—</div></div>
         <div class="card"><h3>JUMLAH WH CLUSTER</h3><div class="num" id="whCluster">—</div></div>
@@ -390,6 +379,8 @@ let allData = [];
 let chartStockPart, chartFaulty, chartScope, chartFaultyRate, chartBMN;
 let mapWH = null;
 let markers = [];
+
+Chart.register(ChartDataLabels);
 
 const PulseIcon = L.divIcon({
     className: 'pulse-icon',
@@ -768,6 +759,7 @@ function drawFaultyRateChart(data) {
     const labels = sorted.length ? sorted.map(item => item.part) : ["No Data"];
     const faultyValues = sorted.length ? sorted.map(item => item.faultyQty) : [0];
     const forceValues = sorted.length ? sorted.map(item => item.forceMajureQty) : [0];
+    const totalValues = sorted.length ? sorted.map(item => item.totalQty) : [0];
 
     if (chartFaultyRate) chartFaultyRate.destroy();
     chartFaultyRate = new Chart(document.getElementById("chartFaultyRate"), {
@@ -782,13 +774,40 @@ function drawFaultyRateChart(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 10, bottom: 10 } },
-            plugins: { legend: { display: true, position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } } },
+            layout: { padding: { top: 30, bottom: 10 } },
+            plugins: {
+                legend: { display: true, position: "top", labels: { color: "#e6e6e6", font: { size: 11 }, boxWidth: 15 } },
+                tooltip: {
+                    backgroundColor: "rgba(26, 31, 46, 0.95)",
+                    titleColor: "#00d4ff",
+                    bodyColor: "#fff",
+                    borderColor: "#ff5252",
+                    borderWidth: 1,
+                    callbacks: {
+                        label: ctx => {
+                            const idx = ctx.dataIndex;
+                            return [
+                                `Total: ${totalValues[idx]}`,
+                                `Replacement Faulty: ${faultyValues[idx]}`,
+                                `Replacement Force Majure: ${forceValues[idx]}`
+                            ];
+                        }
+                    }
+                },
+                datalabels: {
+                    anchor: "end",
+                    align: "top",
+                    color: "#ffffff",
+                    font: { size: 11, weight: "bold" },
+                    formatter: (value, ctx) => totalValues[ctx.dataIndex] || ""
+                }
+            },
             scales: { 
                 y: { beginAtZero: true, ticks: { color: "#8892a6", font: { size: 11 } }, grid: { color: "rgba(44, 52, 75, 0.4)" }, stacked: true }, 
                 x: { ticks: { color: "#8892a6", maxRotation: 65, font: { size: 7 } }, grid: { display: false }, stacked: true } 
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
@@ -817,24 +836,4 @@ function resetFilters() {
 }
 
 document.getElementById("filterScope").addEventListener("change", updateView);
-document.getElementById("filterMaterialType").addEventListener("change", syncFilterBrand);
-document.getElementById("filterBrand").addEventListener("change", syncFilterPart);
-document.getElementById("filterPart").addEventListener("change", updateView);
-
-function updateView() {
-    syncFilterMaterialType();
-    syncFilterBrand();
-    syncFilterPart();
-    updatePartDetail();
-    const filtered = getFilteredData();
-    drawStockPartChart(filtered);
-    drawUnfulfilledChart(filtered);
-    drawFaultyRateChart(filtered);
-    drawStockPerScopeChart(filtered);
-}
-
-fetchData();
-setInterval(fetchData, REFRESH_MINUTES * 60 * 1000);
-</script>
-</body>
-</html>
+document.getElementById("filterMaterialType").add
