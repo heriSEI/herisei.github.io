@@ -687,31 +687,72 @@ function updatePartDetail() {
     detailBox.classList.add("show");
 }
 
-function drawStockPartChart(data) {
+    function drawStockPartChart(data) {
     const stockData = data.filter(r => (r["USAGE STATUS"] || "").trim().toLowerCase() === "stock");
     const partQty = {};
     stockData.forEach(r => {
         const partName = (r["PART"] || "UNKNOWN").trim() || "UNKNOWN";
         partQty[partName] = (partQty[partName] || 0) + (Number(r["QTY"]) || 0);
     });
-    const sorted = Object.entries(partQty).sort((a, b) => b[1] - a[1]);
+    
+    // ✅ DIURUTKAN BERDASARKAN NAMA PART (sesuai urutan asli/scope), BUKAN berdasarkan jumlah
+    const sorted = Object.entries(partQty).sort((a, b) => a[0].localeCompare(b[0]));
+    
     const labels = sorted.map(i => i[0]);
     const values = sorted.map(i => i[1]);
     const maxValue = Math.max(...values) || 1;
     const scaledValues = values.map(v => Math.max(1, (v / maxValue) * 280));
     const greenColors = values.map(v => `rgba(0, 208, 132, ${0.45 + ((v / maxValue) * 0.55)})`);
-
+    
     if (chartStockPart) chartStockPart.destroy();
     chartStockPart = new Chart(document.getElementById("chartStockPart"), {
         type: "bar",
-        data: { labels: labels, datasets: [{ label: "Stock QTY", data: scaledValues, backgroundColor: greenColors, borderRadius: 4 }] },
+        data: { 
+            labels: labels, 
+            datasets: [{ 
+                label: "Stock QTY", 
+                data: scaledValues, 
+                backgroundColor: greenColors, 
+                borderRadius: 4 
+            }] 
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             layout: { padding: { top: 5, bottom: 45 } },
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: "rgba(26, 31, 46, 0.95)", titleColor: "#00d4ff", bodyColor: "#ffffff", borderColor: "#00d084", borderWidth: 1, padding: 10, displayColors: false, callbacks: { label: ctx => `Stock QTY: ${values[ctx.dataIndex]}` } } },
-            scales: { y: { display: false, beginAtZero: true, max: 280 }, x: { ticks: { color: "#8892a6", maxRotation: 60, minRotation: 45, font: { size: 8 } }, grid: { display: false } } }
-        }
+            plugins: { 
+                legend: { display: false }, 
+                tooltip: { 
+                    backgroundColor: "rgba(26, 31, 46, 0.95)", 
+                    titleColor: "#00d4ff", 
+                    bodyColor: "#ffffff", 
+                    borderColor: "#00d084", 
+                    borderWidth: 1, 
+                    padding: 10, 
+                    displayColors: false, 
+                    callbacks: { label: ctx => `Stock QTY: ${values[ctx.dataIndex]}` } 
+                },
+                // ✅ ANGKA MUNCUL DI DALAM/ATAS BATANG
+                datalabels: {
+                    anchor: "end",
+                    align: "top",
+                    color: "#ffffff",
+                    font: { size: 9, weight: "bold" },
+                    formatter: function(value, ctx) {
+                        const realVal = values[ctx.dataIndex];
+                        return realVal > 0 ? realVal : ""; // tampilkan angka asli, bukan skala
+                    }
+                }
+            },
+            scales: { 
+                y: { display: false, beginAtZero: true, max: 280 }, 
+                x: { 
+                    ticks: { color: "#8892a6", maxRotation: 60, minRotation: 45, font: { size: 8 } }, 
+                    grid: { display: false } 
+                } 
+            }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
