@@ -706,20 +706,16 @@ function updatePartDetail() {
     const maxReal = Math.max(...realValues);
     const minReal = Math.min(...realValues.filter(v => v > 0));
 
-    // Skala agar batang tidak terlalu jauh selisihnya
+        // Skala agar batang tidak terlalu kecil, tapi tetap proporsional
     const scaledValues = realValues.map(v => {
         if (v === 0) return 0;
+        return Math.sqrt(v) * 4.5;
+    });
 
-        // Bisa pilih salah satu metode scaling di bawah:
-
-        // Opsi 1: Log scale (paling bagus untuk data yang ada nilai sangat besar)
-        return Math.log10(v) * 10;
-
-        // Opsi 2: Akar kuadrat (lebih lembut dari log)
-        // return Math.sqrt(v) * 3;
-
-        // Opsi 3: Proporsional terbatas
-        // return (v / maxReal) * 100;
+    // Semua batang warna hijau sama, tidak ada yang beda
+    const greenColors = realValues.map(v => {
+        if (v === 0) return "rgba(0, 208, 132, 0.3)";
+        return "rgba(0, 208, 132, 0.85)";
     });
 
     const greenColors = realValues.map(v => {
@@ -760,18 +756,17 @@ function updatePartDetail() {
                         label: ctx => `Stock QTY: ${realValues[ctx.dataIndex]}`
                     }
                 },
-                datalabels: {
-                    anchor: "center",
-                    align: "center",
-                    rotation: -90,
+                    datalabels: {
+                    anchor: "end",
+                    align: "top",
                     color: "#ffffff",
                     font: { size: 9, weight: "bold" },
+                    rotation: 0,
                     formatter: function (value, ctx) {
                         const realVal = realValues[ctx.dataIndex];
                         return realVal > 0 ? realVal : "";
                     }
-                }
-            },
+                },
             scales: {
                 y: {
                     display: false,
