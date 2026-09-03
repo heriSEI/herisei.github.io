@@ -24,11 +24,30 @@
             --muted: #8892a6;
             --border: rgba(44, 52, 75, 0.5);
         }
+        
+        /* === OTOMATIS MENYESUAIKAN TEMA PERANGKAT === */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f0f4f8;
+                --bg-card: rgba(255, 255, 255, 0.9);
+                --bg-card-2: rgba(235, 240, 245, 0.9);
+                --accent: #0091c2;
+                --green: #00a86b;
+                --yellow: #e6a800;
+                --red: #e03e3e;
+                --purple: #9333ea;
+                --orange: #e68900;
+                --text: #1e293b;
+                --muted: #64748b;
+                --border: rgba(148, 163, 184, 0.35);
+            }
+        }
         body { 
             color: var(--text); 
             padding: 20px; 
             min-height: 100vh; 
-            background-color: #0f1419;
+            background-color: var(--bg);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .container { max-width: 1400px; margin: 0 auto; position: relative; }
 
