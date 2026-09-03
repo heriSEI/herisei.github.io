@@ -395,23 +395,9 @@
 .sidebar.collapsed .sidebar-logo img {
     height: 28px;
 }
-/* === PETA IKUT TEMA OTOMATIS === */
-.leaflet-container {
-    background-color: transparent !important;
-}
-
-/* Saat tema TERANG → peta tampil normal */
-@media (prefers-color-scheme: light) {
-    .leaflet-tile-pane {
-        filter: none !important;
-    }
-}
-
-/* Saat tema GELAP → peta jadi gelap */
-@media (prefers-color-scheme: dark) {
-    .leaflet-tile-pane {
-        filter: invert(0.85) hue-rotate(180deg) saturate(1.2) contrast(0.9) !important;
-    }
+/* === PETA GELAP OTOMATIS === */
+.dark-tiles {
+    filter: invert(0.85) hue-rotate(180deg) saturate(1.2) contrast(0.85);
 }
     </style>
 </head>
@@ -688,16 +674,17 @@ function initOrUpdateMap(whList) {
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
         
-        // Peta gratis dari OpenStreetMap — tidak perlu API Key
+        // ✅ Peta GRATIS tanpa API Key — OpenStreetMap
         if (isDark) {
             // Versi Gelap
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '',
-                maxZoom: 12
+                maxZoom: 12,
+                className: 'dark-tiles'
             }).addTo(mapWH);
         } else {
             // Versi Terang
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '',
                 maxZoom: 12
             }).addTo(mapWH);
@@ -707,11 +694,11 @@ function initOrUpdateMap(whList) {
         mapWH.eachLayer(layer => { if (layer instanceof L.TileLayer) mapWH.removeLayer(layer); });
         
         if (isDark) {
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-                attribution: '', maxZoom: 12
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '', maxZoom: 12, className: 'dark-tiles'
             }).addTo(mapWH);
         } else {
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '', maxZoom: 12
             }).addTo(mapWH);
         }
