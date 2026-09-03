@@ -395,16 +395,22 @@
 .sidebar.collapsed .sidebar-logo img {
     height: 28px;
 }
-/* === PETA IKUT TEMA === */
+/* === PETA IKUT TEMA OTOMATIS === */
 .leaflet-container {
-    background-color: var(--bg-card) !important;
+    background-color: transparent !important;
 }
-.leaflet-tile-pane {
-    filter: none; /* default untuk tema terang */
+
+/* Saat tema TERANG → peta tampil normal */
+@media (prefers-color-scheme: light) {
+    .leaflet-tile-pane {
+        filter: none !important;
+    }
 }
+
+/* Saat tema GELAP → peta jadi gelap */
 @media (prefers-color-scheme: dark) {
     .leaflet-tile-pane {
-        filter: invert(1) hue-rotate(180deg) contrast(0.9);
+        filter: invert(0.85) hue-rotate(180deg) saturate(1.2) contrast(0.9) !important;
     }
 }
     </style>
