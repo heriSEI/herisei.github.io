@@ -365,12 +365,32 @@
 .sidebar:not(.collapsed) ~ .container {
     margin-left: 260px;
 }
+/* === LOGO DI SIDEBAR === */
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    margin-bottom: 8px;
+}
+.sidebar-logo img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+.sidebar.collapsed .sidebar-logo img {
+    height: 28px;
+}
     </style>
 </head>
 <body>
 
         <!-- === SIDEBAR MENU === -->
     <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <img src="https://herisei.github.io/spmsmss/Logo%20PT%20SEI%20(A%20Len%20Industri%20Company).png" alt="Logo PT SEI">
+    </div>
         <div class="sidebar-toggle" onclick="toggleSidebar()">
             <span>☰</span>
             <span class="toggle-text">MENU</span>
