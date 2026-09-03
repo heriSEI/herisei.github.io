@@ -282,8 +282,8 @@
     left: 0;
     height: 100vh;
     width: 260px;
-    background: linear-gradient(180deg, #1a1f2e, #0f1419);
-    border-right: 1px solid rgba(0, 212, 255, 0.2);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
     z-index: 50;
     transition: width 0.3s ease;
     padding-top: 10px;
@@ -394,6 +394,18 @@
 }
 .sidebar.collapsed .sidebar-logo img {
     height: 28px;
+}
+/* === PETA IKUT TEMA === */
+.leaflet-container {
+    background-color: var(--bg-card) !important;
+}
+.leaflet-tile-pane {
+    filter: none; /* default untuk tema terang */
+}
+@media (prefers-color-scheme: dark) {
+    .leaflet-tile-pane {
+        filter: invert(1) hue-rotate(180deg) contrast(0.9);
+    }
 }
     </style>
 </head>
