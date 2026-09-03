@@ -262,19 +262,106 @@
             0% { transform: scale(1); opacity: 0.8; }
             100% { transform: scale(2.2); opacity: 0; }
         }
+        /* === SIDEBAR BISA DITEKUK === */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    background: linear-gradient(180deg, #1a1f2e, #0f1419);
+    border-right: 1px solid rgba(0, 212, 255, 0.2);
+    z-index: 50;
+    transition: width 0.3s ease;
+    padding-top: 10px;
+}
+.sidebar.collapsed {
+    width: 60px;
+}
+.sidebar.collapsed .toggle-text,
+.sidebar.collapsed .sidebar-nav .text {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: #00d4ff;
+    font-weight: bold;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+    margin-bottom: 10px;
+    white-space: nowrap;
+}
+.sidebar-toggle:hover {
+    background: rgba(0, 212, 255, 0.08);
+}
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 5px;
+}
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 10px;
+    color: #e6e6e6;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.sidebar-nav a:hover {
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+}
+.sidebar-nav a .icon {
+    font-size: 20px;
+    min-width: 30px;
+    text-align: center;
+}
+.sidebar-nav a .text {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+.sidebar.collapsed .sidebar-nav a {
+    justify-content: center;
+    padding: 12px 0;
+}
+.sidebar.collapsed .sidebar-nav a .icon {
+    min-width: auto;
+}
     </style>
 </head>
 <body>
 <div class="container">
 
-    <!-- === MENU NAVIGASI === -->
-    <div class="menu-container">
-        <div class="menu-toggle" id="menuToggle"><span>☰</span> <span>MENU</span></div>
-        <div class="menu-dropdown" id="menuDropdown">
-            <a href="https://docs.google.com/spreadsheets/d/1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ/edit#gid=0" target="_blank">📝 TRANSAKSI MATERIAL</a>
-            <a href="https://docs.google.com/spreadsheets/d/1f8ihfSSYAa1KtE3ynhe6JdCdzMNBxlf_SaR7foyd5_8/edit" target="_blank">🏷️ LABEL BMN</a>
-            <a href="https://docs.google.com/spreadsheets/d/1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ/edit#gid=409788786" target="_blank">📍 WAREHOUSE CLUSTER</a>
+        <!-- === SIDEBAR MENU === -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-toggle" onclick="toggleSidebar()">
+            <span>☰</span>
+            <span class="toggle-text">MENU</span>
         </div>
+        <nav class="sidebar-nav">
+            <a href="https://docs.google.com/spreadsheets/d/1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ/edit#gid=0" target="_blank">
+                <span class="icon">⚙️</span>
+                <span class="text">TRANSAKSI SPAREPART</span>
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ/edit#gid=1608638676" target="_blank">
+                <span class="icon">🏠</span>
+                <span class="text">WAREHOUSE CLUSTER</span>
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/1f8ihfSSYAa1KtE3ynhe6JdCdzMNBxlf_SaR7foyd5_8/edit" target="_blank">
+                <span class="icon">🏷️</span>
+                <span class="text">LABEL BMN</span>
+            </a>
+        </nav>
     </div>
 
     <!-- === HEADER — JUDUL DI TENGAH === -->
@@ -370,11 +457,14 @@
 </div>
 
 <script>
-document.getElementById('menuToggle').onclick = e => {
-    e.stopPropagation();
-    document.getElementById('menuDropdown').classList.toggle('show');
+function toggleSidebar() {
+    const sb = document.getElementById("sidebar");
+    sb.classList.toggle("collapsed");
+}
+// Saat halaman dimuat, sidebar dalam keadaan tertutup (hanya ikon)
+window.onload = function() {
+    document.getElementById("sidebar").classList.add("collapsed");
 };
-document.onclick = () => document.getElementById('menuDropdown').classList.remove('show');
 
 const SHEET_ID = "1Ciq9oYizelBd85lzz4Qpyqn7q4jZDP1f6sJbI22O_QQ";
 const SHEET_NAME = "Raw_File_Update";
