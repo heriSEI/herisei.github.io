@@ -684,19 +684,37 @@ function drawBMNChart(bmnData) {
 
 function initOrUpdateMap(whList) {
     const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const mapStyle = isDark ? 'dark_all' : 'light_all';
-
+    
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer(`https://{s}.basemaps.cartocdn.com/${mapStyle}/{z}/{x}/{y}{r}.png`, { 
-            attribution: '' 
-        }).addTo(mapWH);
+        
+        // Peta gratis dari OpenStreetMap — tidak perlu API Key
+        if (isDark) {
+            // Versi Gelap
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '',
+                maxZoom: 12
+            }).addTo(mapWH);
+        } else {
+            // Versi Terang
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '',
+                maxZoom: 12
+            }).addTo(mapWH);
+        }
     } else {
         // Ganti ul gaya peta saat tema berubah
         mapWH.eachLayer(layer => { if (layer instanceof L.TileLayer) mapWH.removeLayer(layer); });
-        L.tileLayer(`https://{s}.basemaps.cartocdn.com/${mapStyle}/{z}/{x}/{y}{r}.png`, { 
-            attribution: '' 
-        }).addTo(mapWH);
+        
+        if (isDark) {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '', maxZoom: 12
+            }).addTo(mapWH);
+        } else {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '', maxZoom: 12
+            }).addTo(mapWH);
+        }
         
         markers.forEach(m => mapWH.removeLayer(m));
         markers = [];
