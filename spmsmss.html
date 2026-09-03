@@ -683,10 +683,21 @@ function drawBMNChart(bmnData) {
 }
 
 function initOrUpdateMap(whList) {
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const mapStyle = isDark ? 'dark_all' : 'light_all';
+
     if (!mapWH) {
         mapWH = L.map('mapWH').setView([-2.5, 118], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '' }).addTo(mapWH);
+        L.tileLayer(`https://{s}.basemaps.cartocdn.com/${mapStyle}/{z}/{x}/{y}{r}.png`, { 
+            attribution: '' 
+        }).addTo(mapWH);
     } else {
+        // Ganti ul gaya peta saat tema berubah
+        mapWH.eachLayer(layer => { if (layer instanceof L.TileLayer) mapWH.removeLayer(layer); });
+        L.tileLayer(`https://{s}.basemaps.cartocdn.com/${mapStyle}/{z}/{x}/{y}{r}.png`, { 
+            attribution: '' 
+        }).addTo(mapWH);
+        
         markers.forEach(m => mapWH.removeLayer(m));
         markers = [];
     }
