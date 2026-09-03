@@ -349,10 +349,25 @@
     justify-content: center;
     padding: 12px 0;
 }
+/* === Isi Halaman Bergeser Saat Sidebar Terbuka === */
+.container {
+    position: relative;
+    transition: margin-left 0.3s ease;
+    margin-left: 0;
+}
+
+/* Saat sidebar TERTUTUP — lebar sidebar kecil */
+.sidebar.collapsed ~ .container {
+    margin-left: 60px;
+}
+
+/* Saat sidebar TERBUKA — isi halaman bergeser ke kanan */
+.sidebar:not(.collapsed) ~ .container {
+    margin-left: 260px;
+}
     </style>
 </head>
 <body>
-<div class="container">
 
         <!-- === SIDEBAR MENU === -->
     <div class="sidebar" id="sidebar">
@@ -375,6 +390,7 @@
             </a>
         </nav>
     </div>
+    <div class="container">
 
     <!-- === HEADER — JUDUL DI TENGAH === -->
     <header>
